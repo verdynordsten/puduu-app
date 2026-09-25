@@ -1,129 +1,220 @@
 import 'package:flutter/material.dart';
 
-/// Puduu tokens v4 — Editorial Calm.
-/// Display font (Fredoka) ONLY for greetings, timer digits, hero title.
-/// Everything else is Nunito. Zero emoji, Lucide-mapped icons only.
+/// Puduu tokens v5 — "Ledger": warm paper journal, ink serif headlines,
+/// ONE accent (ember). No pastel tiles, no toy pills, no generic blue.
+/// Display: Fraunces (bundled). UI: Inter (bundled).
 class PuduuColors {
-  static const paper = Color(0xFFFAFAF8);
-  static const card = Colors.white;
-  static const ink = Color(0xFF111827);
-  static const slate = Color(0xFF4B5563);
-  static const faint = Color(0xFF9AA1AD);
-  static const line = Color(0xFFE6E4DE);
-  static const primary = Color(0xFF2563EB);
-  static const primaryDeep = Color(0xFF1E40AF);
-  static const pale = Color(0xFFEDF2FF);
-  static const heroA = Color(0xFF101828);
-  static const heroB = Color(0xFF232F4B);
-  static const teal = Color(0xFF0E7490);
-  static const tealSoft = Color(0xFFE4F3F6);
-  static const amber = Color(0xFFEA580C);
-  static const amberSoft = Color(0xFFFFF3E8);
-  static const green = Color(0xFF15803D);
-  static const greenSoft = Color(0xFFEAF5EE);
-  static const purple = Color(0xFF7C3AED);
-  static const purpleSoft = Color(0xFFF2EAFB);
-  static const danger = Color(0xFFDC2626);
-  static const rails = [primary, teal, amber, green];
-  static List<Color> get timelineHues => rails;
+  static const paper = Color(0xFFF6F3EC);
+  static const paperDeep = Color(0xFFEFE8D8);
+  static const card = Color(0xFFFFFDF8);
+  static const ink = Color(0xFF1C1917);
+  static const inkSoft = Color(0xFF44403C);
+  static const mute = Color(0xFF78716C);
+  static const faint = Color(0xFF6F655C);
+  static const line = Color(0xFFE3DAC7);
+  static const ember = Color(0xFF9A3412);
+  static const emberDeep = Color(0xFF7C2D12);
+  static const emberWash = Color(0xFFF7E8D2);
+  static const moss = Color(0xFF5B6B1F);
+  static const danger = Color(0xFFB91C1C);
 }
 
-/// Lucide-mapped icons (no emoji anywhere).
+/// Editorial text styles. Fraunces = headlines/timer numerals only.
+class PuduuType {
+  static const display = TextStyle(
+    fontFamily: 'Fraunces',
+    fontWeight: FontWeight.w600,
+    color: PuduuColors.ink,
+    height: 1.12,
+    letterSpacing: -0.3,
+  );
+  static const title = TextStyle(
+    fontFamily: 'Fraunces',
+    fontWeight: FontWeight.w600,
+    color: PuduuColors.ink,
+    height: 1.2,
+  );
+  static TextStyle eyebrow([Color color = PuduuColors.mute]) => TextStyle(
+        fontFamily: 'Inter',
+        fontSize: 11,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 1.6,
+        color: color,
+      );
+  static const body = TextStyle(
+    fontFamily: 'Inter',
+    fontSize: 14.5,
+    height: 1.55,
+    color: PuduuColors.inkSoft,
+  );
+  static const strong = TextStyle(
+    fontFamily: 'Inter',
+    fontSize: 15,
+    fontWeight: FontWeight.w600,
+    color: PuduuColors.ink,
+    height: 1.4,
+  );
+  static const meta = TextStyle(
+    fontFamily: 'Inter',
+    fontSize: 12.5,
+    color: PuduuColors.mute,
+    height: 1.45,
+  );
+  static const tabular = TextStyle(
+    fontFamily: 'Inter',
+    fontFeatures: [FontFeature.tabularFigures()],
+  );
+}
+
+/// Lucide-mapped monochrome icons. Color comes from context, never the icon.
 class PuduuIcons {
   static const today = Icons.wb_sunny_outlined;
   static const focus = Icons.timer_outlined;
-  static const reset = Icons.ac_unit;
+  static const reset = Icons.self_improvement_outlined;
   static const grows = Icons.emoji_events_outlined;
-  static const yours = Icons.settings_outlined;
+  static const yours = Icons.person_outline;
   static const sort = Icons.auto_awesome_outlined;
   static const check = Icons.check;
-  static const checkCircle = Icons.check_circle_outline;
   static const play = Icons.play_arrow;
-  static const playCircle = Icons.play_circle_outline;
+  static const pause = Icons.pause;
   static const chevron = Icons.chevron_right;
   static const bell = Icons.notifications_outlined;
   static const sound = Icons.volume_up_outlined;
-  static const account = Icons.person_outline;
   static const crown = Icons.workspace_premium_outlined;
   static const calendar = Icons.calendar_today_outlined;
-  static const calendarCheck = Icons.event_available_outlined;
-  static const mail = Icons.mail_outline;
-  static const water = Icons.water_drop_outlined;
-  static const steps = Icons.directions_walk;
-  static const bolt = Icons.bolt_outlined;
-  static const trend = Icons.trending_up_outlined;
-  static const sunSoft = Icons.wb_sunny_outlined;
+  static const plus = Icons.add;
+  static const arrow = Icons.arrow_forward;
 }
 
 ThemeData puduuTheme() {
   const scheme = ColorScheme(
     brightness: Brightness.light,
-    primary: PuduuColors.primary,
-    onPrimary: Colors.white,
-    secondary: PuduuColors.teal,
+    primary: PuduuColors.ink,
+    onPrimary: Color(0xFFFFFDF8),
+    secondary: PuduuColors.ember,
     onSecondary: Colors.white,
-    tertiary: PuduuColors.amber,
+    tertiary: PuduuColors.moss,
     onTertiary: Colors.white,
     error: PuduuColors.danger,
     onError: Colors.white,
     surface: PuduuColors.card,
     onSurface: PuduuColors.ink,
-    surfaceContainerLow: PuduuColors.pale,
-    onSurfaceVariant: PuduuColors.slate,
+    surfaceContainerLow: PuduuColors.paperDeep,
+    onSurfaceVariant: PuduuColors.inkSoft,
     outline: PuduuColors.line,
   );
   return ThemeData(
     useMaterial3: true,
     colorScheme: scheme,
     scaffoldBackgroundColor: PuduuColors.paper,
-    fontFamily: 'Nunito',
+    fontFamily: 'Inter',
+    dividerTheme: const DividerThemeData(
+      color: PuduuColors.line,
+      thickness: 1,
+      space: 1,
+    ),
     appBarTheme: const AppBarTheme(
       backgroundColor: PuduuColors.paper,
       foregroundColor: PuduuColors.ink,
       elevation: 0,
+      scrolledUnderElevation: 0,
     ),
     cardTheme: CardThemeData(
       color: PuduuColors.card,
+      elevation: 0,
+      margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(8),
         side: const BorderSide(color: PuduuColors.line),
       ),
-      elevation: 1,
-      shadowColor: const Color(0xFF111827).withValues(alpha: 0.05),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        shape: const StadiumBorder(),
-        minimumSize: const Size(48, 54),
-        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+        backgroundColor: PuduuColors.ink,
+        foregroundColor: const Color(0xFFFFFDF8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         textStyle: const TextStyle(
-            fontSize: 15, fontWeight: FontWeight.w800, fontFamily: 'Nunito'),
-        animationDuration: const Duration(milliseconds: 200),
+          fontFamily: 'Inter',
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: PuduuColors.emberDeep,
+        textStyle: const TextStyle(
+          fontFamily: 'Inter',
+          fontSize: 13.5,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: PuduuColors.card,
+      hintStyle: const TextStyle(
+        fontFamily: 'Inter',
+        fontSize: 14,
+        color: PuduuColors.faint,
+      ),
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: PuduuColors.line),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: PuduuColors.line),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide:
+            const BorderSide(color: PuduuColors.ink, width: 1.4),
       ),
     ),
     navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: Colors.white,
+      backgroundColor: PuduuColors.paper,
       indicatorColor: Colors.transparent,
+      elevation: 0,
       labelTextStyle: WidgetStateProperty.resolveWith((states) {
         final sel = states.contains(WidgetState.selected);
         return TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w800,
-            color: sel ? PuduuColors.primary : PuduuColors.faint);
+          fontFamily: 'Inter',
+          fontSize: 11,
+          fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
+          color: sel ? PuduuColors.ink : PuduuColors.faint,
+        );
       }),
       iconTheme: WidgetStateProperty.resolveWith((states) {
         final sel = states.contains(WidgetState.selected);
         return IconThemeData(
-            color: sel ? PuduuColors.primary : PuduuColors.faint, size: 24);
+          color: sel ? PuduuColors.ink : PuduuColors.faint,
+          size: 23,
+        );
       }),
     ),
-    inputDecorationTheme: InputDecorationTheme(
-      filled: true,
-      fillColor: Colors.white,
-      hintStyle: const TextStyle(color: PuduuColors.slate),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: PuduuColors.line, width: 1.5),
+    navigationRailTheme: const NavigationRailThemeData(
+      backgroundColor: PuduuColors.paper,
+      selectedIconTheme:
+          IconThemeData(color: PuduuColors.ink, size: 22),
+      unselectedIconTheme:
+          IconThemeData(color: PuduuColors.faint, size: 22),
+      selectedLabelTextStyle: TextStyle(
+        fontFamily: 'Inter',
+        fontSize: 13,
+        fontWeight: FontWeight.w700,
+        color: PuduuColors.ink,
+      ),
+      unselectedLabelTextStyle: TextStyle(
+        fontFamily: 'Inter',
+        fontSize: 13,
+        fontWeight: FontWeight.w500,
+        color: PuduuColors.mute,
       ),
     ),
   );
