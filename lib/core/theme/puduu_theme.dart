@@ -54,7 +54,7 @@ class PuduuIcons {
   static const water = Icons.water_drop_outlined; // glass-water
   static const steps = Icons.directions_walk; // footprints
   static const bolt = Icons.bolt_outlined; // zap
-  static const smile = Icons.sentiment_satisfied_outlined; // smile
+  static const trend = Icons.trending_up_outlined; // trending-up
   static const heart = Icons.favorite_outline; // heart
   static const star = Icons.star_outline; // star
 }
