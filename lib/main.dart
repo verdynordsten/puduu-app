@@ -19,32 +19,13 @@ final inboxProvider = StateProvider<List<PuduuTask>>((_) => [
     ]);
 final todayProvider = StateProvider<List<PuduuTask>>((_) => [
       PuduuTask(
-          id: _uuid.v4(),
-          title: 'Morning reset',
-          note: 'Meds, water, 5-min tidy',
-          durationMin: 25,
-          colorIndex: 0,
-          status: 'planned'),
+          id: _uuid.v4(), title: 'Morning reset', durationMin: 25, colorIndex: 0, status: 'planned'),
       PuduuTask(
-          id: _uuid.v4(),
-          title: 'Deep work: portfolio',
-          note: 'Timer ready, step 2 of 4',
-          durationMin: 50,
-          colorIndex: 1,
-          status: 'planned'),
+          id: _uuid.v4(), title: 'Deep work: portfolio', durationMin: 50, colorIndex: 1, status: 'planned'),
       PuduuTask(
-          id: _uuid.v4(),
-          title: 'Walk outside',
-          durationMin: 15,
-          colorIndex: 3,
-          status: 'done'),
+          id: _uuid.v4(), title: 'Walk outside', durationMin: 15, colorIndex: 3, status: 'done'),
       PuduuTask(
-          id: _uuid.v4(),
-          title: 'Admin batch',
-          note: 'Bills and inbox',
-          durationMin: 30,
-          colorIndex: 2,
-          status: 'planned'),
+          id: _uuid.v4(), title: 'Admin batch', durationMin: 30, colorIndex: 2, status: 'planned'),
     ]);
 final aiProvider = Provider<AiPlannerProvider>((_) => RuleBasedProvider());
 
@@ -81,13 +62,7 @@ class _ShellState extends ConsumerState<Shell> {
   ];
   @override
   Widget build(BuildContext context) {
-    const pages = [
-      TodayPage(),
-      FocusPage(),
-      RescuePage(),
-      GrowsPage(),
-      YoursPage()
-    ];
+    const pages = [TodayPage(), FocusPage(), RescuePage(), GrowsPage(), YoursPage()];
     return Scaffold(
       body: SafeArea(child: pages[tab]),
       bottomNavigationBar: NavigationBar(
@@ -102,7 +77,7 @@ class _ShellState extends ConsumerState<Shell> {
   }
 }
 
-/// Premium primitives (mirror the .pen v3 system).
+// ---------- editorial primitives (v4) ----------
 
 class AppHead extends StatelessWidget {
   final String greet;
@@ -116,16 +91,18 @@ class AppHead extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('PUDUU',
-                style: TextStyle(
-                    fontFamily: 'Fredoka',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
-                    letterSpacing: 2,
-                    color: PuduuColors.primary)),
+            const Row(
+              children: [
+                // mascot mark would sit here (asset) — wordmark only on web
+                Text('Puduu',
+                    style: TextStyle(
+                        fontFamily: 'Fredoka',
+                        fontWeight: FontWeight.w600,
+                        fontSize: 17)),
+              ],
+            ),
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(999),
@@ -133,9 +110,9 @@ class AppHead extends StatelessWidget {
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(PuduuIcons.calendar, size: 14),
+                  Icon(PuduuIcons.calendarCheck, size: 15),
                   SizedBox(width: 6),
-                  Text('Thu, Sep 25',
+                  Text('Thu Sep 25',
                       style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
@@ -148,12 +125,8 @@ class AppHead extends StatelessWidget {
         const SizedBox(height: 8),
         Text(greet,
             style: const TextStyle(
-                fontFamily: 'Fredoka',
-                fontSize: 24,
-                fontWeight: FontWeight.w600)),
-        Text(sub,
-            style:
-                const TextStyle(fontSize: 13, color: PuduuColors.slate)),
+                fontFamily: 'Fredoka', fontSize: 26, fontWeight: FontWeight.w600)),
+        Text(sub, style: const TextStyle(fontSize: 13, color: PuduuColors.slate)),
       ],
     );
   }
@@ -188,13 +161,15 @@ class SecRow extends StatelessWidget {
   }
 }
 
-class TaskCard extends StatelessWidget {
-  final PuduuTask task;
+class TimelineRow extends StatelessWidget {
   final String hour;
-  const TaskCard({super.key, required this.task, required this.hour});
+  final String mins;
+  final PuduuTask task;
+  const TimelineRow(
+      {super.key, required this.hour, required this.mins, required this.task});
   @override
   Widget build(BuildContext context) {
-    final rail = PuduuColors.timelineHues[task.colorIndex % 6];
+    final rail = PuduuColors.rails[task.colorIndex % 4];
     final done = task.status == 'done';
     final icon = done
         ? PuduuIcons.checkCircle
@@ -202,52 +177,68 @@ class TaskCard extends StatelessWidget {
             ? PuduuIcons.focus
             : task.colorIndex == 2
                 ? PuduuIcons.bolt
-                : PuduuIcons.today;
+                : PuduuIcons.sunSoft;
+    final tint = done
+        ? PuduuColors.greenSoft
+        : task.colorIndex == 1
+            ? PuduuColors.tealSoft
+            : task.colorIndex == 2
+                ? PuduuColors.amberSoft
+                : PuduuColors.pale;
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Row(
           children: [
+            SizedBox(
+              width: 48,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(hour,
+                      style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                          color: done ? PuduuColors.slate : PuduuColors.ink)),
+                  Text(mins.toUpperCase(),
+                      style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: PuduuColors.faint)),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
             Container(
-                width: 5,
-                height: 60,
+                width: 4,
+                height: 48,
                 decoration: BoxDecoration(
-                    color: rail, borderRadius: BorderRadius.circular(3))),
-            const SizedBox(width: 10),
+                    color: rail, borderRadius: BorderRadius.circular(2))),
+            const SizedBox(width: 8),
             Container(
-              width: 46,
-              height: 46,
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
-                  color: rail.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(15)),
-              child: Icon(icon, color: rail, size: 24),
+                  color: tint, borderRadius: BorderRadius.circular(15)),
+              child: Icon(icon, color: done ? PuduuColors.green : rail, size: 24),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(hour.toUpperCase(),
-                      style: const TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.5,
-                          color: PuduuColors.slate)),
                   Text(task.title,
                       style: TextStyle(
                           fontSize: 15,
-                          fontWeight: FontWeight.w800,
-                          color: done ? PuduuColors.slate : PuduuColors.foreground)),
-                  Text(
-                      task.note ??
-                          '${task.durationMin ?? 25} min - ${task.status}',
-                      style: const TextStyle(
-                          fontSize: 12, color: PuduuColors.slate)),
+                          fontWeight: done ? FontWeight.w700 : FontWeight.w800,
+                          color: done ? PuduuColors.slate : PuduuColors.ink)),
+                  Text(done ? 'Done' : '${task.durationMin ?? 25} min · ${task.status}',
+                      style: const TextStyle(fontSize: 12, color: PuduuColors.slate)),
                 ],
               ),
             ),
-
           ],
         ),
       ),
@@ -277,19 +268,82 @@ class OptCard extends StatelessWidget {
           width: 44,
           height: 44,
           decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(14)),
+              color: color.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(15)),
           child: Icon(icon, color: color, size: 24),
         ),
-        title: Text(title,
-            style: const TextStyle(fontWeight: FontWeight.w800)),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
         subtitle: Text(detail),
-        trailing: const Icon(PuduuIcons.chevron),
         onTap: onTap,
       ),
     );
   }
 }
+
+class FocusHero extends StatelessWidget {
+  const FocusHero({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+            colors: [PuduuColors.heroA, PuduuColors.heroB],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight),
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+              color: PuduuColors.heroA.withValues(alpha: 0.22),
+              blurRadius: 28,
+              offset: const Offset(0, 10)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text("TODAY'S FOCUS",
+              style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.2,
+                  color: Colors.white70)),
+          const SizedBox(height: 3),
+          const Text('Deep work: portfolio',
+              style: TextStyle(
+                  fontFamily: 'Fredoka', fontSize: 20, color: Colors.white)),
+          const Text('09:00 · 50 min · step 2 of 4',
+              style: TextStyle(fontSize: 12, color: Colors.white70)),
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(5),
+            child: LinearProgressIndicator(
+              value: 0.61,
+              minHeight: 10,
+              backgroundColor: Colors.white24,
+              valueColor: const AlwaysStoppedAnimation(PuduuColors.primary),
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              style: FilledButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: PuduuColors.primary),
+              onPressed: () {},
+              icon: const Icon(PuduuIcons.play, size: 20),
+              label: const Text('Start focus'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------- screens ----------
 
 class TodayPage extends ConsumerWidget {
   const TodayPage({super.key});
@@ -298,64 +352,21 @@ class TodayPage extends ConsumerWidget {
     final inbox = ref.watch(inboxProvider);
     final today = ref.watch(todayProvider);
     final ctl = TextEditingController();
-    const hours = ['08:00 - 25 min', '09:00 - 50 min', '11:00 - 15 min', '13:00 - 30 min'];
+    const hours = ['08:00', '09:00', '11:00', '13:00'];
+    const mins = ['25 min', '50 min', '15 min', '30 min'];
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 120),
       children: [
         const AppHead(
             greet: 'Good morning, Alex',
-            sub: 'Thursday, Sep 25 - 4 blocks planned.'),
-        Container(
-          margin: const EdgeInsets.only(top: 10),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF1D4ED8), Color(0xFF2563EB)],
-              begin: Alignment.topLeft, end: Alignment.bottomRight),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("TODAY'S FOCUS",
-                          style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 1,
-                              color: Colors.white70)),
-                      SizedBox(height: 2),
-                      Text('Deep work: portfolio',
-                          style: TextStyle(
-                              fontFamily: 'Fredoka',
-                              fontSize: 19,
-                              color: Colors.white)),
-                      Text('09:00 - 50 min - step 2 of 4',
-                          style:
-                              TextStyle(fontSize: 12, color: Colors.white70)),
-                    ],
-                  ),
-                ),
-                FilledButton.icon(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: PuduuColors.primary,
-                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                  ),
-                  onPressed: () {},
-                  icon: const Icon(PuduuIcons.play, size: 20),
-                  label: const Text('Start'),
-                ),
-              ],
-            ),
-          ),
-        ),
+            sub: 'Thursday, Sep 25 · 4 blocks planned.'),
+        const FocusHero(),
         const SecRow(label: 'Up next', action: 'See all'),
         for (var i = 0; i < today.length; i++)
-          TaskCard(task: today[i], hour: hours[i % hours.length]),
+          TimelineRow(
+              hour: hours[i % hours.length],
+              mins: mins[i % mins.length],
+              task: today[i]),
         SecRow(label: 'Inbox', action: '${inbox.length} waiting'),
         Card(
           child: Padding(
@@ -365,37 +376,33 @@ class TodayPage extends ConsumerWidget {
                 TextField(
                     controller: ctl,
                     decoration: const InputDecoration(
-                        hintText: 'Capture a task, idea, or reminder...')),
+                        hintText: 'Capture a task, idea, or reminder…')),
                 const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      child: FilledButton.tonal(
-                        onPressed: () {
-                          if (ctl.text.trim().isEmpty) return;
-                          ref.read(inboxProvider.notifier).state = [
-                            ...inbox,
-                            PuduuTask(id: _uuid.v4(), title: ctl.text.trim()),
-                          ];
-                          ctl.clear();
-                        },
-                        child: const Text('Add'),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: FilledButton.icon(
-                        onPressed: () async {
-                          final planned =
-                              await ref.read(aiProvider).plan(inbox);
-                          ref.read(todayProvider.notifier).state = planned;
-                          ref.read(inboxProvider.notifier).state = [];
-                        },
-                        icon: const Icon(PuduuIcons.sort, size: 18),
-                        label: const Text('Sort into my day'),
-                      ),
-                    ),
-                  ],
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: () async {
+                      final planned = await ref.read(aiProvider).plan(inbox);
+                      ref.read(todayProvider.notifier).state = planned;
+                      ref.read(inboxProvider.notifier).state = [];
+                    },
+                    icon: const Icon(PuduuIcons.sort, size: 18),
+                    label: const Text('Sort into my day'),
+                  ),
+                ),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.tonal(
+                    onPressed: () {
+                      if (ctl.text.trim().isEmpty) return;
+                      ref.read(inboxProvider.notifier).state = [
+                        ...inbox,
+                        PuduuTask(id: _uuid.v4(), title: ctl.text.trim()),
+                      ];
+                      ctl.clear();
+                    },
+                    child: const Text('Add to inbox'),
+                  ),
                 ),
               ],
             ),
@@ -404,7 +411,7 @@ class TodayPage extends ConsumerWidget {
         for (final t in inbox) Card(child: ListTile(title: Text(t.title))),
         const OptCard(
             icon: PuduuIcons.reset,
-            color: PuduuColors.accent,
+            color: PuduuColors.amber,
             title: 'Stalling?',
             detail: 'Take a 2-minute reset.'),
       ],
@@ -417,16 +424,55 @@ class FocusPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.all(16),
-      children: const [
-        AppHead(
-            greet: 'Stay with it',
-            sub: 'Deep work: portfolio - step 2 of 4.'),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 120),
+      children: [
+        const AppHead(
+            greet: 'Stay with it.', sub: 'Deep work: portfolio · step 2 of 4.'),
         Card(
-            child: ListTile(
-                leading: Icon(PuduuIcons.focus),
-                title: Text('Focus timer ships in M2'),
-                subtitle: Text('Visual ring, subtask timers, ritual link.'))),
+          margin: const EdgeInsets.only(top: 10),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 16),
+            child: Column(
+              children: [
+                const Text('FOCUS SESSION',
+                    style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.2,
+                        color: PuduuColors.slate)),
+                const SizedBox(height: 12),
+                Container(
+                  width: 160,
+                  height: 160,
+                  decoration: const BoxDecoration(
+                      color: PuduuColors.tealSoft, shape: BoxShape.circle),
+                  child: const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('32:10',
+                          style: TextStyle(
+                              fontFamily: 'Fredoka',
+                              fontSize: 34,
+                              fontWeight: FontWeight.w600,
+                              fontFeatures: [FontFeature.tabularFigures()])),
+                      Text('LEFT',
+                          style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1,
+                              color: PuduuColors.slate)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Text('Sketch hero section · gentle chime at end',
+                    textAlign: TextAlign.center,
+                    style:
+                        TextStyle(fontSize: 13, color: PuduuColors.slate)),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -437,31 +483,29 @@ class RescuePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 120),
       children: const [
-        AppHead(
-            greet: 'Hit a wall?',
-            sub: 'Freeze reset - two minutes counts.'),
+        AppHead(greet: 'Hit a wall?', sub: 'Freeze reset · two minutes counts.'),
         OptCard(
             icon: PuduuIcons.water,
-            color: PuduuColors.secondary,
+            color: PuduuColors.teal,
             title: 'Drink a glass of water',
-            detail: '2 min - raises energy.'),
+            detail: '2 min · raises energy.'),
         OptCard(
             icon: PuduuIcons.steps,
-            color: PuduuColors.success,
+            color: PuduuColors.green,
             title: 'Clear one surface',
-            detail: '2 min - just the desk corner.'),
+            detail: '2 min · just the desk corner.'),
         OptCard(
             icon: PuduuIcons.mail,
-            color: Color(0xFF7C3AED),
+            color: PuduuColors.purple,
             title: 'Open the difficult email',
             detail: 'Just open it. Reply later.'),
         OptCard(
             icon: PuduuIcons.sort,
             color: PuduuColors.primary,
             title: 'Sort my inbox',
-            detail: 'Rule-based now, assisted later.'),
+            detail: 'Rule-based now · assisted later.'),
       ],
     );
   }
@@ -472,21 +516,21 @@ class GrowsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 120),
       children: const [
         AppHead(
-            greet: 'Keep growing',
-            sub: 'Good days: 5 of 7 - never resets to zero.'),
+            greet: 'Keep growing.',
+            sub: 'Good days: 5 of 7 · never resets to zero.'),
         OptCard(
             icon: PuduuIcons.grows,
-            color: PuduuColors.accent,
+            color: PuduuColors.amber,
             title: 'Weekly shelf',
-            detail: 'Early starter x3 - Reset used x5 - Focus 25m x8.'),
+            detail: 'Early starter ×3 · Reset used ×5 · Focus 25m ×8.'),
         OptCard(
             icon: PuduuIcons.trend,
-            color: PuduuColors.success,
+            color: PuduuColors.green,
             title: 'Focus trend',
-            detail: 'Up 20 percent vs last week.'),
+            detail: 'Up 20% vs last week · mornings work best.'),
       ],
     );
   }
@@ -497,29 +541,28 @@ class YoursPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 120),
       children: const [
-        AppHead(greet: 'Make it yours', sub: 'Settings, plan, and backup.'),
+        AppHead(greet: 'Make it yours.', sub: 'Settings, plan, and backup.'),
         Card(
-            color: PuduuColors.primary,
+            color: PuduuColors.heroA,
             child: ListTile(
                 leading: Icon(PuduuIcons.crown, color: Colors.white),
-                title: Text('Puduu Pro - \$6.99/mo',
+                title: Text('Puduu Pro · \$6.99/mo',
                     style: TextStyle(
                         color: Colors.white, fontWeight: FontWeight.w800)),
-                subtitle: Text(
-                    'Unlimited resets, assisted planning (soon), yearly \$49.99',
+                subtitle: Text('Unlimited resets · yearly \$49.99',
                     style: TextStyle(color: Colors.white70)))),
         OptCard(
             icon: PuduuIcons.bell,
-            color: PuduuColors.accent,
+            color: PuduuColors.amber,
             title: 'Gentle nudges',
-            detail: 'Max 6 per day, quiet 22:00-07:00 on.'),
+            detail: 'Max 6 per day · quiet 22:00–07:00 on.'),
         OptCard(
             icon: PuduuIcons.sound,
-            color: PuduuColors.secondary,
+            color: PuduuColors.teal,
             title: 'Sounds and haptics',
-            detail: 'Calm chime, soft vibration on.'),
+            detail: 'Calm chime · soft vibration on.'),
       ],
     );
   }
