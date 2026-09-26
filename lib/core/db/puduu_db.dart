@@ -1,8 +1,5 @@
 import 'package:drift/drift.dart';
-// ignore: deprecated_member_use
-import 'package:drift/web.dart';
 import 'package:drift_flutter/drift_flutter.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 part 'puduu_db.g.dart';
 
@@ -56,13 +53,9 @@ class PuduuDb extends _$PuduuDb {
   @override
   int get schemaVersion => 1;
 
-  static QueryExecutor _open() {
-    if (kIsWeb) {
-      // sql.js via CDN (web/index.html) + IndexedDB persist. WASM worker
-      // path needs hosted sqlite3.wasm which we don't ship — sql.js it is.
-      // ignore: experimental_member_use
-      return WebDatabase.withStorage(DriftWebStorage.indexedDb('puduu'));
-    }
-    return driftDatabase(name: 'puduu');
-  }
+  // drift_flutter picks the right backend per platform:
+  // native SQLite on Android/iOS/desktop, sql.js+IndexedDB on web.
+  // No platform imports here — that keeps the Android build free of
+  // dart:js_interop (the old `drift/web.dart` import broke assembleDebug).
+  static QueryExecutor _open() => driftDatabase(name: 'puduu');
 }
