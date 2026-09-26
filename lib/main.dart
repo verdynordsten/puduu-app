@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import 'core/theme/puduu_theme.dart';
 import 'core/models.dart';
 import 'core/ai_slot/ai_planner.dart';
+import 'features/more_pages.dart';
 
 const _uuid = Uuid();
 
@@ -466,6 +467,65 @@ class TaskCard extends StatelessWidget {
 
 // ---------- 5 screens ----------
 
+// ---------- visual timeline strip (Tiimo parity) ----------
+class TimelineStrip extends StatelessWidget {
+  const TimelineStrip({super.key});
+  static const _blocks = [
+    ('09:00', 'Deep work', PuduuColors.teal, 0.61),
+    ('11:00', 'Walk', PuduuColors.moss, 1.0),
+    ('13:00', 'Admin', PuduuColors.amber, 0.0),
+    ('15:00', 'Call', PuduuColors.tealDeep, 0.0),
+  ];
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          children: [
+            for (final b in _blocks)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    SizedBox(width: 40, child: Text(b.$1, style: PuduuType.meta)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(b.$2, style: PuduuType.strong),
+                              if (b.$4 == 1.0)
+                                const Text('✓', style: TextStyle(fontSize: 12, color: PuduuColors.moss, fontWeight: FontWeight.w700)),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: b.$4 == 0.0 ? 0.04 : b.$4,
+                              minHeight: 7,
+                              backgroundColor: PuduuColors.bg,
+                              valueColor: AlwaysStoppedAnimation(b.$3),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            TextButton(onPressed: () {}, child: const Text('Open full calendar ›')),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class TodayPage extends ConsumerWidget {
   const TodayPage({super.key});
   @override
@@ -495,6 +555,8 @@ class TodayPage extends ConsumerWidget {
           primary: 'Begin session',
           secondary: 'Skip',
         ),
+        const SectionHead(label: 'TIMELINE'),
+        const TimelineStrip(),
         const SectionHead(label: 'CATEGORIES', action: 'See all ›'),
         GridView.count(
           crossAxisCount: 4,
@@ -814,6 +876,34 @@ class GrowsPage extends StatelessWidget {
               ),
           ],
         ),
+        const SectionHead(label: 'TROPHIES'),
+        Row(
+          children: [
+            for (final t in [('×3', 'Early bird', Icons.wb_sunny_outlined, PuduuColors.amberWash), ('×5', 'Resetter', Icons.bolt_outlined, PuduuColors.tealWash), ('×8', 'Focused', Icons.timer_outlined, PuduuColors.mossWash)])
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 36, height: 36,
+                            decoration: BoxDecoration(color: t.$4, shape: BoxShape.circle),
+                            child: Icon(t.$3, size: 19, color: PuduuColors.soft),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(t.$1, style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700, color: PuduuColors.ink)),
+                          Text(t.$2, style: PuduuType.meta),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
         const SectionHead(label: 'THIS WEEK', action: 'See all ›'),
         const TaskCard(
             dot: PuduuColors.teal,
@@ -867,6 +957,61 @@ class GrowsPage extends StatelessWidget {
   }
 }
 
+class _NavRow extends StatelessWidget {
+  final IconData icon;
+  final String title, detail;
+  final Widget page;
+  const _NavRow({required this.icon, required this.title, required this.detail, required this.page});
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => _SubShell(title: title, child: page))),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              Container(
+                width: 36, height: 36,
+                decoration: BoxDecoration(color: PuduuColors.tealWash, borderRadius: BorderRadius.circular(12)),
+                child: Icon(icon, size: 19, color: PuduuColors.soft),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: PuduuType.strong),
+                    Text(detail, style: PuduuType.meta),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: PuduuColors.mute),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SubShell extends StatelessWidget {
+  final String title;
+  final Widget child;
+  const _SubShell({required this.title, required this.child});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.of(context).pop()),
+        title: Text(title, style: PuduuType.title.copyWith(fontSize: 17)),
+      ),
+      body: SafeArea(child: Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 560), child: child))),
+    );
+  }
+}
+
 class YoursPage extends StatelessWidget {
   const YoursPage({super.key});
   @override
@@ -915,13 +1060,24 @@ class YoursPage extends StatelessWidget {
                     backgroundColor: Colors.white,
                     foregroundColor: PuduuColors.tealDeep,
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PaywallPage()));
+                  },
                   child: const Text('Upgrade'),
                 ),
               ),
             ],
           ),
         ),
+        const SectionHead(label: 'MORE'),
+        _NavRow(icon: Icons.refresh_outlined, title: 'Routines', detail: 'Repeatable calm', page: const RoutinesPage()),
+        const SizedBox(height: 8),
+        _NavRow(icon: Icons.calendar_month_outlined, title: 'Calendar', detail: 'Week view · sync', page: const CalendarPage()),
+        const SizedBox(height: 8),
+        _NavRow(icon: Icons.auto_awesome_outlined, title: 'Library', detail: 'Ready-made activities', page: const LibraryPage()),
+        const SizedBox(height: 8),
+        _NavRow(icon: Icons.sentiment_satisfied_outlined, title: 'Mood', detail: 'Check-ins + patterns', page: const MoodPage()),
+        const SizedBox(height: 8),
         const SectionHead(label: 'SETTINGS'),
         const TaskCard(
             dot: PuduuColors.teal,
