@@ -74,6 +74,103 @@ class PuduuRepo {
         .write(DbTasksCompanion(status: Value(status)));
   }
 
+  Future<void> deleteTask(String id) async {
+    await (db.delete(db.dbTasks)..where((t) => t.id.equals(id))).go();
+    await (db.delete(db.dbSubtasks)..where((s) => s.taskId.equals(id))).go();
+  }
+
+  /// All planned tasks that carry a clock time, earliest first.
+  /// Backs TimelineStrip, CalendarPage, DarkHero NOW-card.
+  Future<List<PuduuTask>> plannedWithTime() async {
+    final all = await tasksByStatus('planned');
+    final timed = all.where((t) => t.scheduledAt != null).toList()
+      ..sort((a, b) => a.scheduledAt!.compareTo(b.scheduledAt!));
+    return timed;
+  }
+
+  Future<List<PuduuTask>> tasksByStatuses(List<String> statuses) async {
+    final rows = await (db.select(db.dbTasks)
+          ..where((t) => t.status.isIn(statuses))
+          ..orderBy([(t) => OrderingTerm(expression: t.rowId)]))
+        .get();
+    final out = <PuduuTask>[];
+    for (final r in rows) {
+      final subs = await (db.select(db.dbSubtasks)
+            ..where((s) => s.taskId.equals(r.id)))
+          .get();
+      out.add(PuduuTask(
+        id: r.id,
+        title: r.title,
+        note: r.note,
+        durationMin: r.durationMin,
+        scheduledAt: r.scheduledAt,
+        colorIndex: r.colorIndex,
+        status: r.status,
+        subtasks: [
+          for (final s in subs)
+            PuduuSubtask(
+                id: s.id, title: s.title, timerMin: s.timerMin, done: s.done),
+        ],
+      ));
+    }
+    return out;
+  }
+
+  /// Done-task count, optionally only those finished today.
+  Future<int> doneCount({bool todayOnly = false}) async {
+    final rows = await (db.select(db.dbTasks)
+          ..where((t) => t.status.equals('done')))
+        .get();
+    if (!todayOnly) return rows.length;
+    final now = DateTime.now();
+    return rows
+        .where((r) =>
+            r.scheduledAt != null &&
+            r.scheduledAt!.year == now.year &&
+            r.scheduledAt!.month == now.month &&
+            r.scheduledAt!.day == now.day)
+        .length;
+  }
+
+  /// Consecutive days (ending today/yesterday) with >=1 done task.
+  Future<int> doneStreakDays() async {
+    final rows = await (db.select(db.dbTasks)
+          ..where((t) => t.status.equals('done')))
+        .get();
+    final days = <DateTime>{};
+    for (final r in rows) {
+      final d = r.scheduledAt;
+      if (d != null) days.add(DateTime(d.year, d.month, d.day));
+    }
+    if (days.isEmpty) return 0;
+    var streak = 0;
+    var cursor =
+        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    // allow streak to start yesterday (today not done yet)
+    if (!days.contains(cursor)) cursor = cursor.subtract(const Duration(days: 1));
+    while (days.contains(cursor)) {
+      streak++;
+      cursor = cursor.subtract(const Duration(days: 1));
+    }
+    return streak;
+  }
+
+  Future<void> addRoutine(PuduuRoutine r) async {
+    await db.into(db.dbRoutines).insert(
+          DbRoutinesCompanion(
+            id: Value(r.id),
+            name: Value(r.name),
+            stepTitles: Value(jsonEncode(r.stepTitles)),
+            rrule: Value(r.rrule),
+          ),
+          mode: InsertMode.insertOrReplace,
+        );
+  }
+
+  Future<void> deleteRoutine(String id) async {
+    await (db.delete(db.dbRoutines)..where((r) => r.id.equals(id))).go();
+  }
+
   Future<void> moveAllToToday(List<PuduuTask> planned) async {
     for (final t in planned) {
       await addTask(PuduuTask(
