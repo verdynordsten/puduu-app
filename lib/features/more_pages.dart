@@ -455,6 +455,74 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 }
 
+// ---------- onboarding flow (interactive first-run gate) ----------
+class OnboardingFlow extends StatefulWidget {
+  final VoidCallback onDone;
+  const OnboardingFlow({super.key, required this.onDone});
+  @override
+  State<OnboardingFlow> createState() => _OnboardingFlowState();
+}
+
+class _OnboardingFlowState extends State<OnboardingFlow> {
+  int step = 0;
+  static const _steps = [
+    ('See your day', 'A visual timeline built for busy brains — one block at a time.', Icons.calendar_month_outlined),
+    ('Start tiny', 'Two-minute resets thaw frozen days. Done beats perfect.', Icons.bolt_outlined),
+    ('Stay gentle', 'Max 6 nudges a day. Quiet 22:00–07:00. You stay in charge.', Icons.notifications_outlined),
+  ];
+  @override
+  Widget build(BuildContext context) {
+    final s = _steps[step];
+    return ListView(
+      padding: _pad,
+      children: [
+        const SizedBox(height: 24),
+        Container(
+          width: 72, height: 72,
+          decoration: BoxDecoration(color: PuduuColors.tealWash, borderRadius: BorderRadius.circular(22)),
+          child: Icon(s.$3, size: 34, color: PuduuColors.tealDeep),
+        ),
+        const SizedBox(height: 20),
+        Text(s.$1, style: PuduuType.display.copyWith(fontSize: 26)),
+        const SizedBox(height: 6),
+        Text(s.$2, style: PuduuType.body.copyWith(fontSize: 14.5)),
+        const SizedBox(height: 20),
+        Row(
+          children: [
+            for (var i = 0; i < 3; i++)
+              Container(width: i == step ? 24 : 8, height: 8, margin: const EdgeInsets.only(right: 6),
+                decoration: BoxDecoration(color: i == step ? PuduuColors.teal : PuduuColors.line, borderRadius: BorderRadius.circular(4))),
+          ],
+        ),
+        const SizedBox(height: 24),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton(
+            onPressed: () {
+              if (step < 2) {
+                setState(() => step++);
+              } else {
+                widget.onDone();
+              }
+            },
+            child: Text(step == 2 ? 'Start planning' : 'Next'),
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            if (step > 0)
+              TextButton(onPressed: () => setState(() => step--), child: const Text('Back'))
+            else
+              const SizedBox.shrink(),
+            TextButton(onPressed: widget.onDone, child: const Text('Skip')),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
 // ---------- shared search (no controller variant) ----------
 class SearchField2 extends StatelessWidget {
   final String hint;

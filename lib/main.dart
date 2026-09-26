@@ -6,6 +6,7 @@ import 'core/theme/puduu_theme.dart';
 import 'core/models.dart';
 import 'core/ai_slot/ai_planner.dart';
 import 'features/more_pages.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 const _uuid = Uuid();
 
@@ -50,7 +51,23 @@ final todayProvider = StateProvider<List<PuduuTask>>((_) => [
     ]);
 final aiProvider = Provider<AiPlannerProvider>((_) => RuleBasedProvider());
 
-void main() => runApp(const ProviderScope(child: PuduuApp()));
+final onboardedProvider = StateProvider<bool>((_) => false);
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  final seen = prefs.getBool('puduu_onboarded') ?? false;
+  runApp(ProviderScope(
+    overrides: [onboardedProvider.overrideWith((_) => seen)],
+    child: const PuduuApp(),
+  ));
+}
+
+Future<void> completeOnboarding(WidgetRef ref) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool('puduu_onboarded', true);
+  ref.read(onboardedProvider.notifier).state = true;
+}
 
 class PuduuApp extends StatelessWidget {
   const PuduuApp({super.key});
@@ -59,8 +76,38 @@ class PuduuApp extends StatelessWidget {
     return MaterialApp(
       title: 'Puduu',
       theme: puduuTheme(),
-      home: const Shell(),
+      home: const _Root(),
       debugShowCheckedModeBanner: false,
+    );
+  }
+}
+
+// ---------- root: onboarding gate -> shell ----------
+class _Root extends ConsumerWidget {
+  const _Root();
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final seen = ref.watch(onboardedProvider);
+    if (!seen) return const OnboardingGate();
+    return const Shell();
+  }
+}
+
+class OnboardingGate extends ConsumerWidget {
+  const OnboardingGate({super.key});
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 560),
+            child: OnboardingFlow(
+              onDone: () => completeOnboarding(ref),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -518,7 +565,10 @@ class TimelineStrip extends StatelessWidget {
                   ],
                 ),
               ),
-            TextButton(onPressed: () {}, child: const Text('Open full calendar ›')),
+            TextButton(
+                onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const _SubShell(title: 'Calendar', child: CalendarPage()))),
+                child: const Text('Open full calendar ›')),
           ],
         ),
       ),
@@ -557,7 +607,11 @@ class TodayPage extends ConsumerWidget {
         ),
         const SectionHead(label: 'TIMELINE'),
         const TimelineStrip(),
-        const SectionHead(label: 'CATEGORIES', action: 'See all ›'),
+        SectionHead(
+            label: 'CATEGORIES',
+            action: 'See all ›',
+            onAction: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => const _SubShell(title: 'Library', child: LibraryPage())))),
         GridView.count(
           crossAxisCount: 4,
           shrinkWrap: true,
@@ -904,7 +958,7 @@ class GrowsPage extends StatelessWidget {
               ),
           ],
         ),
-        const SectionHead(label: 'THIS WEEK', action: 'See all ›'),
+        const SectionHead(label: 'THIS WEEK'),
         const TaskCard(
             dot: PuduuColors.teal,
             title: 'Weekly shelf',
