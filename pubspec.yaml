@@ -27,9 +27,9 @@ flutter:
   assets:
     - assets/fonts/
   fonts:
-    - family: Fraunces
+    - family: Outfit
       fonts:
-        - asset: assets/fonts/Fraunces.ttf
-    - family: Inter
+        - asset: assets/fonts/Outfit.ttf
+    - family: Work Sans
       fonts:
-        - asset: assets/fonts/Inter.ttf
+        - asset: assets/fonts/WorkSans.ttf

@@ -64,7 +64,7 @@ class PuduuApp extends StatelessWidget {
   }
 }
 
-// ---------- shell: rail on wide screens, tabs on phones ----------
+// ---------- shell: dark pill nav on phones ----------
 
 class Shell extends ConsumerStatefulWidget {
   const Shell({super.key});
@@ -101,338 +101,187 @@ class _ShellState extends ConsumerState<Shell> {
       GrowsPage(),
       YoursPage()
     ];
-    return LayoutBuilder(
-      builder: (context, c) {
-        final wide = c.maxWidth >= 900;
-        if (wide) {
-          return Scaffold(
-            body: SafeArea(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _SideRail(tab: tab, onGo: _go),
-                  Expanded(
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints:
-                            const BoxConstraints(maxWidth: 640),
-                        child: Row(
-                          crossAxisAlignment:
-                              CrossAxisAlignment.start,
-                          children: [
-                            Expanded(child: pages[tab]),
-                            const SizedBox(width: 40),
-                            const _MarginNotes(),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-        return Scaffold(
-          body: SafeArea(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 560),
-                child: pages[tab],
-              ),
-            ),
+    return Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 560),
+            child: pages[tab],
           ),
-          bottomNavigationBar: Container(
-            decoration: const BoxDecoration(
-              border:
-                  Border(top: BorderSide(color: PuduuColors.line)),
-            ),
-            child: NavigationBar(
-              selectedIndex: tab,
-              height: 68,
-              onDestinationSelected: _go,
-              destinations: [
-                for (var i = 0; i < titles.length; i++)
-                  NavigationDestination(
-                    icon: Badge(
-                      isLabelVisible:
-                          i == 0 && ref.watch(inboxProvider).isNotEmpty,
-                      label: Text(
-                          '${ref.watch(inboxProvider).length}',
-                          style: const TextStyle(fontSize: 10)),
-                      backgroundColor: PuduuColors.ember,
-                      textColor: Colors.white,
-                      smallSize: 16,
-                      largeSize: 18,
-                      padding: const EdgeInsets.symmetric(horizontal: 5),
-                      child: Icon(icons[i], size: 24),
-                    ),
-                    selectedIcon: Badge(
-                      isLabelVisible:
-                          i == 0 && ref.watch(inboxProvider).isNotEmpty,
-                      label: Text(
-                          '${ref.watch(inboxProvider).length}',
-                          style: const TextStyle(fontSize: 10)),
-                      backgroundColor: PuduuColors.ember,
-                      textColor: Colors.white,
-                      smallSize: 16,
-                      largeSize: 18,
-                      padding: const EdgeInsets.symmetric(horizontal: 5),
-                      child: Icon(iconsFill[i], size: 24),
-                    ),
-                    label: titles[i],
-                  ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _SideRail extends ConsumerWidget {
-  final int tab;
-  final ValueChanged<int> onGo;
-  const _SideRail({required this.tab, required this.onGo});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    const items = [
-      (PuduuIcons.today, PuduuIcons.todayFill, 'Today'),
-      (PuduuIcons.focus, PuduuIcons.focusFill, 'Focus'),
-      (PuduuIcons.reset, PuduuIcons.resetFill, 'Reset'),
-      (PuduuIcons.grows, PuduuIcons.growsFill, 'Progress'),
-      (PuduuIcons.yours, PuduuIcons.yoursFill, 'Yours'),
-    ];
-    final inboxCount = ref.watch(inboxProvider).length;
-    return Container(
-      width: 232,
-      padding: const EdgeInsets.fromLTRB(20, 26, 16, 20),
-      decoration: const BoxDecoration(
-        border: Border(
-            right: BorderSide(color: PuduuColors.line)),
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Row(
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+        child: Container(
+          decoration: BoxDecoration(
+            color: PuduuColors.dark,
+            borderRadius: BorderRadius.circular(26),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+          child: Row(
             children: [
-              _Wordmark(),
-              SizedBox(width: 9),
-              Text('Puduu',
-                  style: TextStyle(
-                      fontFamily: 'Fraunces',
-                      fontSize: 21,
-                      fontWeight: FontWeight.w600,
-                      color: PuduuColors.ink)),
+              for (var i = 0; i < titles.length; i++)
+                Expanded(
+                  child: _PillTab(
+                    label: titles[i],
+                    icon: tab == i ? iconsFill[i] : icons[i],
+                    active: tab == i,
+                    badge: i == 0
+                        ? ref.watch(inboxProvider).length
+                        : 0,
+                    onTap: () => _go(i),
+                  ),
+                ),
             ],
           ),
-          const SizedBox(height: 30),
-          for (var i = 0; i < items.length; i++)
-            _RailItem(
-              icon: tab == i ? items[i].$2 : items[i].$1,
-              label: items[i].$3,
-              active: tab == i,
-              badge: i == 0 ? inboxCount : 0,
-              onTap: () => onGo(i),
-            ),
-          const Spacer(),
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: PuduuColors.card,
-              border: Border.all(color: PuduuColors.line),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(PuduuIcons.crown,
-                        size: 16, color: PuduuColors.emberDeep),
-                    SizedBox(width: 6),
-                    Text('Puduu Pro',
-                        style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: PuduuColors.ink)),
-                  ],
-                ),
-                SizedBox(height: 5),
-                Text('Unlimited plans, calm history, yearly \$49.99.',
-                    style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 12,
-                        height: 1.5,
-                        color: PuduuColors.mute)),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 }
 
-class _RailItem extends StatelessWidget {
-  final IconData icon;
+class _PillTab extends StatelessWidget {
   final String label;
+  final IconData icon;
   final bool active;
   final int badge;
   final VoidCallback onTap;
-  const _RailItem(
-      {required this.icon,
-      required this.label,
+  const _PillTab(
+      {required this.label,
+      required this.icon,
       required this.active,
       this.badge = 0,
       required this.onTap});
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 2),
-      child: Material(
-        color: active ? PuduuColors.emberWash : Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(8),
-          onTap: onTap,
-          child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-            child: Row(
-              children: [
-                Badge(
-                  isLabelVisible: badge > 0,
-                  label: Text('$badge',
-                      style: const TextStyle(fontSize: 10)),
-                  backgroundColor: PuduuColors.ember,
-                  textColor: Colors.white,
-                  smallSize: 14,
-                  largeSize: 16,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 4),
-                  child: Icon(icon,
-                      size: 22,
-                      color: active
-                          ? PuduuColors.emberDeep
-                          : PuduuColors.mute),
-                ),
-                const SizedBox(width: 11),
-                Text(label,
-                    style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 14,
-                        fontWeight:
-                            active ? FontWeight.w700 : FontWeight.w500,
-                        color: active
-                            ? PuduuColors.ink
-                            : PuduuColors.mute)),
-              ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 7),
+        decoration: BoxDecoration(
+          color: active ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Badge(
+              isLabelVisible: badge > 0,
+              label: Text('$badge',
+                  style: const TextStyle(fontSize: 10)),
+              backgroundColor: PuduuColors.teal,
+              textColor: Colors.white,
+              smallSize: 14,
+              largeSize: 16,
+              child: Icon(icon,
+                  size: 22,
+                  color: active
+                      ? PuduuColors.dark
+                      : const Color(0xFF8FA3A1)),
             ),
-          ),
+            const SizedBox(height: 2),
+            Text(label,
+                style: TextStyle(
+                    fontFamily: 'Work Sans',
+                    fontSize: 10,
+                    fontWeight:
+                        active ? FontWeight.w700 : FontWeight.w500,
+                    color: active
+                        ? PuduuColors.dark
+                        : const Color(0xFF8FA3A1))),
+          ],
         ),
       ),
     );
   }
 }
 
-class _Wordmark extends StatelessWidget {
-  const _Wordmark();
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 30,
-      height: 30,
-      decoration: BoxDecoration(
-        color: PuduuColors.ink,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: const Center(
-        child: Text('P',
-            style: TextStyle(
-                fontFamily: 'Fraunces',
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFFFFFDF8))),
-      ),
-    );
-  }
-}
+// ---------- shared DocSpot-class primitives ----------
 
-/// Margin notes column: fills wide screens with intent, ledger-style.
-class _MarginNotes extends StatelessWidget {
-  const _MarginNotes();
+class HelloHead extends StatelessWidget {
+  final String hello;
+  final String sub;
+  final bool showBell;
+  const HelloHead(
+      {super.key,
+      required this.hello,
+      required this.sub,
+      this.showBell = false});
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 180,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 118),
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: PuduuColors.card,
-            border: Border.all(color: PuduuColors.line),
-            borderRadius: BorderRadius.circular(8),
-          ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
             children: [
-              Text('MARGIN NOTES',
-                  style: PuduuType.eyebrow()),
-              const SizedBox(height: 10),
-              _note('Energy peaks before noon. Heavy work goes first.'),
-              const Divider(height: 24),
-              _note('One reset beats one more scroll. Two minutes counts.'),
-              const Divider(height: 24),
-              _note('Done is a direction, not a streak.'),
+              Text(hello,
+                  style: PuduuType.display.copyWith(fontSize: 23)),
+              const SizedBox(height: 2),
+              Text(sub,
+                  style: const TextStyle(
+                      fontFamily: 'Work Sans',
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: PuduuColors.tealDeep)),
             ],
           ),
         ),
-      ),
+        if (showBell)
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: PuduuColors.card,
+              border: Border.all(color: PuduuColors.line),
+              shape: BoxShape.circle,
+            ),
+            child: const Badge(
+              isLabelVisible: true,
+              backgroundColor: PuduuColors.danger,
+              smallSize: 8,
+              child: Icon(PuduuIcons.bell,
+                  size: 19, color: PuduuColors.soft),
+            ),
+          ),
+        const SizedBox(width: 8),
+        Container(
+          width: 38,
+          height: 38,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(colors: [
+              PuduuColors.teal,
+              PuduuColors.tealDeep,
+            ]),
+            shape: BoxShape.circle,
+          ),
+          alignment: Alignment.center,
+          child: const Text('A',
+              style: TextStyle(
+                  fontFamily: 'Outfit',
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white)),
+        ),
+      ],
     );
   }
-
-  Widget _note(String s) => Text(s,
-      style: const TextStyle(
-          fontFamily: 'Fraunces',
-          fontSize: 13.5,
-          fontStyle: FontStyle.italic,
-          height: 1.5,
-          color: PuduuColors.mute));
 }
 
-// ---------- editorial primitives (v5: ledger, not cards) ----------
-
-class LedgerHead extends StatelessWidget {
-  final String eyebrow;
-  final String headline;
-  final String standfirst;
-  const LedgerHead(
-      {super.key,
-      required this.eyebrow,
-      required this.headline,
-      required this.standfirst});
+class SearchField extends StatelessWidget {
+  final String hint;
+  final TextEditingController? controller;
+  const SearchField({super.key, required this.hint, this.controller});
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(eyebrow.toUpperCase(), style: PuduuType.eyebrow()),
-        const SizedBox(height: 7),
-        Text(headline,
-            style: PuduuType.display
-                .copyWith(fontSize: 30, fontWeight: FontWeight.w600)),
-        const SizedBox(height: 6),
-        Text(standfirst,
-            style: PuduuType.meta.copyWith(fontSize: 13.5)),
-        const SizedBox(height: 14),
-        const Divider(height: 1),
-      ],
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        hintText: hint,
+        prefixIcon:
+            const Icon(PuduuIcons.search, color: PuduuColors.mute),
+      ),
     );
   }
 }
@@ -445,13 +294,11 @@ class SectionHead extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 24, bottom: 4),
+      padding: const EdgeInsets.only(top: 18, bottom: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.baseline,
-        textBaseline: TextBaseline.alphabetic,
         children: [
-          Text(label.toUpperCase(), style: PuduuType.eyebrow()),
+          Text(label, style: PuduuType.label()),
           if (action != null)
             TextButton(onPressed: onAction ?? () {}, child: Text(action!)),
         ],
@@ -460,80 +307,87 @@ class SectionHead extends StatelessWidget {
   }
 }
 
-/// The "now" panel: one ruled panel, hairline progress, single ink button.
-class NowPanel extends StatelessWidget {
-  const NowPanel({super.key});
+class DarkHero extends StatelessWidget {
+  final String tag;
+  final String title;
+  final String meta;
+  final double progress;
+  final String primary;
+  final String secondary;
+  final VoidCallback? onPrimary;
+  const DarkHero(
+      {super.key,
+      required this.tag,
+      required this.title,
+      required this.meta,
+      required this.progress,
+      required this.primary,
+      required this.secondary,
+      this.onPrimary});
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(top: 16),
-      padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+      margin: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: PuduuColors.card,
-        border: Border.all(color: PuduuColors.line),
-        borderRadius: BorderRadius.circular(8),
+        color: PuduuColors.dark,
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text('NOW', style: PuduuType.eyebrow(PuduuColors.emberDeep)),
-              const SizedBox(width: 8),
-              const Expanded(
-                child: Text('09:00 · 50 min · step 2 of 4',
-                    style: PuduuType.meta)),
-            ],
-          ),
-          const SizedBox(height: 7),
-          const Text('Deep work: portfolio',
-              style: TextStyle(
-                  fontFamily: 'Fraunces',
-                  fontSize: 21,
-                  fontWeight: FontWeight.w600,
-                  color: PuduuColors.ink,
-                  height: 1.25)),
-          const SizedBox(height: 12),
+          Text(tag,
+              style: const TextStyle(
+                  fontFamily: 'Outfit',
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.6,
+                  color: Color(0xFF7DD3C7))),
+          const SizedBox(height: 5),
+          Text(title,
+              style: const TextStyle(
+                  fontFamily: 'Outfit',
+                  fontSize: 19,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                  height: 1.2)),
+          const SizedBox(height: 2),
+          Text(meta,
+              style: const TextStyle(
+                  fontFamily: 'Work Sans',
+                  fontSize: 12,
+                  color: Color(0xFFB9CDC9))),
+          const SizedBox(height: 10),
           ClipRRect(
-            borderRadius: BorderRadius.circular(3),
-            child: const LinearProgressIndicator(
-              value: 0.61,
-              minHeight: 4,
-              backgroundColor: PuduuColors.paperDeep,
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 6,
+              backgroundColor: Colors.white.withAlpha(28),
               valueColor:
-                  AlwaysStoppedAnimation(PuduuColors.ember),
+                  const AlwaysStoppedAnimation(Color(0xFF2DD4BF)),
             ),
           ),
           const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
-                child: OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: PuduuColors.ink,
-                    backgroundColor: PuduuColors.emberWash,
-                    side: const BorderSide(
-                        color: PuduuColors.emberDeep, width: 1.2),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 14),
-                    textStyle: const TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700),
+                child: FilledButton.icon(
+                  onPressed: onPrimary ?? () {},
+                  icon: const Icon(PuduuIcons.play, size: 18),
+                  label: Text(primary),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.white.withAlpha(28),
+                    foregroundColor: Colors.white,
                   ),
                   onPressed: () {},
-                  icon: const Icon(PuduuIcons.play, size: 18),
-                  label: const Text('Begin session'),
+                  child: Text(secondary),
                 ),
-              ),
-              TextButton(
-                onPressed: () {},
-                child: const Text('Skip'),
               ),
             ],
           ),
@@ -543,173 +397,47 @@ class NowPanel extends StatelessWidget {
   }
 }
 
-/// One ledger line: tabular time gutter, hairline marker, text, status.
-class DayLine extends StatelessWidget {
-  final String hour;
-  final String span;
-  final PuduuTask task;
-  final bool current;
-  const DayLine(
-      {super.key,
-      required this.hour,
-      required this.span,
-      required this.task,
-      this.current = false});
-  @override
-  Widget build(BuildContext context) {
-    final done = task.status == 'done';
-    final timeStyle = PuduuType.tabular.copyWith(
-      fontFamily: 'Inter',
-      fontSize: 14,
-      fontWeight: FontWeight.w700,
-      color: done ? PuduuColors.faint : PuduuColors.ink,
-    );
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 11),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 56,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(hour, style: timeStyle),
-                const SizedBox(height: 2),
-                Text(span,
-                    style: PuduuType.tabular.copyWith(
-                        fontFamily: 'Inter',
-                        fontSize: 11,
-                        color: PuduuColors.faint)),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          Column(
-            children: [
-              const SizedBox(height: 3),
-              Container(
-                width: 9,
-                height: 9,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: done
-                      ? PuduuColors.moss
-                      : current
-                          ? PuduuColors.ember
-                          : Colors.transparent,
-                  border: Border.all(
-                    color: done
-                        ? PuduuColors.moss
-                        : current
-                            ? PuduuColors.ember
-                            : PuduuColors.faint,
-                    width: 1.6,
-                  ),
-                ),
-              ),
-              Container(
-                  width: 2.5,
-                  height: 34,
-                  color: PuduuColors.paperDeep),
-            ],
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(task.title,
-                    style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: done
-                            ? PuduuColors.faint
-                            : PuduuColors.ink,
-                        decoration:
-                            done ? TextDecoration.lineThrough : null,
-                        decorationColor: PuduuColors.faint,
-                        height: 1.35)),
-                if (task.note != null) ...[
-                  const SizedBox(height: 2),
-                  Text(task.note!,
-                      style: PuduuType.meta
-                          .copyWith(color: PuduuColors.faint)),
-                ],
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          Padding(
-            padding: const EdgeInsets.only(top: 1),
-            child: done
-                ? const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(PuduuIcons.check,
-                          size: 15, color: PuduuColors.moss),
-                      SizedBox(width: 4),
-                      Text('Done',
-                          style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w600,
-                              color: PuduuColors.moss)),
-                    ],
-                  )
-                : current
-                    ? TextButton(
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 6),
-                          minimumSize: Size.zero,
-                          tapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        onPressed: () {},
-                        child: const Text('Begin'),
-                      )
-                    : Text('${task.durationMin ?? 25} min',
-                        style: PuduuType.tabular.copyWith(
-                            fontFamily: 'Inter',
-                            fontSize: 12,
-                            color: PuduuColors.faint)),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Ruled option row for Reset / Progress / Yours (replaces pastel cards).
-class RuleRow extends StatelessWidget {
-  final IconData icon;
+class TaskCard extends StatelessWidget {
+  final Color dot;
   final String title;
   final String detail;
-  final String? trailing;
-  final VoidCallback? onTap;
-  const RuleRow(
+  final String? side;
+  final bool sideDone;
+  final IconData? icon;
+  final Color? tile;
+  const TaskCard(
       {super.key,
-      required this.icon,
+      required this.dot,
       required this.title,
       required this.detail,
-      this.trailing,
-      this.onTap});
+      this.side,
+      this.sideDone = false,
+      this.icon,
+      this.tile});
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap ?? () {},
+    return Card(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.all(12),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 1),
-              child: Icon(icon, size: 20, color: PuduuColors.inkSoft),
-            ),
-            const SizedBox(width: 13),
+            if (icon != null)
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: tile ?? PuduuColors.tealWash,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, size: 19, color: PuduuColors.soft),
+              )
+            else
+              Container(
+                  width: 10,
+                  height: 10,
+                  decoration:
+                      BoxDecoration(shape: BoxShape.circle, color: dot)),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -720,16 +448,15 @@ class RuleRow extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 8),
-            if (trailing != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 2),
-                child: Text(trailing!,
-                    style: PuduuType.tabular.copyWith(
-                        fontFamily: 'Inter',
-                        fontSize: 12,
-                        color: PuduuColors.faint)),
-              ),
+            if (side != null)
+              Text(side!,
+                  style: TextStyle(
+                      fontFamily: 'Work Sans',
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                      color: sideDone
+                          ? PuduuColors.moss
+                          : PuduuColors.tealDeep)),
           ],
         ),
       ),
@@ -737,59 +464,109 @@ class RuleRow extends StatelessWidget {
   }
 }
 
-// ---------- screens ----------
+// ---------- 5 screens ----------
 
 class TodayPage extends ConsumerWidget {
   const TodayPage({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final inbox = ref.watch(inboxProvider);
-    final today = ref.watch(todayProvider);
     final ctl = TextEditingController();
-    const hours = ['08:00', '09:00', '11:00', '13:00'];
-    const spans = ['25m', '50m', '15m', '30m'];
+    const cats = [
+      (PuduuIcons.focus, 'Focus', PuduuColors.tealWash),
+      (PuduuIcons.reset, 'Reset', PuduuColors.amberWash),
+      (PuduuIcons.check, 'Habits', PuduuColors.mossWash),
+      (PuduuIcons.sort, 'More', Color(0xFFE8F1F6)),
+    ];
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 22, 20, 120),
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 110),
       children: [
-        const LedgerHead(
-          eyebrow: 'Thursday · September 25',
-          headline: 'Good morning, Alex.',
-          standfirst: 'Four blocks planned. One thing at a time.',
+        const HelloHead(
+            hello: 'Hello, Alex',
+            sub: '◉ Morning plan ▾',
+            showBell: true),
+        const SizedBox(height: 12),
+        SearchField(hint: 'Search a task or ritual', controller: ctl),
+        const DarkHero(
+          tag: 'NOW · 09:00 · 50 MIN',
+          title: 'Deep work: portfolio',
+          meta: 'Step 2 of 4 · timer ready',
+          progress: 0.61,
+          primary: 'Begin session',
+          secondary: 'Skip',
         ),
-        const NowPanel(),
-        const SectionHead(label: 'The day', action: 'See all'),
-        for (var i = 0; i < today.length; i++) ...[
-          DayLine(
-            hour: hours[i % hours.length],
-            span: spans[i % spans.length],
-            task: today[i],
-            current: i == 1 && today[i].status != 'done',
-          ),
-          if (i < today.length - 1) const Divider(height: 1),
-        ],
+        const SectionHead(label: 'CATEGORIES', action: 'See all ›'),
+        GridView.count(
+          crossAxisCount: 4,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
+          childAspectRatio: 0.86,
+          children: [
+            for (final c in cats)
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 34,
+                        height: 34,
+                        decoration: BoxDecoration(
+                          color: c.$3,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(c.$1,
+                            size: 18, color: PuduuColors.soft),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(c.$2,
+                          style: const TextStyle(
+                              fontFamily: 'Work Sans',
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w600,
+                              color: PuduuColors.ink)),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
         SectionHead(
-            label: 'Inbox',
+            label: 'UP NEXT',
             action: inbox.isEmpty ? null : '${inbox.length} waiting'),
+        const TaskCard(
+            dot: PuduuColors.teal,
+            title: 'Deep work: portfolio',
+            detail: '09:00 · Hero section, phone away',
+            side: 'Begin'),
+        const SizedBox(height: 8),
+        const TaskCard(
+            dot: PuduuColors.moss,
+            title: 'Walk outside',
+            detail: '11:00 · Fifteen minutes, no podcast',
+            side: '✓ Done',
+            sideDone: true),
+        const SectionHead(label: 'INBOX'),
         Card(
           child: Padding(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(12),
             child: Column(
               children: [
                 Row(
                   children: [
                     Expanded(
                       child: TextField(
-                          controller: ctl,
-                          decoration: const InputDecoration(
-                              hintText:
-                                  'Capture a task, idea, or reminder…')),
+                        controller: ctl,
+                        decoration: const InputDecoration(
+                            hintText:
+                                'Capture a task, idea, or reminder…'),
+                      ),
                     ),
                     const SizedBox(width: 8),
                     FilledButton.icon(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: PuduuColors.ember,
-                        foregroundColor: Colors.white,
-                      ),
                       onPressed: () {
                         if (ctl.text.trim().isEmpty) return;
                         ref.read(inboxProvider.notifier).state = [
@@ -810,18 +587,13 @@ class TodayPage extends ConsumerWidget {
                   width: double.infinity,
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: PuduuColors.emberDeep,
+                      foregroundColor: PuduuColors.tealDeep,
                       side: const BorderSide(
-                          color: PuduuColors.emberDeep, width: 1.2),
+                          color: PuduuColors.tealDeep, width: 1.2),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(14),
                       ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 13),
-                      textStyle: const TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w700),
+                      padding: const EdgeInsets.symmetric(vertical: 13),
                     ),
                     onPressed: () async {
                       final planned =
@@ -838,20 +610,6 @@ class TodayPage extends ConsumerWidget {
             ),
           ),
         ),
-        const SizedBox(height: 6),
-        for (final t in inbox) ...[
-          RuleRow(
-              icon: PuduuIcons.calendar,
-              title: t.title,
-              detail: '${t.durationMin ?? 10} min · unsorted'),
-          const Divider(height: 1),
-        ],
-        const SectionHead(label: 'If you stall'),
-        const RuleRow(
-            icon: PuduuIcons.reset,
-            title: 'Take a two-minute reset',
-            detail: 'Water, air, one small surface.',
-            trailing: '2 min'),
       ],
     );
   }
@@ -862,80 +620,103 @@ class FocusPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 22, 20, 120),
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 110),
       children: [
-        const LedgerHead(
-          eyebrow: 'Focus session',
-          headline: 'Stay with it.',
-          standfirst: 'Deep work: portfolio · step 2 of 4.',
-        ),
-        const SizedBox(height: 26),
-        Center(
+        const HelloHead(
+            hello: 'Stay with it',
+            sub: '◷ Focus session · step 2 of 4'),
+        Container(
+          margin: const EdgeInsets.only(top: 12),
+          padding: const EdgeInsets.fromLTRB(18, 20, 18, 18),
+          decoration: BoxDecoration(
+            color: PuduuColors.dark,
+            borderRadius: BorderRadius.circular(20),
+          ),
           child: Column(
             children: [
               const Text('32:10',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                      fontFamily: 'Fraunces',
-                      fontSize: 76,
-                      fontWeight: FontWeight.w600,
-                      fontFeatures: [
-                        FontFeature.tabularFigures()
-                      ],
-                      color: PuduuColors.ink,
+                      fontFamily: 'Outfit',
+                      fontSize: 58,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
                       height: 1.0)),
-              const SizedBox(height: 8),
-              Text('MINUTES LEFT · GENTLE CHIME AT THE END',
+              const SizedBox(height: 6),
+              const Text('MINUTES LEFT · GENTLE CHIME AT END',
                   textAlign: TextAlign.center,
-                  style: PuduuType.eyebrow()),
-              const SizedBox(height: 18),
+                  style: TextStyle(
+                      fontFamily: 'Work Sans',
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.2,
+                      color: Color(0xFF7DD3C7))),
+              const SizedBox(height: 14),
               ClipRRect(
-                borderRadius: BorderRadius.circular(3),
+                borderRadius: BorderRadius.circular(4),
                 child: const LinearProgressIndicator(
                   value: 0.36,
-                  minHeight: 4,
-                  backgroundColor: PuduuColors.paperDeep,
-                  valueColor: AlwaysStoppedAnimation(
-                      PuduuColors.ember),
+                  minHeight: 6,
+                  backgroundColor: Color(0x29FFFFFF),
+                  valueColor:
+                      AlwaysStoppedAnimation(Color(0xFF2DD4BF)),
                 ),
               ),
               const SizedBox(height: 8),
-              const Text('Sketch the hero section. Phone in another room.',
+              const Text(
+                  'Sketch the hero section. Phone in another room.',
                   textAlign: TextAlign.center,
-                  style: PuduuType.meta),
-              const SizedBox(height: 22),
+                  style: TextStyle(
+                      fontFamily: 'Work Sans',
+                      fontSize: 12,
+                      color: Color(0xFFB9CDC9))),
+              const SizedBox(height: 14),
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  FilledButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(PuduuIcons.pause, size: 18),
-                    label: const Text('Pause'),
-                  ),
-                  const SizedBox(width: 10),
-                  OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: PuduuColors.ink,
-                      side: const BorderSide(
-                          color: PuduuColors.line),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 14),
-                      textStyle: const TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600),
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: () {},
+                      icon:
+                          const Icon(PuduuIcons.pause, size: 18),
+                      label: const Text('Pause'),
                     ),
-                    onPressed: () {},
-                    child: const Text('End early'),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor:
+                            Colors.white.withAlpha(28),
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: () {},
+                      child: const Text('End early'),
+                    ),
                   ),
                 ],
               ),
             ],
           ),
         ),
+        const SectionHead(label: 'SESSION STEPS'),
+        const TaskCard(
+            dot: PuduuColors.moss,
+            title: 'Open the file',
+            detail: 'Done · 2 min',
+            side: '✓',
+            sideDone: true),
+        const SizedBox(height: 8),
+        const TaskCard(
+            dot: PuduuColors.teal,
+            title: 'Sketch hero section',
+            detail: 'Now · 25 min',
+            side: '25 min'),
+        const SizedBox(height: 8),
+        const TaskCard(
+            dot: PuduuColors.line,
+            title: 'Review + save',
+            detail: 'Next · 10 min',
+            side: '10 min'),
       ],
     );
   }
@@ -945,37 +726,51 @@ class RescuePage extends StatelessWidget {
   const RescuePage({super.key});
   @override
   Widget build(BuildContext context) {
+    const rows = [
+      (PuduuIcons.drop, PuduuColors.tealWash, 'Drink a glass of water',
+          'Stand up, sip slowly, look far away.', '2 min'),
+      (PuduuIcons.reset, PuduuColors.amberWash, 'Clear one surface',
+          'Just the desk corner. Nothing more.', '2 min'),
+      (PuduuIcons.mail, PuduuColors.mossWash, 'Open the difficult email',
+          'Read it only. Reply comes later.', '2 min'),
+      (PuduuIcons.sort, Color(0xFFE8F1F6), 'Sort the inbox',
+          'Rule-based now, assisted later.', '3 min'),
+    ];
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 22, 20, 120),
-      children: const [
-        LedgerHead(
-            eyebrow: 'Freeze reset',
-            headline: 'Hit a wall?',
-            standfirst: 'Two minutes counts. Pick the smallest one.'),
-        SizedBox(height: 10),
-        RuleRow(
-            icon: PuduuIcons.drop,
-            title: 'Drink a glass of water',
-            detail: 'Stand up, sip slowly, look far away.',
-            trailing: '2 min'),
-        Divider(height: 1),
-        RuleRow(
-            icon: PuduuIcons.walk,
-            title: 'Clear one surface',
-            detail: 'Just the desk corner. Nothing more.',
-            trailing: '2 min'),
-        Divider(height: 1),
-        RuleRow(
-            icon: PuduuIcons.mail,
-            title: 'Open the difficult email',
-            detail: 'Read it only. Reply comes later.',
-            trailing: '2 min'),
-        Divider(height: 1),
-        RuleRow(
-            icon: PuduuIcons.sort,
-            title: 'Sort the inbox',
-            detail: 'Rule-based now, assisted later.',
-            trailing: '3 min'),
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 110),
+      children: [
+        const HelloHead(
+            hello: 'Hit a wall?',
+            sub: '✦ Two minutes counts'),
+        const SizedBox(height: 12),
+        const SearchField(hint: 'Search a reset'),
+        const SectionHead(label: 'PICK THE SMALLEST ONE'),
+        for (final r in rows) ...[
+          TaskCard(
+              dot: PuduuColors.teal,
+              title: r.$3,
+              detail: r.$4,
+              side: r.$5,
+              icon: r.$1,
+              tile: r.$2),
+          const SizedBox(height: 8),
+        ],
+        Card(
+          color: PuduuColors.tealWash,
+          child: const Padding(
+            padding: EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Slow is still moving.',
+                    style: PuduuType.strong),
+                SizedBox(height: 2),
+                Text('Skipping is allowed — Puduu waits.',
+                    style: PuduuType.meta),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -985,31 +780,88 @@ class GrowsPage extends StatelessWidget {
   const GrowsPage({super.key});
   @override
   Widget build(BuildContext context) {
+    const chips = [('5/7', 'good days'), ('+20%', 'focus'), ('×5', 'resets')];
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 22, 20, 120),
-      children: const [
-        LedgerHead(
-            eyebrow: 'Progress',
-            headline: 'Keep growing.',
-            standfirst: 'Good days: 5 of 7. Never resets to zero.'),
-        SizedBox(height: 10),
-        RuleRow(
-            icon: PuduuIcons.grows,
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 110),
+      children: [
+        const HelloHead(
+            hello: 'Keep growing', sub: '▥ Good days: 5 of 7'),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            for (final c in chips)
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 10),
+                      child: Column(
+                        children: [
+                          Text(c.$1,
+                              style: const TextStyle(
+                                  fontFamily: 'Outfit',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: PuduuColors.ink)),
+                          Text(c.$2, style: PuduuType.meta),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+        const SectionHead(label: 'THIS WEEK', action: 'See all ›'),
+        const TaskCard(
+            dot: PuduuColors.teal,
             title: 'Weekly shelf',
-            detail: 'Early starter ×3 · Reset used ×5 · Focus 25m ×8.',
-            trailing: 'W39'),
-        Divider(height: 1),
-        RuleRow(
-            icon: PuduuIcons.focus,
+            detail: 'Early starter ×3 · Reset ×5 · Focus 25m ×8',
+            side: 'W39',
+            icon: PuduuIcons.grows,
+            tile: PuduuColors.tealWash),
+        const SizedBox(height: 8),
+        const TaskCard(
+            dot: PuduuColors.teal,
             title: 'Focus trend',
-            detail: 'Up 20% vs last week. Mornings work best.',
-            trailing: '+20%'),
-        Divider(height: 1),
-        RuleRow(
-            icon: PuduuIcons.reset,
+            detail: 'Up 20% vs last week. Mornings win',
+            side: '+20%',
+            icon: PuduuIcons.focus,
+            tile: PuduuColors.amberWash),
+        const SizedBox(height: 8),
+        const TaskCard(
+            dot: PuduuColors.teal,
             title: 'Resets that worked',
-            detail: 'Water first, then air. Evenings stay hard.',
-            trailing: '×5'),
+            detail: 'Water first, then air. Evenings hard',
+            side: '×5',
+            icon: PuduuIcons.reset,
+            tile: PuduuColors.mossWash),
+        const SizedBox(height: 8),
+        Card(
+          color: PuduuColors.dark,
+          child: const Padding(
+            padding: EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Done is a direction.',
+                    style: TextStyle(
+                        fontFamily: 'Work Sans',
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white)),
+                SizedBox(height: 2),
+                Text('Not a streak. Never resets to zero.',
+                    style: TextStyle(
+                        fontFamily: 'Work Sans',
+                        fontSize: 11.5,
+                        color: Color(0xFFB9CDC9))),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -1020,29 +872,80 @@ class YoursPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 22, 20, 120),
-      children: const [
-        LedgerHead(
-            eyebrow: 'Settings',
-            headline: 'Make it yours.',
-            standfirst: 'Plan, sounds, reminders, and backup.'),
-        SizedBox(height: 10),
-        RuleRow(
-            icon: PuduuIcons.crown,
-            title: 'Puduu Pro · \$6.99/mo',
-            detail: 'Unlimited resets · yearly \$49.99.'),
-        Divider(height: 1),
-        RuleRow(
-            icon: PuduuIcons.bell,
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 110),
+      children: [
+        const HelloHead(
+            hello: 'Make it yours',
+            sub: '⚙ Plan, sounds, reminders'),
+        Container(
+          margin: const EdgeInsets.only(top: 12),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: PuduuColors.teal,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('PUDUU PRO · \$6.99/MO',
+                  style: TextStyle(
+                      fontFamily: 'Outfit',
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.6,
+                      color: Color(0xFFDDF3F0))),
+              const SizedBox(height: 5),
+              const Text('Unlimited resets',
+                  style: TextStyle(
+                      fontFamily: 'Outfit',
+                      fontSize: 19,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white)),
+              const SizedBox(height: 2),
+              const Text('Yearly \$49.99 · calm history · backup',
+                  style: TextStyle(
+                      fontFamily: 'Work Sans',
+                      fontSize: 12,
+                      color: Color(0xFFDDF3F0))),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: PuduuColors.tealDeep,
+                  ),
+                  onPressed: () {},
+                  child: const Text('Upgrade'),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SectionHead(label: 'SETTINGS'),
+        const TaskCard(
+            dot: PuduuColors.teal,
             title: 'Gentle nudges',
-            detail: 'Max 6 per day · quiet 22:00–07:00.',
-            trailing: 'On'),
-        Divider(height: 1),
-        RuleRow(
-            icon: PuduuIcons.sound,
+            detail: 'Max 6 per day · quiet 22:00–07:00',
+            side: 'On',
+            icon: PuduuIcons.bell,
+            tile: PuduuColors.amberWash),
+        const SizedBox(height: 8),
+        const TaskCard(
+            dot: PuduuColors.teal,
             title: 'Sounds and haptics',
-            detail: 'Calm chime · soft vibration.',
-            trailing: 'On'),
+            detail: 'Calm chime · soft vibration',
+            side: 'On',
+            icon: PuduuIcons.sound,
+            tile: PuduuColors.tealWash),
+        const SizedBox(height: 8),
+        const TaskCard(
+            dot: PuduuColors.teal,
+            title: 'Backup and export',
+            detail: 'Weekly backup · CSV export',
+            side: '›',
+            icon: PuduuIcons.shield,
+            tile: Color(0xFFE8F1F6)),
       ],
     );
   }
