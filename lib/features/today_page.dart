@@ -13,6 +13,7 @@ import '../../main.dart'
         todayProvider,
         timedProvider,
         aiProvider,
+        tabJumpProvider,
         bumpTasks;
 import 'sub_pages.dart' show LibraryPageBody;
 
@@ -125,17 +126,28 @@ class TodayPage extends ConsumerStatefulWidget {
 
 class _TodayPageState extends ConsumerState<TodayPage> {
   late final TextEditingController _ctl;
+  late final TextEditingController _searchCtl;
+  String _query = '';
 
   @override
   void initState() {
     super.initState();
     _ctl = TextEditingController();
+    _searchCtl = TextEditingController();
   }
 
   @override
   void dispose() {
     _ctl.dispose();
+    _searchCtl.dispose();
     super.dispose();
+  }
+
+  bool _hit(PuduuTask t) {
+    if (_query.isEmpty) return true;
+    final q = _query.toLowerCase();
+    return t.title.toLowerCase().contains(q) ||
+        (t.note?.toLowerCase().contains(q) ?? false);
   }
 
   Future<void> _addTask() async {
@@ -149,9 +161,13 @@ class _TodayPageState extends ConsumerState<TodayPage> {
   @override
   Widget build(BuildContext context) {
     final inboxAsync = ref.watch(inboxProvider);
-    final inbox = inboxAsync.maybeWhen(data: (v) => v, orElse: () => <PuduuTask>[]);
+    final inboxAll =
+        inboxAsync.maybeWhen(data: (v) => v, orElse: () => <PuduuTask>[]);
     final todayAsync = ref.watch(todayProvider);
-    final today = todayAsync.maybeWhen(data: (v) => v, orElse: () => <PuduuTask>[]);
+    final todayAll =
+        todayAsync.maybeWhen(data: (v) => v, orElse: () => <PuduuTask>[]);
+    final inbox = inboxAll.where(_hit).toList();
+    final today = todayAll.where(_hit).toList();
     final timedAsync = ref.watch(timedProvider);
     final timed =
         timedAsync.maybeWhen(data: (v) => v, orElse: () => <PuduuTask>[]);
@@ -167,7 +183,11 @@ class _TodayPageState extends ConsumerState<TodayPage> {
         HelloHead(
             hello: dayGreeting(), sub: daySubline(), showBell: true, showSync: true),
         const SizedBox(height: 12),
-        SearchField(hint: 'Search a task or ritual', controller: _ctl),
+        SearchField(
+            hint: 'Search tasks — filters inbox + today',
+            controller: _searchCtl,
+            onChanged: (v) =>
+                setState(() => _query = v.trim())),
         // NOW hero: first timed task with a clock, else empty-state card.
         if (timed.isNotEmpty)
           DarkHero(
@@ -181,6 +201,8 @@ class _TodayPageState extends ConsumerState<TodayPage> {
                 timed.length.clamp(1, 1 << 30),
             primary: 'Begin session',
             secondary: 'Skip',
+            onPrimary: () =>
+                ref.read(tabJumpProvider.notifier).state = 1,
             onSecondary: () async {
               await ref
                   .read(repoProvider)
@@ -246,7 +268,8 @@ class _TodayPageState extends ConsumerState<TodayPage> {
         SectionHead(
             label: 'UP NEXT',
             action: today.isEmpty ? null : '${today.length} today'),
-        // UP NEXT: real planned tasks from drift, tap Begin to start.
+        // UP NEXT: real planned tasks from drift.
+        // Tap card = open detail sheet, tap Begin = mark done.
         if (today.isEmpty)
           const Card(
             child: Padding(
@@ -264,7 +287,12 @@ class _TodayPageState extends ConsumerState<TodayPage> {
                   '${_clock(t.scheduledAt)} · ${t.note?.isNotEmpty == true ? t.note! : '${t.durationMin ?? 25} min'}',
               side: t.status == 'done' ? '✓ Done' : 'Begin',
               sideDone: t.status == 'done',
-              onTap: () async {
+              onTap: () => showTaskSheet(
+                  context,
+                  ref.read(repoProvider),
+                  t,
+                  () async => bumpTasks(ref)),
+              onSideTap: () async {
                 await ref.read(repoProvider).setTaskStatus(t.id, 'done');
                 bumpTasks(ref);
               },
@@ -307,9 +335,14 @@ class _TodayPageState extends ConsumerState<TodayPage> {
                         title: t.title,
                         detail: t.note?.isNotEmpty == true
                             ? t.note!
-                            : 'From inbox · tap ✓ to plan',
+                            : 'From inbox · tap card to edit',
                         side: '✓',
-                        onTap: () async {
+                        onTap: () => showTaskSheet(
+                            context,
+                            ref.read(repoProvider),
+                            t,
+                            () async => bumpTasks(ref)),
+                        onSideTap: () async {
                           await ref
                               .read(repoProvider)
                               .setTaskStatus(t.id, 'planned');
@@ -332,12 +365,39 @@ class _TodayPageState extends ConsumerState<TodayPage> {
                       padding: const EdgeInsets.symmetric(vertical: 13),
                     ),
                     onPressed: () async {
-                      final planned =
-                          await ref.read(aiProvider).plan(inbox);
-                      await ref
-                          .read(repoProvider)
-                          .moveAllToToday(planned);
+                      final ai = ref.read(aiProvider);
+                      final repo = ref.read(repoProvider);
+                      final planned = await ai.plan(inboxAll);
+                      // AI subtask split: tasks without steps get a
+                      // 3-step breakdown so Focus shows SESSION STEPS.
+                      for (final t in planned) {
+                        if (t.subtasks.isEmpty) {
+                          final steps = await ai.breakdown(t);
+                          await repo.moveAllToToday([
+                            PuduuTask(
+                              id: t.id,
+                              title: t.title,
+                              note: t.note,
+                              durationMin: t.durationMin,
+                              scheduledAt: t.scheduledAt,
+                              colorIndex: t.colorIndex,
+                              status: t.status,
+                              subtasks: steps,
+                            )
+                          ]);
+                        } else {
+                          await repo.moveAllToToday([t]);
+                        }
+                      }
                       bumpTasks(ref);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text(
+                                    'Sorted ${planned.length} into today with steps'),
+                                duration:
+                                    const Duration(seconds: 2)));
+                      }
                     },
                     icon: const Icon(PuduuIcons.sort, size: 17),
                     label: Text(inbox.isEmpty

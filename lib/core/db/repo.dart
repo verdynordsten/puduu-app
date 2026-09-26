@@ -74,6 +74,50 @@ class PuduuRepo {
         .write(DbTasksCompanion(status: Value(status)));
   }
 
+  /// Full-field edit from the task detail sheet. Null = leave unchanged,
+  /// nullWrapped = explicitly clear the nullable field.
+  Future<void> updateTask(String id,
+      {String? title,
+      Value<String?>? note,
+      Value<int?>? durationMin,
+      Value<DateTime?>? scheduledAt,
+      int? colorIndex}) async {
+    await (db.update(db.dbTasks)..where((t) => t.id.equals(id)))
+        .write(DbTasksCompanion(
+      title: title == null ? const Value.absent() : Value(title),
+      note: note ?? const Value.absent(),
+      durationMin: durationMin ?? const Value.absent(),
+      scheduledAt: scheduledAt ?? const Value.absent(),
+      colorIndex:
+          colorIndex == null ? const Value.absent() : Value(colorIndex),
+    ));
+  }
+
+  Future<void> toggleSubtask(String subtaskId, bool done) async {
+    await (db.update(db.dbSubtasks)
+          ..where((s) => s.id.equals(subtaskId)))
+        .write(DbSubtasksCompanion(done: Value(done)));
+  }
+
+  Future<void> addSubtask(String taskId, PuduuSubtask s) async {
+    await db.into(db.dbSubtasks).insert(
+          DbSubtasksCompanion(
+            id: Value(s.id),
+            taskId: Value(taskId),
+            title: Value(s.title),
+            timerMin: Value(s.timerMin),
+            done: Value(s.done),
+          ),
+          mode: InsertMode.insertOrReplace,
+        );
+  }
+
+  Future<void> deleteSubtask(String subtaskId) async {
+    await (db.delete(db.dbSubtasks)
+          ..where((s) => s.id.equals(subtaskId)))
+        .go();
+  }
+
   Future<void> deleteTask(String id) async {
     await (db.delete(db.dbTasks)..where((t) => t.id.equals(id))).go();
     await (db.delete(db.dbSubtasks)..where((s) => s.taskId.equals(id))).go();
@@ -226,6 +270,18 @@ class PuduuRepo {
     await db.into(db.dbMoods).insert(
           DbMoodsCompanion(
               day: Value(day), score: Value(score), note: const Value(null)),
+          mode: InsertMode.insertOrReplace,
+        );
+  }
+
+  /// Dated mood write (sync pull + note support). Same-day insert replaces.
+  Future<void> logMoodAt(DateTime day, int score, {String? note}) async {
+    final d = DateTime(day.year, day.month, day.day);
+    await db.into(db.dbMoods).insert(
+          DbMoodsCompanion(
+              day: Value(d),
+              score: Value(score.clamp(1, 5)),
+              note: note == null ? const Value(null) : Value(note)),
           mode: InsertMode.insertOrReplace,
         );
   }

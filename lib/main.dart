@@ -9,7 +9,7 @@ import 'core/sync.dart';
 import 'core/ai_slot/ai_planner.dart';
 import 'features/today_page.dart' show TodayPage;
 import 'features/main_pages.dart'
-    show FocusPage, RescuePage, GrowsPage, YoursPage;
+    show FocusPage, RescuePage, GrowsPage, YoursPage, SettingsState;
 import 'features/sub_pages.dart' show OnboardingFlowCompat;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -53,6 +53,7 @@ final syncLiveProvider = StateProvider<bool?>((_) => null);
 final dbReadyProvider = FutureProvider<bool>((ref) async {
   final repo = ref.watch(repoProvider);
   await repo.seedIfEmpty();
+  await SettingsState.load(ref);
   final sync = ref.watch(syncProvider);
   await sync.init();
   final r = await sync.syncAll();
@@ -135,6 +136,9 @@ class Shell extends ConsumerStatefulWidget {
   ConsumerState<Shell> createState() => _ShellState();
 }
 
+/// Tab jump bus: pages request Shell to switch tabs (e.g. Begin hero -> Focus).
+final tabJumpProvider = StateProvider<int?>((_) => null);
+
 class _ShellState extends ConsumerState<Shell> {
   int tab = 0;
   static const titles = ['Today', 'Focus', 'Reset', 'Progress', 'Yours'];
@@ -157,6 +161,12 @@ class _ShellState extends ConsumerState<Shell> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<int?>(tabJumpProvider, (_, next) {
+      if (next != null) {
+        _go(next);
+        ref.read(tabJumpProvider.notifier).state = null;
+      }
+    });
     const pages = [
       TodayPage(),
       FocusPage(),

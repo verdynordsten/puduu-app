@@ -121,7 +121,65 @@ class PuduuSync {
         ));
         down++;
       }
-      return SyncResult.ok(up: up, down: down);
+      // pull subtasks (scoped per task; drift insertOrReplace keeps id stable)
+      final remoteSubs = await c
+          .from('subtasks')
+          .select()
+          .order('updated_at', ascending: false)
+          .limit(1000);
+      var downSubs = 0;
+      for (final row in (remoteSubs as List)) {
+        final m = row as Map<String, dynamic>;
+        await repo.addSubtask(
+            m['task_id'] as String,
+            PuduuSubtask(
+              id: m['id'] as String,
+              title: (m['title'] as String?) ?? '',
+              timerMin: m['timer_min'] as int?,
+              done: (m['done'] as bool?) ?? false,
+            ));
+        downSubs++;
+      }
+      // pull routines
+      final remoteRoutines =
+          await c.from('routines').select().limit(200);
+      var downRoutines = 0;
+      for (final row in (remoteRoutines as List)) {
+        final m = row as Map<String, dynamic>;
+        final rawSteps = m['step_titles'];
+        await repo.addRoutine(PuduuRoutine(
+          id: m['id'] as String,
+          name: (m['name'] as String?) ?? 'Routine',
+          stepTitles: rawSteps is List
+              ? rawSteps.map((e) => '$e').toList()
+              : decodeSteps('${rawSteps ?? '[]'}'),
+          rrule: (m['rrule'] as String?) ?? '',
+        ));
+        downRoutines++;
+      }
+      // pull moods
+      final remoteMoods = await c.from('moods').select().limit(400);
+      var downMoods = 0;
+      for (final row in (remoteMoods as List)) {
+        final m = row as Map<String, dynamic>;
+        final dayRaw = m['day'];
+        DateTime? day;
+        if (dayRaw is String) {
+          day = DateTime.tryParse(dayRaw);
+        }
+        if (day == null) continue;
+        await repo.logMoodAt(
+            DateTime(day.year, day.month, day.day),
+            (m['score'] as int?) ?? 3,
+            note: m['note'] as String?);
+        downMoods++;
+      }
+      return SyncResult.ok(
+          up: up,
+          down: down,
+          downSubs: downSubs,
+          downRoutines: downRoutines,
+          downMoods: downMoods);
     } catch (_) {
       return const SyncResult.offline();
     }
@@ -132,11 +190,35 @@ class SyncResult {
   final bool live;
   final int up;
   final int down;
-  const SyncResult.ok({required this.up, required this.down}) : live = true;
+  final int downSubs;
+  final int downRoutines;
+  final int downMoods;
+  const SyncResult.ok(
+      {required this.up,
+      required this.down,
+      this.downSubs = 0,
+      this.downRoutines = 0,
+      this.downMoods = 0})
+      : live = true;
   const SyncResult.offline()
       : live = false,
         up = 0,
-        down = 0;
+        down = 0,
+        downSubs = 0,
+        downRoutines = 0,
+        downMoods = 0;
+
+  /// One-line human summary for the manual-sync snackbar.
+  String describe() {
+    if (!live) return 'Offline — kept local';
+    final parts = <String>['↑$up'];
+    if (down > 0) parts.add('↓$down tasks');
+    if (downSubs > 0) parts.add('$downSubs steps');
+    if (downRoutines > 0) parts.add('$downRoutines routines');
+    if (downMoods > 0) parts.add('$downMoods moods');
+    if (parts.length == 1) return 'Synced ↑$up · already up to date';
+    return 'Synced ${parts.join(' · ')}';
+  }
 }
 
 /// JSON helpers for routine steps (repo stores JSON string).

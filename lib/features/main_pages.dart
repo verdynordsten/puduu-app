@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/models.dart';
 import '../../core/theme/puduu_theme.dart';
@@ -193,10 +195,16 @@ class _FocusPageState extends ConsumerState<FocusPage> {
               dot: s.done ? PuduuColors.moss : PuduuColors.line,
               title: s.title,
               detail: s.done
-                  ? 'Done${s.timerMin != null ? ' · ${s.timerMin} min' : ''}'
-                  : 'Next${s.timerMin != null ? ' · ${s.timerMin} min' : ''}',
+                  ? 'Done${s.timerMin != null ? ' · ${s.timerMin} min' : ''} · tap to uncheck'
+                  : 'Next${s.timerMin != null ? ' · ${s.timerMin} min' : ''} · tap to check',
               side: s.done ? '✓' : '${s.timerMin ?? 5} min',
               sideDone: s.done,
+              onTap: () async {
+                await ref
+                    .read(repoProvider)
+                    .toggleSubtask(s.id, !s.done);
+                bumpTasks(ref);
+              },
             ),
             const SizedBox(height: 8),
           ],
@@ -207,8 +215,14 @@ class _FocusPageState extends ConsumerState<FocusPage> {
 
 // ---------- Rescue: presets write real inbox tasks ----------
 
-class RescuePage extends ConsumerWidget {
+class RescuePage extends ConsumerStatefulWidget {
   const RescuePage({super.key});
+  @override
+  ConsumerState<RescuePage> createState() => _RescuePageState();
+}
+
+class _RescuePageState extends ConsumerState<RescuePage> {
+  String _query = '';
   static const rows = [
     (PuduuIcons.drop, PuduuColors.tealWash, 'Drink a glass of water',
         'Stand up, sip slowly, look far away.', 2),
@@ -220,16 +234,23 @@ class RescuePage extends ConsumerWidget {
         'Rule-based now, assisted later.', 3),
   ];
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final ref = this.ref;
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 110),
       children: [
         const HelloHead(
             hello: 'Hit a wall?', sub: '✦ Two minutes counts'),
         const SizedBox(height: 12),
-        const SearchField2(hint: 'Search a reset'),
+        SearchField2(
+            hint: 'Search resets',
+            onChanged: (v) =>
+                setState(() => _query = v.trim().toLowerCase())),
         const SectionHead(label: 'PICK THE SMALLEST ONE'),
-        for (final r in rows) ...[
+        for (final r in rows.where((r) =>
+            _query.isEmpty ||
+            r.$3.toLowerCase().contains(_query) ||
+            r.$4.toLowerCase().contains(_query))) ...[
           TaskCard(
               dot: PuduuColors.teal,
               title: r.$3,
@@ -453,12 +474,37 @@ String _weekNo() {
           .padLeft(2, '0');
 }
 
-// ---------- Yours: settings hub ----------
+// ---------- Yours: settings hub (toggles persist via SharedPreferences) ----------
 
-class YoursPage extends StatelessWidget {
+/// Persisted toggles backing the SETTINGS section.
+class SettingsState {
+  static const _kNudges = 'puduu_set_nudges';
+  static const _kSounds = 'puduu_set_sounds';
+  static const _kQuiet = 'puduu_set_quiet';
+
+  static final nudgesProvider = StateProvider<bool>((_) => true);
+  static final soundsProvider = StateProvider<bool>((_) => true);
+  static final quietProvider = StateProvider<bool>((_) => true);
+
+  static Future<void> load(Ref ref) async {
+    final prefs = await SharedPreferences.getInstance();
+    ref.read(nudgesProvider.notifier).state =
+        prefs.getBool(_kNudges) ?? true;
+    ref.read(soundsProvider.notifier).state =
+        prefs.getBool(_kSounds) ?? true;
+    ref.read(quietProvider.notifier).state = prefs.getBool(_kQuiet) ?? true;
+  }
+
+  static Future<void> saveBool(String key, bool v) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(key, v);
+  }
+}
+
+class YoursPage extends ConsumerWidget {
   const YoursPage({super.key});
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 110),
       children: [
@@ -542,30 +588,94 @@ class YoursPage extends StatelessWidget {
             page: MoodPageBody()),
         const SizedBox(height: 8),
         const SectionHead(label: 'SETTINGS'),
-        const TaskCard(
-            dot: PuduuColors.teal,
-            title: 'Gentle nudges',
-            detail: 'Max 6 per day · quiet 22:00–07:00',
-            side: 'On',
-            icon: PuduuIcons.bell,
-            tile: PuduuColors.amberWash),
+        _SettingTile(
+          icon: PuduuIcons.bell,
+          tile: PuduuColors.amberWash,
+          title: 'Gentle nudges',
+          detail: 'Max 6 per day · quiet 22:00–07:00',
+          value: ref.watch(SettingsState.nudgesProvider),
+          onFlip: (v) async {
+            ref.read(SettingsState.nudgesProvider.notifier).state = v;
+            await SettingsState.saveBool(SettingsState._kNudges, v);
+          },
+        ),
         const SizedBox(height: 8),
-        const TaskCard(
-            dot: PuduuColors.teal,
-            title: 'Sounds and haptics',
-            detail: 'Calm chime · soft vibration',
-            side: 'On',
-            icon: PuduuIcons.sound,
-            tile: PuduuColors.tealWash),
+        _SettingTile(
+          icon: PuduuIcons.sound,
+          tile: PuduuColors.tealWash,
+          title: 'Sounds and haptics',
+          detail: 'Calm chime · soft vibration',
+          value: ref.watch(SettingsState.soundsProvider),
+          onFlip: (v) async {
+            ref.read(SettingsState.soundsProvider.notifier).state = v;
+            await SettingsState.saveBool(SettingsState._kSounds, v);
+          },
+        ),
         const SizedBox(height: 8),
-        const TaskCard(
-            dot: PuduuColors.teal,
-            title: 'Backup and export',
-            detail: 'Weekly backup · CSV export',
-            side: '›',
-            icon: PuduuIcons.shield,
-            tile: Color(0xFFE8F1F6)),
+        _SettingTile(
+          icon: PuduuIcons.shield,
+          tile: const Color(0xFFE8F1F6),
+          title: 'Quiet hours',
+          detail: 'Mute 22:00–07:00 · calm only',
+          value: ref.watch(SettingsState.quietProvider),
+          onFlip: (v) async {
+            ref.read(SettingsState.quietProvider.notifier).state = v;
+            await SettingsState.saveBool(SettingsState._kQuiet, v);
+          },
+        ),
       ],
+    );
+  }
+}
+
+/// Settings row with a real working Switch.
+class _SettingTile extends StatelessWidget {
+  final IconData icon;
+  final Color tile;
+  final String title, detail;
+  final bool value;
+  final ValueChanged<bool> onFlip;
+  const _SettingTile(
+      {required this.icon,
+      required this.tile,
+      required this.title,
+      required this.detail,
+      required this.value,
+      required this.onFlip});
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                  color: tile,
+                  borderRadius: BorderRadius.circular(12)),
+              child: Icon(icon, size: 19, color: PuduuColors.soft),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: PuduuType.strong),
+                  const SizedBox(height: 2),
+                  Text(detail, style: PuduuType.meta),
+                ],
+              ),
+            ),
+            Switch(
+              value: value,
+              activeThumbColor: PuduuColors.teal,
+              onChanged: onFlip,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

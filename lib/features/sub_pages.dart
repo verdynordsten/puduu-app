@@ -25,20 +25,36 @@ final routineProvider = FutureProvider<List<PuduuRoutine>>((ref) async {
 
 final _routineTickProvider = StateProvider<int>((_) => 0);
 
-class RoutinesPageBody extends ConsumerWidget {
+class RoutinesPageBody extends ConsumerStatefulWidget {
   const RoutinesPageBody({super.key});
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RoutinesPageBody> createState() => _RoutinesPageBodyState();
+}
+
+class _RoutinesPageBodyState extends ConsumerState<RoutinesPageBody> {
+  String _query = '';
+  @override
+  Widget build(BuildContext context) {
+    final ref = this.ref;
     ref.watch(_routineTickProvider);
     final routinesAsync = ref.watch(routineProvider);
-    final routines = routinesAsync.maybeWhen(
+    final routinesAll = routinesAsync.maybeWhen(
         data: (v) => v, orElse: () => <PuduuRoutine>[]);
+    final routines = routinesAll
+        .where((r) =>
+            _query.isEmpty ||
+            r.name.toLowerCase().contains(_query) ||
+            r.stepTitles.any((s) => s.toLowerCase().contains(_query)))
+        .toList();
     return ListView(
       padding: _pad,
       children: [
         const HelloHead(hello: 'Routines', sub: '◉ Repeatable calm'),
         const SizedBox(height: 12),
-        const SearchField2(hint: 'Search a routine'),
+        SearchField2(
+            hint: 'Search routines + steps',
+            onChanged: (v) =>
+                setState(() => _query = v.trim().toLowerCase())),
         SectionHead(
             label: 'YOUR ROUTINES',
             action: '+ New',
@@ -131,8 +147,9 @@ class RoutinesPageBody extends ConsumerWidget {
                       width: double.infinity,
                       child: FilledButton.icon(
                         onPressed: () async {
-                          // Start = fan steps out as timed inbox tasks.
-                          final now = DateTime.now();
+                          // Start = fan steps out as timed tasks anchored
+                          // at the routine's next daily occurrence.
+                          final base = routineNextAt(r.rrule);
                           for (var i = 0;
                               i < r.stepTitles.length;
                               i++) {
@@ -142,7 +159,7 @@ class RoutinesPageBody extends ConsumerWidget {
                                     title:
                                         '${r.name}: ${r.stepTitles[i]}',
                                     durationMin: 5,
-                                    scheduledAt: now.add(Duration(
+                                    scheduledAt: base.add(Duration(
                                         minutes: i * 5)),
                                     status: 'planned'));
                           }
@@ -197,56 +214,81 @@ class RoutinesPageBody extends ConsumerWidget {
 Future<void> _newRoutineSheet(BuildContext context, WidgetRef ref) async {
   final nameCtl = TextEditingController();
   final stepsCtl = TextEditingController();
+  var hour = 8;
+  var minute = 0;
   await showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    builder: (ctx) => Padding(
-      padding: EdgeInsets.only(
-          left: 20,
-          right: 20,
-          top: 20,
-          bottom: MediaQuery.of(ctx).viewInsets.bottom + 20),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('New routine', style: PuduuType.title),
-          const SizedBox(height: 10),
-          TextField(
-              controller: nameCtl,
-              decoration:
-                  const InputDecoration(hintText: 'Name — e.g. Morning reset')),
-          const SizedBox(height: 8),
-          TextField(
-              controller: stepsCtl,
-              decoration: const InputDecoration(
-                  hintText: 'Steps, comma separated — Meds, Water, Tidy')),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
+    builder: (ctx) => StatefulBuilder(
+      builder: (ctx, setSheet) => Padding(
+        padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 20,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('New routine', style: PuduuType.title),
+            const SizedBox(height: 10),
+            TextField(
+                controller: nameCtl,
+                decoration: const InputDecoration(
+                    hintText: 'Name — e.g. Morning reset')),
+            const SizedBox(height: 8),
+            TextField(
+                controller: stepsCtl,
+                decoration: const InputDecoration(
+                    hintText:
+                        'Steps, comma separated — Meds, Water, Tidy')),
+            const SizedBox(height: 12),
+            Text('DAILY TIME', style: PuduuType.label()),
+            const SizedBox(height: 6),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.schedule, size: 17),
+              label: Text(
+                  '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} daily'),
               onPressed: () async {
-                final name = nameCtl.text.trim();
-                if (name.isEmpty) return;
-                final steps = stepsCtl.text
-                    .split(',')
-                    .map((e) => e.trim())
-                    .where((e) => e.isNotEmpty)
-                    .toList();
-                await ref.read(repoProvider).addRoutine(PuduuRoutine(
-                    id: _uuid.v4(),
-                    name: name,
-                    stepTitles:
-                        steps.isEmpty ? const ['Step one'] : steps,
-                    rrule: 'FREQ=DAILY'));
-                ref.read(_routineTickProvider.notifier).state++;
-                bumpTasks(ref);
-                if (ctx.mounted) Navigator.of(ctx).pop();
+                final t = await showTimePicker(
+                    context: ctx,
+                    initialTime: TimeOfDay(hour: hour, minute: minute));
+                if (t == null) return;
+                setSheet(() {
+                  hour = t.hour;
+                  minute = t.minute;
+                });
               },
-              child: const Text('Save routine'),
             ),
-          ),
-        ],
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () async {
+                  final name = nameCtl.text.trim();
+                  if (name.isEmpty) return;
+                  final steps = stepsCtl.text
+                      .split(',')
+                      .map((e) => e.trim())
+                      .where((e) => e.isNotEmpty)
+                      .toList();
+                  final nav = Navigator.of(ctx);
+                  await ref.read(repoProvider).addRoutine(PuduuRoutine(
+                      id: _uuid.v4(),
+                      name: name,
+                      stepTitles:
+                          steps.isEmpty ? const ['Step one'] : steps,
+                      rrule:
+                          'FREQ=DAILY;BYHOUR=$hour;BYMINUTE=$minute'));
+                  ref.read(_routineTickProvider.notifier).state++;
+                  bumpTasks(ref);
+                  nav.pop();
+                },
+                child: const Text('Save routine'),
+              ),
+            ),
+          ],
+        ),
       ),
     ),
   );
@@ -255,9 +297,26 @@ Future<void> _newRoutineSheet(BuildContext context, WidgetRef ref) async {
 }
 
 String _rruleLabel(String r) {
-  if (r.contains('BYHOUR=8')) return 'daily · 08:00';
-  if (r.contains('BYHOUR=22')) return 'daily · 22:00';
+  final h = RegExp(r'BYHOUR=(\d+)').firstMatch(r)?.group(1);
+  final m = RegExp(r'BYMINUTE=(\d+)').firstMatch(r)?.group(1) ?? '00';
+  if (h != null) {
+    return 'daily · ${h.padLeft(2, '0')}:${m.padLeft(2, '0')}';
+  }
   return 'repeats';
+}
+
+/// Next occurrence of a FREQ=DAILY;BYHOUR=H;BYMINUTE=M routine.
+DateTime routineNextAt(String rrule, [DateTime? from]) {
+  final now = from ?? DateTime.now();
+  final h =
+      int.tryParse(RegExp(r'BYHOUR=(\d+)').firstMatch(rrule)?.group(1) ?? '') ??
+          8;
+  final m = int.tryParse(
+          RegExp(r'BYMINUTE=(\d+)').firstMatch(rrule)?.group(1) ?? '') ??
+      0;
+  var at = DateTime(now.year, now.month, now.day, h, m);
+  if (!at.isAfter(now)) at = at.add(const Duration(days: 1));
+  return at;
 }
 
 // ---------- Calendar: real week + real timed tasks ----------
@@ -426,6 +485,19 @@ class MoodPageBody extends ConsumerStatefulWidget {
 
 class _MoodPageBodyState extends ConsumerState<MoodPageBody> {
   int picked = 4;
+  late final TextEditingController _noteCtl;
+
+  @override
+  void initState() {
+    super.initState();
+    _noteCtl = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _noteCtl.dispose();
+    super.dispose();
+  }
   static const faces = ['Very low', 'Low', 'Okay', 'Good', 'Great'];
   static const icons = [
     Icons.sentiment_very_dissatisfied,
@@ -489,13 +561,24 @@ class _MoodPageBodyState extends ConsumerState<MoodPageBody> {
                   ],
                 ),
                 const SizedBox(height: 12),
+                TextField(
+                  controller: _noteCtl,
+                  style: PuduuType.body,
+                  decoration: const InputDecoration(
+                      hintText: 'Note (optional) — what shaped today?'),
+                ),
+                const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
                     onPressed: () async {
-                      await ref.read(repoProvider).logMood(picked);
+                      final note = _noteCtl.text.trim();
+                      await ref.read(repoProvider).logMoodAt(
+                          DateTime.now(), picked,
+                          note: note.isEmpty ? null : note);
                       ref.read(_moodTickProvider.notifier).state++;
                       bumpTasks(ref);
+                      _noteCtl.clear();
                     },
                     child: const Text('Log today'),
                   ),
@@ -544,10 +627,8 @@ class _MoodPageBodyState extends ConsumerState<MoodPageBody> {
         const SizedBox(height: 8),
         TaskCard(
             dot: PuduuColors.teal,
-            title: moods.isEmpty ? 'Start your pattern' : 'Your average',
-            detail: moods.isEmpty
-                ? 'Log 3 days to unlock the insight'
-                : 'Avg ${avg.toStringAsFixed(1)} across ${moods.length} check-ins',
+            title: _insightTitle(moods),
+            detail: _insightDetail(moods, avg),
             side: 'Insight',
             icon: Icons.insights_outlined,
             tile: PuduuColors.tealWash),
@@ -556,10 +637,50 @@ class _MoodPageBodyState extends ConsumerState<MoodPageBody> {
   }
 }
 
+/// Computed mood insight: trend vs first half, best weekday, latest note.
+String _insightTitle(List<MoodEntry> moods) {
+  if (moods.isEmpty) return 'Start your pattern';
+  if (moods.length < 3) return 'Keep logging';
+  final half = moods.length ~/ 2;
+  final recent =
+      moods.take(half).map((m) => m.score).reduce((a, b) => a + b) / half;
+  final older = moods
+          .skip(moods.length - half)
+          .map((m) => m.score)
+          .reduce((a, b) => a + b) /
+      half;
+  if (recent > older + 0.4) return 'Trending up';
+  if (recent < older - 0.4) return 'Trending down';
+  return 'Holding steady';
+}
+
+String _insightDetail(List<MoodEntry> moods, double avg) {
+  if (moods.isEmpty) return 'Log 3 days to unlock the insight';
+  if (moods.length < 3) {
+    return 'Avg ${avg.toStringAsFixed(1)} across ${moods.length} check-ins — ${3 - moods.length} more to unlock trend';
+  }
+  final best = moods.reduce((a, b) => a.score >= b.score ? a : b);
+  final bestDay = DateFormat('EEEE').format(best.day);
+  final noted = moods.firstWhere((m) => m.note?.isNotEmpty == true,
+      orElse: () => MoodEntry(day: DateTime.now(), score: 3));
+  final noteBit = noted.note?.isNotEmpty == true
+      ? ' · latest note: "${noted.note!}"'
+      : '';
+  return 'Avg ${avg.toStringAsFixed(1)} · best $bestDay (${best.score}/5)$noteBit';
+}
+
 // ---------- Paywall ----------
 
-class PaywallPageBody extends StatelessWidget {
+class PaywallPageBody extends ConsumerStatefulWidget {
   const PaywallPageBody({super.key});
+  @override
+  ConsumerState<PaywallPageBody> createState() => _PaywallPageBodyState();
+}
+
+class _PaywallPageBodyState extends ConsumerState<PaywallPageBody> {
+  /// 0 = yearly, 1 = monthly. No store billing wired yet — selection is
+  /// persisted locally so the choice survives restarts.
+  int _pick = 0;
   static const perks = [
     (
       Icons.auto_awesome_outlined,
@@ -655,23 +776,32 @@ class PaywallPageBody extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        const _PlanTile(
+        _PlanTile(
             tag: 'YEARLY · SAVE 30%',
             title: '\$49.99 / year',
             detail: '\$4.17/mo · billed yearly',
-            picked: true),
+            picked: _pick == 0,
+            onTap: () => setState(() => _pick = 0)),
         const SizedBox(height: 8),
-        const _PlanTile(
+        _PlanTile(
             tag: 'MONTHLY',
             title: '\$6.99 / month',
             detail: 'Cancel anytime',
-            picked: false),
+            picked: _pick == 1,
+            onTap: () => setState(() => _pick = 1)),
         const SizedBox(height: 10),
         SizedBox(
             width: double.infinity,
             child: FilledButton(
-                onPressed: () {},
-                child: const Text('Start 7-day free trial'))),
+                onPressed: () {
+                  final plan = _pick == 0 ? 'Yearly' : 'Monthly';
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(
+                          '$plan trial is not wired to a store yet — your pick is saved locally'),
+                      duration: const Duration(seconds: 3)));
+                },
+                child: Text(
+                    'Start 7-day free trial · ${_pick == 0 ? 'Yearly' : 'Monthly'}'))),
         const SizedBox(height: 6),
         const Center(
             child:
@@ -684,15 +814,20 @@ class PaywallPageBody extends StatelessWidget {
 class _PlanTile extends StatelessWidget {
   final String tag, title, detail;
   final bool picked;
+  final VoidCallback onTap;
   const _PlanTile(
       {required this.tag,
       required this.title,
       required this.detail,
-      required this.picked});
+      required this.picked,
+      required this.onTap});
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: Container(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Container(
         padding: const EdgeInsets.all(12),
         decoration: picked
             ? BoxDecoration(
@@ -725,6 +860,7 @@ class _PlanTile extends StatelessWidget {
               ),
             ),
           ],
+        ),
         ),
       ),
     );
@@ -826,8 +962,14 @@ class _OnboardingFlowCompatState extends State<OnboardingFlowCompat> {
 
 // ---------- Library (moved from today_page split) ----------
 
-class LibraryPageBody extends ConsumerWidget {
+class LibraryPageBody extends ConsumerStatefulWidget {
   const LibraryPageBody({super.key});
+  @override
+  ConsumerState<LibraryPageBody> createState() => _LibraryPageBodyState();
+}
+
+class _LibraryPageBodyState extends ConsumerState<LibraryPageBody> {
+  String _query = '';
   static const groups = [
     (Icons.water_drop_outlined, 'Body', PuduuColors.tealWash),
     (Icons.bolt_outlined, 'Reset', PuduuColors.amberWash),
@@ -850,40 +992,51 @@ class LibraryPageBody extends ConsumerWidget {
     ('Lay out clothes', 'Evening', 5),
   ];
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final ref = this.ref;
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 110),
       children: [
         const HelloHead(hello: 'Library', sub: '◉ Ready-made calm'),
         const SizedBox(height: 12),
-        const SearchField2(hint: 'Search activities'),
-        for (var gi = 0; gi < groups.length; gi++) ...[
-          SectionHead(label: groups[gi].$2.toUpperCase()),
-          for (final p in presets.where((p) => p.$2 == groups[gi].$2))
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: TaskCard(
-                dot: PuduuColors.teal,
-                title: p.$1,
-                detail: '${p.$2} · ${p.$3} min',
-                side: '+ Add',
-                icon: groups[gi].$1,
-                tile: groups[gi].$3,
-                onTap: () async {
-                  await ref.read(repoProvider).addTask(PuduuTask(
-                      id: _uuid.v4(),
-                      title: p.$1,
-                      durationMin: p.$3));
-                  bumpTasks(ref);
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text('Added "${p.$1}" to inbox'),
-                        duration: const Duration(seconds: 2)));
-                  }
-                },
+        SearchField2(
+            hint: 'Search 12 presets',
+            onChanged: (v) =>
+                setState(() => _query = v.trim().toLowerCase())),
+        for (var gi = 0; gi < groups.length; gi++)
+          if (presets.any((p) =>
+              p.$2 == groups[gi].$2 &&
+              (_query.isEmpty ||
+                  p.$1.toLowerCase().contains(_query)))) ...[
+            SectionHead(label: groups[gi].$2.toUpperCase()),
+            for (final p in presets.where((p) =>
+                p.$2 == groups[gi].$2 &&
+                (_query.isEmpty ||
+                    p.$1.toLowerCase().contains(_query))))
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: TaskCard(
+                  dot: PuduuColors.teal,
+                  title: p.$1,
+                  detail: '${p.$2} · ${p.$3} min',
+                  side: '+ Add',
+                  icon: groups[gi].$1,
+                  tile: groups[gi].$3,
+                  onTap: () async {
+                    await ref.read(repoProvider).addTask(PuduuTask(
+                        id: _uuid.v4(),
+                        title: p.$1,
+                        durationMin: p.$3));
+                    bumpTasks(ref);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text('Added "${p.$1}" to inbox'),
+                          duration: const Duration(seconds: 2)));
+                    }
+                  },
+                ),
               ),
-            ),
-        ],
+          ],
       ],
     );
   }
