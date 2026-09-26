@@ -6,6 +6,7 @@ import 'core/theme/puduu_theme.dart';
 import 'core/models.dart';
 import 'core/db/puduu_db.dart';
 import 'core/db/repo.dart';
+import 'core/sync.dart';
 import 'core/ai_slot/ai_planner.dart';
 import 'features/more_pages.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,13 +15,6 @@ const _uuid = Uuid();
 
 final dbProvider = Provider<PuduuDb>((_) => PuduuDb());
 final repoProvider = Provider<PuduuRepo>((ref) => PuduuRepo(ref.watch(dbProvider)));
-
-/// DB-ready gate: seed on first run, then release UI.
-final dbReadyProvider = FutureProvider<bool>((ref) async {
-  final repo = ref.watch(repoProvider);
-  await repo.seedIfEmpty();
-  return true;
-});
 
 final inboxProvider =
     FutureProvider<List<PuduuTask>>((ref) async {
@@ -34,10 +28,31 @@ final todayProvider =
 });
 /// bump to refresh inbox+today after any write
 final _inboxTickProvider = StateProvider<int>((_) => 0);
-void bumpTasks(WidgetRef ref) =>
-    ref.read(_inboxTickProvider.notifier).state++;
+void bumpTasks(WidgetRef ref) {
+  ref.read(_inboxTickProvider.notifier).state++;
+  // background cloud push; never blocks UI, never throws
+  Future(() async {
+    final r = await ref.read(syncProvider).syncAll();
+    ref.read(syncLiveProvider.notifier).state = r.live;
+  });
+}
 
 final aiProvider = Provider<AiPlannerProvider>((_) => RuleBasedProvider());
+
+final syncProvider = Provider<PuduuSync>((ref) => PuduuSync(ref.watch(repoProvider)));
+/// null = not synced yet, true = live, false = local-only
+final syncLiveProvider = StateProvider<bool?>((_) => null);
+
+/// DB-ready gate: seed on first run, init Supabase, first sync, then release UI.
+final dbReadyProvider = FutureProvider<bool>((ref) async {
+  final repo = ref.watch(repoProvider);
+  await repo.seedIfEmpty();
+  final sync = ref.watch(syncProvider);
+  await sync.init();
+  final r = await sync.syncAll();
+  ref.read(syncLiveProvider.notifier).state = r.live;
+  return true;
+});
 
 final onboardedProvider = StateProvider<bool>((_) => false);
 
@@ -242,17 +257,57 @@ class _PillTab extends StatelessWidget {
 
 // ---------- shared DocSpot-class primitives ----------
 
-class HelloHead extends StatelessWidget {
+/// Cloud status line: green dot + CLOUD / grey dot + LOCAL.
+class _SyncLine extends ConsumerWidget {
+  const _SyncLine();
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final live = ref.watch(syncLiveProvider);
+    final dot = live == true ? PuduuColors.teal : PuduuColors.mute;
+    final label = live == null
+        ? 'Syncing…'
+        : live
+            ? '◉ Morning plan · Cloud'
+            : '◉ Morning plan · Local';
+    return GestureDetector(
+      onTap: () async {
+        final r = await ref.read(syncProvider).syncAll();
+        ref.read(syncLiveProvider.notifier).state = r.live;
+        bumpTasks(ref);
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(shape: BoxShape.circle, color: dot)),
+          const SizedBox(width: 6),
+          Text(label,
+              style: const TextStyle(
+                  fontFamily: 'Work Sans',
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  color: PuduuColors.tealDeep)),
+        ],
+      ),
+    );
+  }
+}
+
+class HelloHead extends ConsumerWidget {
   final String hello;
   final String sub;
   final bool showBell;
+  final bool showSync;
   const HelloHead(
       {super.key,
       required this.hello,
       required this.sub,
-      this.showBell = false});
+      this.showBell = false,
+      this.showSync = false});
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -263,12 +318,14 @@ class HelloHead extends StatelessWidget {
               Text(hello,
                   style: PuduuType.display.copyWith(fontSize: 23)),
               const SizedBox(height: 2),
-              Text(sub,
-                  style: const TextStyle(
-                      fontFamily: 'Work Sans',
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w600,
-                      color: PuduuColors.tealDeep)),
+              if (!showSync)
+                Text(sub,
+                    style: const TextStyle(
+                        fontFamily: 'Work Sans',
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w600,
+                        color: PuduuColors.tealDeep)),
+              if (showSync) const _SyncLine(),
             ],
           ),
         ),
@@ -591,7 +648,8 @@ class TodayPage extends ConsumerWidget {
         const HelloHead(
             hello: 'Hello, Alex',
             sub: '◉ Morning plan ▾',
-            showBell: true),
+            showBell: true,
+            showSync: true),
         const SizedBox(height: 12),
         SearchField(hint: 'Search a task or ritual', controller: ctl),
         const DarkHero(
