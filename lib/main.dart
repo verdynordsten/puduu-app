@@ -82,6 +82,13 @@ class _ShellState extends ConsumerState<Shell> {
     PuduuIcons.grows,
     PuduuIcons.yours,
   ];
+  static const iconsFill = [
+    PuduuIcons.todayFill,
+    PuduuIcons.focusFill,
+    PuduuIcons.resetFill,
+    PuduuIcons.growsFill,
+    PuduuIcons.yoursFill,
+  ];
 
   void _go(int i) => setState(() => tab = i);
 
@@ -142,12 +149,28 @@ class _ShellState extends ConsumerState<Shell> {
             ),
             child: NavigationBar(
               selectedIndex: tab,
-              height: 66,
+              height: 68,
               onDestinationSelected: _go,
               destinations: [
                 for (var i = 0; i < titles.length; i++)
                   NavigationDestination(
-                      icon: Icon(icons[i]), label: titles[i]),
+                    icon: Badge(
+                      isLabelVisible:
+                          i == 0 && ref.watch(inboxProvider).isNotEmpty,
+                      label: Text(
+                          '${ref.watch(inboxProvider).length}',
+                          style: const TextStyle(fontSize: 10)),
+                      backgroundColor: PuduuColors.ember,
+                      textColor: Colors.white,
+                      smallSize: 14,
+                      largeSize: 16,
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Icon(icons[i], size: 24),
+                    ),
+                    selectedIcon:
+                        Icon(iconsFill[i], size: 24),
+                    label: titles[i],
+                  ),
               ],
             ),
           ),
@@ -157,20 +180,21 @@ class _ShellState extends ConsumerState<Shell> {
   }
 }
 
-class _SideRail extends StatelessWidget {
+class _SideRail extends ConsumerWidget {
   final int tab;
   final ValueChanged<int> onGo;
   const _SideRail({required this.tab, required this.onGo});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     const items = [
-      (PuduuIcons.today, 'Today'),
-      (PuduuIcons.focus, 'Focus'),
-      (PuduuIcons.reset, 'Reset'),
-      (PuduuIcons.grows, 'Progress'),
-      (PuduuIcons.yours, 'Yours'),
+      (PuduuIcons.today, PuduuIcons.todayFill, 'Today'),
+      (PuduuIcons.focus, PuduuIcons.focusFill, 'Focus'),
+      (PuduuIcons.reset, PuduuIcons.resetFill, 'Reset'),
+      (PuduuIcons.grows, PuduuIcons.growsFill, 'Progress'),
+      (PuduuIcons.yours, PuduuIcons.yoursFill, 'Yours'),
     ];
+    final inboxCount = ref.watch(inboxProvider).length;
     return Container(
       width: 232,
       padding: const EdgeInsets.fromLTRB(20, 26, 16, 20),
@@ -196,9 +220,10 @@ class _SideRail extends StatelessWidget {
           const SizedBox(height: 30),
           for (var i = 0; i < items.length; i++)
             _RailItem(
-              icon: items[i].$1,
-              label: items[i].$2,
+              icon: tab == i ? items[i].$2 : items[i].$1,
+              label: items[i].$3,
               active: tab == i,
+              badge: i == 0 ? inboxCount : 0,
               onTap: () => onGo(i),
             ),
           const Spacer(),
@@ -245,11 +270,13 @@ class _RailItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool active;
+  final int badge;
   final VoidCallback onTap;
   const _RailItem(
       {required this.icon,
       required this.label,
       required this.active,
+      this.badge = 0,
       required this.onTap});
   @override
   Widget build(BuildContext context) {
@@ -266,11 +293,22 @@ class _RailItem extends StatelessWidget {
                 const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
             child: Row(
               children: [
-                Icon(icon,
-                    size: 20,
-                    color: active
-                        ? PuduuColors.emberDeep
-                        : PuduuColors.mute),
+                Badge(
+                  isLabelVisible: badge > 0,
+                  label: Text('$badge',
+                      style: const TextStyle(fontSize: 10)),
+                  backgroundColor: PuduuColors.ember,
+                  textColor: Colors.white,
+                  smallSize: 14,
+                  largeSize: 16,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 4),
+                  child: Icon(icon,
+                      size: 22,
+                      color: active
+                          ? PuduuColors.emberDeep
+                          : PuduuColors.mute),
+                ),
                 const SizedBox(width: 11),
                 Text(label,
                     style: TextStyle(
@@ -680,12 +718,6 @@ class RuleRow extends StatelessWidget {
                         fontFamily: 'Inter',
                         fontSize: 12,
                         color: PuduuColors.faint)),
-              )
-            else
-              const Padding(
-                padding: EdgeInsets.only(top: 2),
-                child: Icon(PuduuIcons.chevron,
-                    size: 18, color: PuduuColors.faint),
               ),
           ],
         ),
@@ -911,19 +943,19 @@ class RescuePage extends StatelessWidget {
             standfirst: 'Two minutes counts. Pick the smallest one.'),
         SizedBox(height: 10),
         RuleRow(
-            icon: PuduuIcons.sound,
+            icon: PuduuIcons.drop,
             title: 'Drink a glass of water',
             detail: 'Stand up, sip slowly, look far away.',
             trailing: '2 min'),
         Divider(height: 1),
         RuleRow(
-            icon: PuduuIcons.today,
+            icon: PuduuIcons.walk,
             title: 'Clear one surface',
             detail: 'Just the desk corner. Nothing more.',
             trailing: '2 min'),
         Divider(height: 1),
         RuleRow(
-            icon: PuduuIcons.calendar,
+            icon: PuduuIcons.mail,
             title: 'Open the difficult email',
             detail: 'Read it only. Reply comes later.',
             trailing: '2 min'),

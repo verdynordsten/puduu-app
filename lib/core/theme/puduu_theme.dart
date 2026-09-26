@@ -66,13 +66,22 @@ class PuduuType {
   );
 }
 
-/// Lucide-mapped monochrome icons. Color comes from context, never the icon.
+/// Icon system (M3 + HIG rules): ONE family per surface, filled = active,
+/// outlined = inactive. Nav icons share round 24px geometry; content icons
+/// share 2px-stroke Lucide metaphors. Color comes from context, never icon.
 class PuduuIcons {
-  static const today = Icons.wb_sunny_outlined;
+  // Nav: outlined (inactive) / filled (active) pairs.
+  static const today = Icons.calendar_today_outlined;
+  static const todayFill = Icons.calendar_today;
   static const focus = Icons.timer_outlined;
-  static const reset = Icons.self_improvement_outlined;
-  static const grows = Icons.emoji_events_outlined;
-  static const yours = Icons.person_outline;
+  static const focusFill = Icons.timer;
+  static const reset = Icons.refresh_outlined;
+  static const resetFill = Icons.refresh;
+  static const grows = Icons.bar_chart_outlined;
+  static const growsFill = Icons.bar_chart;
+  static const yours = Icons.settings_outlined;
+  static const yoursFill = Icons.settings;
+  // Content: single 2px-stroke metaphor each, no mixing.
   static const sort = Icons.auto_awesome_outlined;
   static const check = Icons.check;
   static const play = Icons.play_arrow;
@@ -84,6 +93,9 @@ class PuduuIcons {
   static const calendar = Icons.calendar_today_outlined;
   static const plus = Icons.add;
   static const arrow = Icons.arrow_forward;
+  static const drop = Icons.water_drop_outlined;
+  static const walk = Icons.directions_walk;
+  static const mail = Icons.mail_outline;
 }
 
 ThemeData puduuTheme() {
