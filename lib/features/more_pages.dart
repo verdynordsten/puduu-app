@@ -3,21 +3,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import '../core/theme/puduu_theme.dart';
 import '../core/models.dart';
-import '../main.dart' show HelloHead, SectionHead, TaskCard;
+import '../main.dart' show HelloHead, SectionHead, TaskCard, repoProvider;
 
 const _pad = EdgeInsets.fromLTRB(20, 18, 20, 110);
 
 // ---------- Routines (Tiimo parity: repeating checklists) ----------
-final routineProvider = StateProvider<List<PuduuRoutine>>((_) => [
-      const PuduuRoutine(id: 'r1', name: 'Morning reset', stepTitles: ['Meds', 'Water', 'Tidy 5 min'], rrule: 'FREQ=DAILY;BYHOUR=8'),
-      const PuduuRoutine(id: 'r2', name: 'Wind down', stepTitles: ['Dim lights', 'No screens', 'Read'], rrule: 'FREQ=DAILY;BYHOUR=22'),
-    ]);
+final routineProvider = FutureProvider<List<PuduuRoutine>>((ref) async {
+  return ref.watch(repoProvider).routines();
+});
 
 class RoutinesPage extends ConsumerWidget {
   const RoutinesPage({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final routines = ref.watch(routineProvider);
+    final routinesAsync = ref.watch(routineProvider);
+    final routines = routinesAsync.maybeWhen(data: (v) => v, orElse: () => <PuduuRoutine>[]);
     return ListView(
       padding: _pad,
       children: [
@@ -211,11 +211,11 @@ class LibraryPage extends StatelessWidget {
 }
 
 // ---------- Mood (Tiimo parity: check-in + patterns) ----------
-final moodProvider = StateProvider<List<MoodEntry>>((_) => [
-      MoodEntry(day: DateTime.now().subtract(const Duration(days: 1)), score: 4, note: 'Good walk'),
-      MoodEntry(day: DateTime.now().subtract(const Duration(days: 2)), score: 3),
-      MoodEntry(day: DateTime.now().subtract(const Duration(days: 3)), score: 5, note: 'Shipped a thing'),
-    ]);
+final _moodTickProvider = StateProvider<int>((_) => 0);
+final moodProvider = FutureProvider<List<MoodEntry>>((ref) async {
+  ref.watch(_moodTickProvider);
+  return ref.watch(repoProvider).moods();
+});
 
 class MoodPage extends ConsumerStatefulWidget {
   const MoodPage({super.key});
@@ -229,7 +229,8 @@ class _MoodPageState extends ConsumerState<MoodPage> {
   static const _icons = [Icons.sentiment_very_dissatisfied, Icons.sentiment_dissatisfied, Icons.sentiment_neutral, Icons.sentiment_satisfied, Icons.sentiment_very_satisfied];
   @override
   Widget build(BuildContext context) {
-    final moods = ref.watch(moodProvider);
+    final moodsAsync = ref.watch(moodProvider);
+    final moods = moodsAsync.maybeWhen(data: (v) => v, orElse: () => <MoodEntry>[]);
     return ListView(
       padding: _pad,
       children: [
@@ -266,8 +267,9 @@ class _MoodPageState extends ConsumerState<MoodPage> {
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
-                    onPressed: () {
-                      ref.read(moodProvider.notifier).state = [...moods, MoodEntry(day: DateTime.now(), score: picked)];
+                    onPressed: () async {
+                      await ref.read(repoProvider).logMood(picked);
+                      ref.read(_moodTickProvider.notifier).state++;
                     },
                     child: const Text('Log today'),
                   ),

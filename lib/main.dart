@@ -4,51 +4,39 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:uuid/uuid.dart';
 import 'core/theme/puduu_theme.dart';
 import 'core/models.dart';
+import 'core/db/puduu_db.dart';
+import 'core/db/repo.dart';
 import 'core/ai_slot/ai_planner.dart';
 import 'features/more_pages.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const _uuid = Uuid();
 
-final inboxProvider = StateProvider<List<PuduuTask>>((_) => [
-      PuduuTask(id: _uuid.v4(), title: 'Call dentist', durationMin: 10),
-      PuduuTask(id: _uuid.v4(), title: 'Pay electricity bill', durationMin: 15),
-      PuduuTask(
-          id: _uuid.v4(),
-          title: 'Deep work: portfolio hero',
-          durationMin: 50,
-          colorIndex: 1),
-    ]);
-final todayProvider = StateProvider<List<PuduuTask>>((_) => [
-      PuduuTask(
-          id: _uuid.v4(),
-          title: 'Morning reset',
-          note: 'Meds, water, five-minute tidy',
-          durationMin: 25,
-          colorIndex: 0,
-          status: 'planned'),
-      PuduuTask(
-          id: _uuid.v4(),
-          title: 'Deep work: portfolio',
-          note: 'Hero section, timer on, phone away',
-          durationMin: 50,
-          colorIndex: 1,
-          status: 'planned'),
-      PuduuTask(
-          id: _uuid.v4(),
-          title: 'Walk outside',
-          note: 'Fifteen minutes, no podcast',
-          durationMin: 15,
-          colorIndex: 3,
-          status: 'done'),
-      PuduuTask(
-          id: _uuid.v4(),
-          title: 'Admin batch',
-          note: 'Bills and inbox, one pass',
-          durationMin: 30,
-          colorIndex: 2,
-          status: 'planned'),
-    ]);
+final dbProvider = Provider<PuduuDb>((_) => PuduuDb());
+final repoProvider = Provider<PuduuRepo>((ref) => PuduuRepo(ref.watch(dbProvider)));
+
+/// DB-ready gate: seed on first run, then release UI.
+final dbReadyProvider = FutureProvider<bool>((ref) async {
+  final repo = ref.watch(repoProvider);
+  await repo.seedIfEmpty();
+  return true;
+});
+
+final inboxProvider =
+    FutureProvider<List<PuduuTask>>((ref) async {
+  ref.watch(_inboxTickProvider);
+  return ref.watch(repoProvider).tasksByStatus('inbox');
+});
+final todayProvider =
+    FutureProvider<List<PuduuTask>>((ref) async {
+  ref.watch(_inboxTickProvider);
+  return ref.watch(repoProvider).tasksByStatus('planned');
+});
+/// bump to refresh inbox+today after any write
+final _inboxTickProvider = StateProvider<int>((_) => 0);
+void bumpTasks(WidgetRef ref) =>
+    ref.read(_inboxTickProvider.notifier).state++;
+
 final aiProvider = Provider<AiPlannerProvider>((_) => RuleBasedProvider());
 
 final onboardedProvider = StateProvider<bool>((_) => false);
@@ -87,6 +75,11 @@ class _Root extends ConsumerWidget {
   const _Root();
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final ready = ref.watch(dbReadyProvider);
+    if (ready.isLoading) {
+      return const Scaffold(
+          body: Center(child: CircularProgressIndicator()));
+    }
     final seen = ref.watch(onboardedProvider);
     if (!seen) return const OnboardingGate();
     return const Shell();
@@ -175,7 +168,10 @@ class _ShellState extends ConsumerState<Shell> {
                     icon: tab == i ? iconsFill[i] : icons[i],
                     active: tab == i,
                     badge: i == 0
-                        ? ref.watch(inboxProvider).length
+                        ? ref
+                            .watch(inboxProvider)
+                            .maybeWhen(
+                                data: (v) => v.length, orElse: () => 0)
                         : 0,
                     onTap: () => _go(i),
                   ),
@@ -580,7 +576,8 @@ class TodayPage extends ConsumerWidget {
   const TodayPage({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final inbox = ref.watch(inboxProvider);
+    final inboxAsync = ref.watch(inboxProvider);
+    final inbox = inboxAsync.maybeWhen(data: (v) => v, orElse: () => <PuduuTask>[]);
     final ctl = TextEditingController();
     const cats = [
       (PuduuIcons.focus, 'Focus', PuduuColors.tealWash),
@@ -683,14 +680,11 @@ class TodayPage extends ConsumerWidget {
                     ),
                     const SizedBox(width: 8),
                     FilledButton.icon(
-                      onPressed: () {
+                      onPressed: () async {
                         if (ctl.text.trim().isEmpty) return;
-                        ref.read(inboxProvider.notifier).state = [
-                          ...inbox,
-                          PuduuTask(
-                              id: _uuid.v4(),
-                              title: ctl.text.trim()),
-                        ];
+                        await ref.read(repoProvider).addTask(PuduuTask(
+                            id: _uuid.v4(), title: ctl.text.trim()));
+                        bumpTasks(ref);
                         ctl.clear();
                       },
                       icon: const Icon(PuduuIcons.plus, size: 17),
@@ -714,9 +708,8 @@ class TodayPage extends ConsumerWidget {
                     onPressed: () async {
                       final planned =
                           await ref.read(aiProvider).plan(inbox);
-                      ref.read(todayProvider.notifier).state =
-                          planned;
-                      ref.read(inboxProvider.notifier).state = [];
+                      await ref.read(repoProvider).moveAllToToday(planned);
+                      bumpTasks(ref);
                     },
                     icon: const Icon(PuduuIcons.sort, size: 17),
                     label: const Text('Sort into my day'),
