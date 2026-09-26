@@ -162,13 +162,24 @@ class _ShellState extends ConsumerState<Shell> {
                           style: const TextStyle(fontSize: 10)),
                       backgroundColor: PuduuColors.ember,
                       textColor: Colors.white,
-                      smallSize: 14,
-                      largeSize: 16,
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      smallSize: 16,
+                      largeSize: 18,
+                      padding: const EdgeInsets.symmetric(horizontal: 5),
                       child: Icon(icons[i], size: 24),
                     ),
-                    selectedIcon:
-                        Icon(iconsFill[i], size: 24),
+                    selectedIcon: Badge(
+                      isLabelVisible:
+                          i == 0 && ref.watch(inboxProvider).isNotEmpty,
+                      label: Text(
+                          '${ref.watch(inboxProvider).length}',
+                          style: const TextStyle(fontSize: 10)),
+                      backgroundColor: PuduuColors.ember,
+                      textColor: Colors.white,
+                      smallSize: 16,
+                      largeSize: 18,
+                      padding: const EdgeInsets.symmetric(horizontal: 5),
+                      child: Icon(iconsFill[i], size: 24),
+                    ),
                     label: titles[i],
                   ),
               ],
@@ -738,7 +749,7 @@ class TodayPage extends ConsumerWidget {
     const hours = ['08:00', '09:00', '11:00', '13:00'];
     const spans = ['25m', '50m', '15m', '30m'];
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 22, 20, 40),
+      padding: const EdgeInsets.fromLTRB(20, 22, 20, 120),
       children: [
         const LedgerHead(
           eyebrow: 'Thursday · September 25',
@@ -851,7 +862,7 @@ class FocusPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 22, 20, 40),
+      padding: const EdgeInsets.fromLTRB(20, 22, 20, 120),
       children: [
         const LedgerHead(
           eyebrow: 'Focus session',
@@ -935,7 +946,7 @@ class RescuePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 22, 20, 40),
+      padding: const EdgeInsets.fromLTRB(20, 22, 20, 120),
       children: const [
         LedgerHead(
             eyebrow: 'Freeze reset',
@@ -975,7 +986,7 @@ class GrowsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 22, 20, 40),
+      padding: const EdgeInsets.fromLTRB(20, 22, 20, 120),
       children: const [
         LedgerHead(
             eyebrow: 'Progress',
@@ -1009,7 +1020,7 @@ class YoursPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 22, 20, 40),
+      padding: const EdgeInsets.fromLTRB(20, 22, 20, 120),
       children: const [
         LedgerHead(
             eyebrow: 'Settings',
