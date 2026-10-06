@@ -32,7 +32,7 @@ class PuduuColors {
 class PopStyle {
   PopStyle._();
 
-  static const borderW = 3.0;
+  static const borderW = 2.0;
   static const rCard = 24.0;
   static const rHero = 30.0;
   static const rPill = 999.0;
@@ -45,8 +45,8 @@ class PopStyle {
   /// The signature hard shadow: solid ink offset, zero blur.
   static List<BoxShadow> hardShadow(
           {Color color = PuduuColors.ink,
-          double dx = 5,
-          double dy = 5}) =>
+          double dx = 4,
+          double dy = 4}) =>
       [
         BoxShadow(
             color: color, offset: Offset(dx, dy), blurRadius: 0),
@@ -55,7 +55,7 @@ class PopStyle {
   /// Tinted hard shadow for colored surfaces.
   static List<BoxShadow> popShadow(Color tint) => [
         BoxShadow(
-            color: tint, offset: const Offset(5, 5), blurRadius: 0),
+            color: tint, offset: const Offset(4, 4), blurRadius: 0),
       ];
 }
 
@@ -218,17 +218,17 @@ ThemeData puduuTheme() {
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(PopStyle.rInput),
         borderSide: const BorderSide(
-            color: PuduuColors.ink, width: 2.5),
+            color: PuduuColors.ink, width: 1.5),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(PopStyle.rInput),
         borderSide: const BorderSide(
-            color: PuduuColors.ink, width: 2.5),
+            color: PuduuColors.ink, width: 1.5),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(PopStyle.rInput),
         borderSide: const BorderSide(
-            color: PuduuColors.grape, width: 3),
+            color: PuduuColors.grape, width: 2),
       ),
     ),
     navigationBarTheme: NavigationBarThemeData(

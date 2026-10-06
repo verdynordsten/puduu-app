@@ -70,7 +70,7 @@ class _CandyShape extends StatelessWidget {
           color: color.withAlpha(130),
           borderRadius: BorderRadius.circular(36),
           border: Border.all(
-              color: PuduuColors.ink.withAlpha(40), width: 3),
+              color: PuduuColors.ink.withAlpha(40), width: 2),
         ),
       ),
     );
@@ -142,9 +142,9 @@ class PopButton extends StatelessWidget {
       decoration: BoxDecoration(
         color: enabled ? color : PuduuColors.clay.withAlpha(120),
         borderRadius: BorderRadius.circular(small ? 14 : 20),
-        border: PopStyle.inkBorder(small ? 2.5 : 3),
+        border: PopStyle.inkBorder(small ? 1.5 : 2),
         boxShadow:
-            enabled ? PopStyle.hardShadow(dx: 4, dy: 4) : null,
+            enabled ? PopStyle.hardShadow(dx: 3, dy: 3) : null,
       ),
       child: Row(
         mainAxisSize:
@@ -212,8 +212,8 @@ class PopTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(PopStyle.rTile),
-        border: PopStyle.inkBorder(2.5),
-        boxShadow: PopStyle.hardShadow(dx: 3, dy: 3),
+        border: PopStyle.inkBorder(1.5),
+        boxShadow: PopStyle.hardShadow(dx: 2, dy: 2),
       ),
       child: Icon(icon, size: size * 0.46, color: Colors.white),
     );
@@ -238,7 +238,7 @@ class PopBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: PuduuColors.paper,
         borderRadius: BorderRadius.circular(PopStyle.rPill),
-        border: Border.all(color: PuduuColors.ink, width: 2.5),
+        border: Border.all(color: PuduuColors.ink, width: 1.5),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(PopStyle.rPill),
@@ -316,8 +316,8 @@ class Sticker extends StatelessWidget {
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(PopStyle.rPill),
-          border: Border.all(color: PuduuColors.ink, width: 2.5),
-          boxShadow: PopStyle.hardShadow(dx: 3, dy: 3),
+          border: Border.all(color: PuduuColors.ink, width: 1.5),
+          boxShadow: PopStyle.hardShadow(dx: 2, dy: 2),
         ),
         child: expand
             ? FittedBox(fit: BoxFit.scaleDown, child: label)
@@ -402,9 +402,9 @@ class HelloHead extends ConsumerWidget {
             height: 46,
             decoration: BoxDecoration(
               color: PuduuColors.paper,
-              border: PopStyle.inkBorder(2.5),
+              border: PopStyle.inkBorder(1.5),
               shape: BoxShape.circle,
-              boxShadow: PopStyle.hardShadow(dx: 3, dy: 3),
+              boxShadow: PopStyle.hardShadow(dx: 2, dy: 2),
             ),
             child: const Badge(
               isLabelVisible: true,
@@ -446,7 +446,7 @@ class SearchField extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(PopStyle.rInput),
-        boxShadow: PopStyle.hardShadow(dx: 4, dy: 4),
+        boxShadow: PopStyle.hardShadow(dx: 3, dy: 3),
       ),
       child: TextField(
         controller: controller,
@@ -471,7 +471,7 @@ class SearchField2 extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(PopStyle.rInput),
-        boxShadow: PopStyle.hardShadow(dx: 4, dy: 4),
+        boxShadow: PopStyle.hardShadow(dx: 3, dy: 3),
       ),
       child: TextField(
           onChanged: onChanged,
@@ -567,7 +567,7 @@ class PopHero extends StatelessWidget {
         color: color,
         borderRadius: BorderRadius.circular(PopStyle.rHero),
         border: PopStyle.inkBorder(),
-        boxShadow: PopStyle.hardShadow(dx: 6, dy: 6),
+        boxShadow: PopStyle.hardShadow(dx: 5, dy: 5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -663,7 +663,7 @@ class TaskCard extends StatelessWidget {
                     shape: BoxShape.circle,
                     color: dot,
                     border: Border.all(
-                        color: PuduuColors.ink, width: 2.5))),
+                        color: PuduuColors.ink, width: 1.5))),
           const SizedBox(width: 13),
           Expanded(
             child: Column(
@@ -688,8 +688,8 @@ class TaskCard extends StatelessWidget {
                   borderRadius:
                       BorderRadius.circular(PopStyle.rPill),
                   border: Border.all(
-                      color: PuduuColors.ink, width: 2.5),
-                  boxShadow: PopStyle.hardShadow(dx: 3, dy: 3),
+                      color: PuduuColors.ink, width: 1.5),
+                  boxShadow: PopStyle.hardShadow(dx: 2, dy: 2),
                 ),
                 child: Text(sideText,
                     style: const TextStyle(
@@ -732,9 +732,9 @@ class SubShell extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: PuduuColors.paper,
                         shape: BoxShape.circle,
-                        border: PopStyle.inkBorder(2.5),
+                        border: PopStyle.inkBorder(1.5),
                         boxShadow:
-                            PopStyle.hardShadow(dx: 3, dy: 3),
+                            PopStyle.hardShadow(dx: 2, dy: 2),
                       ),
                       child: IconButton(
                           icon: const Icon(
@@ -808,7 +808,7 @@ class NavRow extends StatelessWidget {
               color: PuduuColors.sun,
               shape: BoxShape.circle,
               border:
-                  Border.all(color: PuduuColors.ink, width: 2.5),
+                  Border.all(color: PuduuColors.ink, width: 1.5),
             ),
             child: const Icon(PuduuIcons.chevron,
                 color: PuduuColors.ink, size: 18),
@@ -910,9 +910,9 @@ class _TaskSheetState extends ConsumerState<_TaskSheet> {
         borderRadius:
             const BorderRadius.vertical(top: Radius.circular(32)),
         border: const Border(
-          top: BorderSide(color: PuduuColors.ink, width: 3),
-          left: BorderSide(color: PuduuColors.ink, width: 3),
-          right: BorderSide(color: PuduuColors.ink, width: 3),
+          top: BorderSide(color: PuduuColors.ink, width: 2),
+          left: BorderSide(color: PuduuColors.ink, width: 2),
+          right: BorderSide(color: PuduuColors.ink, width: 2),
         ),
       ),
       child: Padding(
@@ -968,9 +968,9 @@ class _TaskSheetState extends ConsumerState<_TaskSheet> {
                               PopStyle.rPill),
                           border: Border.all(
                               color: PuduuColors.ink,
-                              width: 2.5),
+                              width: 1.5),
                           boxShadow: _minutes == m
-                              ? PopStyle.hardShadow(dx: 3, dy: 3)
+                              ? PopStyle.hardShadow(dx: 2, dy: 2)
                               : null,
                         ),
                         child: Text('${m}m',
@@ -1024,7 +1024,7 @@ class _TaskSheetState extends ConsumerState<_TaskSheet> {
                           color: PuduuColors.paper,
                           shape: BoxShape.circle,
                           border: Border.all(
-                              color: PuduuColors.ink, width: 2.5),
+                              color: PuduuColors.ink, width: 1.5),
                         ),
                         child: const Icon(Icons.clear_rounded,
                             color: PuduuColors.ink),
@@ -1051,9 +1051,9 @@ class _TaskSheetState extends ConsumerState<_TaskSheet> {
                           color: _dots[i],
                           border: Border.all(
                               color: PuduuColors.ink,
-                              width: _color == i ? 3.5 : 2.5),
+                              width: _color == i ? 2.5 : 1.5),
                           boxShadow: _color == i
-                              ? PopStyle.hardShadow(dx: 3, dy: 3)
+                              ? PopStyle.hardShadow(dx: 2, dy: 2)
                               : null,
                         ),
                         child: _color == i
@@ -1100,7 +1100,7 @@ class _TaskSheetState extends ConsumerState<_TaskSheet> {
                                 : PuduuColors.paper,
                             border: Border.all(
                                 color: PuduuColors.ink,
-                                width: 2.5),
+                                width: 1.5),
                             boxShadow: s.done
                                 ? PopStyle.hardShadow(dx: 2, dy: 2)
                                 : null,

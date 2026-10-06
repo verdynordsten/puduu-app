@@ -101,7 +101,7 @@ class _RoutinesPageBodyState extends ConsumerState<RoutinesPageBody> {
                           color: PuduuColors.paper,
                           shape: BoxShape.circle,
                           border: Border.all(
-                              color: PuduuColors.ink, width: 2.5),
+                              color: PuduuColors.ink, width: 1.5),
                         ),
                         child: IconButton(
                           icon: const Icon(
@@ -135,7 +135,7 @@ class _RoutinesPageBodyState extends ConsumerState<RoutinesPageBody> {
                                 color: PuduuColors.sun,
                                 border: Border.all(
                                     color: PuduuColors.ink,
-                                    width: 2.5)),
+                                    width: 1.5)),
                             child: Center(
                               child: Text('${i + 1}',
                                   style: const TextStyle(
@@ -239,9 +239,9 @@ Future<void> _newRoutineSheet(BuildContext context, WidgetRef ref) async {
           borderRadius:
               const BorderRadius.vertical(top: Radius.circular(32)),
           border: const Border(
-            top: BorderSide(color: PuduuColors.ink, width: 3),
-            left: BorderSide(color: PuduuColors.ink, width: 3),
-            right: BorderSide(color: PuduuColors.ink, width: 3),
+            top: BorderSide(color: PuduuColors.ink, width: 2),
+            left: BorderSide(color: PuduuColors.ink, width: 2),
+            right: BorderSide(color: PuduuColors.ink, width: 2),
           ),
         ),
         child: Padding(
@@ -397,7 +397,7 @@ class CalendarPageBody extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(14),
                       border: i == now.weekday - 1
                           ? Border.all(
-                              color: PuduuColors.ink, width: 2.5)
+                              color: PuduuColors.ink, width: 1.5)
                           : null,
                       boxShadow: i == now.weekday - 1
                           ? PopStyle.hardShadow(dx: 2, dy: 2)
@@ -613,7 +613,7 @@ class _MoodPageBodyState extends ConsumerState<MoodPageBody> {
                               color: PuduuColors.ink,
                               width: i == picked ? 3 : 2.5),
                           boxShadow: i == picked
-                              ? PopStyle.hardShadow(dx: 3, dy: 3)
+                              ? PopStyle.hardShadow(dx: 2, dy: 2)
                               : null,
                         ),
                         child: Icon(icons[i - 1],
@@ -678,7 +678,7 @@ class _MoodPageBodyState extends ConsumerState<MoodPageBody> {
                                       BorderRadius.circular(8),
                                   border: Border.all(
                                       color: PuduuColors.ink,
-                                      width: 2.5)),
+                                      width: 1.5)),
                             ),
                             const SizedBox(height: 6),
                             Text('${m.day.day}',
@@ -831,7 +831,7 @@ class _PaywallPageBodyState extends ConsumerState<PaywallPageBody> {
                             color: PuduuColors.mint,
                             border: Border.all(
                                 color: PuduuColors.ink,
-                                width: 2.5),
+                                width: 1.5),
                           ),
                           child: const Icon(
                               Icons.check_rounded,
@@ -908,7 +908,7 @@ class _PlanTile extends StatelessWidget {
               color:
                   picked ? PuduuColors.sun : PuduuColors.paper,
               border: Border.all(
-                  color: PuduuColors.ink, width: 2.5),
+                  color: PuduuColors.ink, width: 1.5),
               boxShadow: picked
                   ? PopStyle.hardShadow(dx: 2, dy: 2)
                   : null,

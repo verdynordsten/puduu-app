@@ -5,7 +5,7 @@ Menggantikan total v11 "Aurora Gloss" (dibuang: teal, Outfit/Work Sans, kaca, sh
 
 ## 1. Prinsip
 1. **Loud, bukan calm.** Warna berani, bentuk tebal, tipografi gemuk.
-2. **Chunky = border tinta + bayangan keras.** Setiap surface: border 3px
+2. **Chunky = border tinta + bayangan keras.** Setiap surface: border 2px
    `#2A2320`, hard shadow offset (5,5) blur 0. Tidak ada blur/glass.
 3. **Stiker di mana-mana.** Badge miring (rotate ±6°) untuk tag, status, angka.
 4. **Bar tebal bergaris.** Progress bar 18-20px dengan garis diagonal putih.
@@ -33,18 +33,18 @@ Warna tab: Today coral, Focus sun, Reset grape, Progress mint, Yours sky.
 
 ## 4. Komponen (lib/widgets/puduu_widgets.dart)
 - **PopBackground**: cream + dot grid + bentuk candy melayang
-- **PopCard**: paper, border 3px ink, hard shadow (5,5), radius 24
-- **PopButton**: warna candy, border 3px ink, hard shadow (4,4), label Baloo2;
+- **PopCard**: paper, border 2px ink, hard shadow (4,4), radius 24
+- **PopButton**: warna candy, border 2px ink, hard shadow (3,3), label Baloo2;
   varian `color`/`textColor`, `small`, `expanded`
-- **PopTile**: tile ikon warna candy, border 2.5px, shadow (3,3)
-- **PopBar**: 18-20px, border 2.5px ink, garis diagonal putih di atas fill
-- **Sticker**: badge pill miring, border 2.5px + shadow (3,3)
-- **PopHero**: hero warna solid candy, border 3px, shadow (6,6), radius 30,
+- **PopTile**: tile ikon warna candy, border 1.5px, shadow (2,2)
+- **PopBar**: 18-20px, border 1.5px ink, garis diagonal putih di atas fill
+- **Sticker**: badge pill miring, border 1.5px + shadow (2,2)
+- **PopHero**: hero warna solid candy, border 2px, shadow (5,5), radius 30,
   Sticker tag, judul Baloo2 26px putih, PopBar, tombol paper + ink
 - **TaskCard**: PopCard + PopTile/dot + pill aksi (sun/mint)
 - **Tab bar**: bar putih chunky mengambang, tab aktif = pill warna candy
   + border ink
-- **Sheet**: cream, border ink 3px atas, handle pill ink, pilihan chunky
+- **Sheet**: cream, border ink 2px atas, handle pill ink, pilihan chunky
 
 ## 5. Jangan
 - Jangan pakai teal #0E9384 / Outfit / Work Sans / glass / blur / sheen.

@@ -216,7 +216,7 @@ class _ShellState extends ConsumerState<Shell> {
             color: PuduuColors.paper,
             borderRadius: BorderRadius.circular(26),
             border: PopStyle.inkBorder(),
-            boxShadow: PopStyle.hardShadow(dx: 5, dy: 5),
+            boxShadow: PopStyle.hardShadow(dx: 4, dy: 4),
           ),
           padding:
               const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -278,10 +278,10 @@ class _PillTab extends StatelessWidget {
           color: active ? color : Colors.transparent,
           borderRadius: BorderRadius.circular(18),
           border: active
-              ? Border.all(color: PuduuColors.ink, width: 2.5)
+              ? Border.all(color: PuduuColors.ink, width: 1.5)
               : null,
           boxShadow:
-              active ? PopStyle.hardShadow(dx: 3, dy: 3) : null,
+              active ? PopStyle.hardShadow(dx: 2, dy: 2) : null,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
