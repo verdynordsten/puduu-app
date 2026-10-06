@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Puduu — Aurora Gloss Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0F1F1E; --soft:#3E5452; --mute:#7A8F8D; --bg:#F3F7F6;
+  --teal:#0E9384; --tealDeep:#0B6B5F; --mint:#2DD4BF;
+  --amber:#F59E0B; --peach:#FDBA74; --moss:#4D7C0F; --lime:#A3E635;
+  --sky:#0EA5E9; --ice:#7DD3FC; --lav:#8B5CF6; --lilac:#C4B5FD; --gold:#EAB308;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0B1F1D;font-family:'Work Sans',sans-serif;color:var(--ink);min-height:100vh;}
+
+/* ============ BOARD ============ */
+.board{max-width:2320px;margin:0 auto;padding:52px 48px 70px;position:relative;overflow:hidden}
+.blob-bg{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none}
+.bb1{width:560px;height:560px;left:-160px;top:-160px;background:radial-gradient(circle,rgba(45,212,191,.20),transparent 70%)}
+.bb2{width:640px;height:640px;right:-200px;top:20%;background:radial-gradient(circle,rgba(253,186,116,.13),transparent 70%)}
+.bb3{width:700px;height:700px;left:35%;bottom:-260px;background:radial-gradient(circle,rgba(139,92,246,.16),transparent 70%)}
+.board-head{position:relative;margin-bottom:38px}
+.kicker{font-family:'Outfit';font-weight:700;font-size:12px;letter-spacing:2.4px;color:var(--mint);text-transform:uppercase;margin-bottom:10px}
+.board-head h1{font-family:'Outfit';font-weight:700;font-size:40px;letter-spacing:-0.5px;color:#fff}
+.board-head h1 .grad{background:linear-gradient(120deg,#2DD4BF,#7DD3FC,#C4B5FD);-webkit-background-clip:text;background-clip:text;color:transparent}
+.board-head .sub{color:#8fb3af;font-size:14px;margin-top:8px;max-width:760px;line-height:1.6}
+.chips{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.chip{font-family:'Outfit';font-size:11px;font-weight:700;letter-spacing:1px;color:#cfe8e4;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:99px;padding:7px 14px;backdrop-filter:blur(8px)}
+.chip b{color:var(--mint)}
+.phones{display:flex;gap:30px;overflow-x:auto;padding:12px 4px 26px;align-items:flex-start;position:relative}
+.phone-wrap{flex:0 0 auto}
+.phone{background:linear-gradient(160deg,#22312f,#040808);border-radius:54px;padding:11px;box-shadow:0 30px 80px rgba(0,0,0,.55),inset 0 1px 1px rgba(255,255,255,.16)}
+.screen{width:300px;height:640px;border-radius:44px;overflow:hidden;position:relative;background:var(--bg);font-size:12px}
+.cap{text-align:center;margin-top:16px}
+.cap .n{font-family:'Outfit';font-weight:800;font-size:11px;letter-spacing:2px;color:var(--mint)}
+.cap .t{font-family:'Outfit';font-weight:700;font-size:14px;color:#e8f4f2;margin-top:3px;letter-spacing:.4px}
+
+/* ============ SCREEN AURORA ============ */
+.aurora{position:absolute;inset:0;background:var(--bg)}
+.blob{position:absolute;border-radius:50%;filter:blur(44px)}
+.b1{width:230px;height:230px;left:-70px;top:-50px;background:radial-gradient(circle,#DDF3F0,rgba(221,243,240,0) 70%)}
+.b2{width:200px;height:200px;right:-60px;top:120px;background:radial-gradient(circle,#FDEBD3,rgba(253,235,211,0) 70%)}
+.b3{width:240px;height:240px;left:-50px;bottom:-40px;background:radial-gradient(circle,#E9E4FA,rgba(233,228,250,0) 70%)}
+.content{position:relative;z-index:2;padding:36px 15px 0}
+.status{position:absolute;top:0;left:0;right:0;height:36px;display:flex;align-items:center;justify-content:space-between;padding:4px 26px 0;font-size:12px;font-weight:600;color:var(--ink);z-index:5}
+.status .sic{display:flex;gap:5px;align-items:center}
+.notch{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:98px;height:25px;background:#060b0a;border-radius:14px;z-index:6}
+
+/* ============ TYPO / LABELS ============ */
+h2.st{font-family:'Outfit';font-weight:700;font-size:21px;letter-spacing:-0.3px;color:var(--ink)}
+p.ssub{font-size:11.5px;color:var(--soft);margin-top:3px;line-height:1.45}
+.lbl{font-family:'Outfit';font-weight:700;font-size:10.5px;letter-spacing:1.6px;color:var(--tealDeep);text-transform:uppercase;margin:13px 2px 7px}
+
+/* ============ GLOSS PRIMITIVES ============ */
+.gloss{position:relative;background:linear-gradient(180deg,#FFFFFF,#F6FAF9);border:1px solid rgba(255,255,255,.6);border-radius:22px;box-shadow:0 8px 18px rgba(14,147,132,.12),inset 0 1px 0 rgba(255,255,255,.4)}
+.gloss::before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0) 38%);pointer-events:none}
+.glass{background:rgba(255,255,255,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.65);border-radius:20px;box-shadow:0 6px 16px rgba(14,147,132,.10),inset 0 1px 0 rgba(255,255,255,.5)}
+.hero{position:relative;overflow:hidden;border-radius:26px;background:linear-gradient(135deg,#0B3B36,#0E9384 55%,#14B8A6);color:#fff;box-shadow:0 14px 30px rgba(14,147,132,.35),inset 0 1px 0 rgba(255,255,255,.35)}
+.hero .hblob{position:absolute;border-radius:50%;filter:blur(30px);pointer-events:none}
+.hero::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,.30),rgba(255,255,255,0) 42%);pointer-events:none}
+.tagpill{display:inline-flex;align-items:center;gap:6px;font-family:'Outfit';font-weight:700;font-size:9.5px;letter-spacing:1.4px;background:rgba(255,255,255,.20);border:1px solid rgba(255,255,255,.42);backdrop-filter:blur(8px);border-radius:99px;padding:6px 12px;color:#fff}
+.tagpill .dot{width:6px;height:6px;border-radius:50%;background:var(--mint);box-shadow:0 0 8px var(--mint)}
+.pbar{height:8px;border-radius:99px;background:rgba(255,255,255,.24);overflow:hidden}
+.pbar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#ffffff,#2DD4BF);box-shadow:0 0 12px rgba(45,212,191,.95)}
+.pbar.light{background:#E2EBEA}
+.pbar.light i{background:linear-gradient(90deg,#0E9384,#2DD4BF);box-shadow:0 0 8px rgba(45,212,191,.7)}
+.btn-grad{display:inline-flex;align-items:center;justify-content:center;gap:7px;background:linear-gradient(180deg,#17A894,#0E9384 55%,#0B6B5F);color:#fff;border:none;border-radius:17px;font-family:'Outfit';font-weight:700;font-size:12.5px;padding:11px 17px;box-shadow:0 8px 16px rgba(14,147,132,.38),inset 0 1px 0 rgba(255,255,255,.35);cursor:pointer}
+.btn-glass{display:inline-flex;align-items:center;justify-content:center;gap:7px;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.45);color:#fff;border-radius:17px;font-family:'Outfit';font-weight:700;font-size:12.5px;padding:11px 17px;backdrop-filter:blur(8px);box-shadow:inset 0 1px 0 rgba(255,255,255,.35);cursor:pointer}
+.pillbtn{display:inline-flex;align-items:center;gap:5px;background:linear-gradient(180deg,#17A894,#0B6B5F);color:#fff;border-radius:99px;font-family:'Outfit';font-weight:700;font-size:10.5px;padding:7px 13px;box-shadow:0 5px 12px rgba(14,147,132,.35),inset 0 1px 0 rgba(255,255,255,.35);white-space:nowrap}
+
+/* tiles */
+.tile{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;color:#fff;flex:0 0 auto}
+.tile::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,0) 45%);pointer-events:none}
+.tile svg{position:relative;z-index:1}
+.t-focus{background:linear-gradient(135deg,#0EA5E9,#7DD3FC);box-shadow:0 8px 16px rgba(14,165,233,.32),inset 0 1px 0 rgba(255,255,255,.45)}
+.t-reset{background:linear-gradient(135deg,#F59E0B,#FDBA74);box-shadow:0 8px 16px rgba(245,158,11,.32),inset 0 1px 0 rgba(255,255,255,.45)}
+.t-habits{background:linear-gradient(135deg,#4D7C0F,#A3E635);box-shadow:0 8px 16px rgba(77,124,15,.30),inset 0 1px 0 rgba(255,255,255,.45)}
+.t-evening{background:linear-gradient(135deg,#8B5CF6,#C4B5FD);box-shadow:0 8px 16px rgba(139,92,246,.32),inset 0 1px 0 rgba(255,255,255,.45)}
+.t-teal{background:linear-gradient(135deg,#0B6B5F,#2DD4BF);box-shadow:0 8px 16px rgba(14,147,132,.32),inset 0 1px 0 rgba(255,255,255,.45)}
+.t-gold{background:linear-gradient(135deg,#FDE68A,#EAB308 55%,#B45309);box-shadow:0 8px 16px rgba(234,179,8,.35),inset 0 1px 0 rgba(255,255,255,.5)}
+
+/* bottom nav */
+.nav{position:absolute;left:14px;right:14px;bottom:11px;background:rgba(255,255,255,.74);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.65);border-radius:26px;display:flex;padding:7px;box-shadow:0 12px 26px rgba(14,147,132,.18),inset 0 1px 0 rgba(255,255,255,.5);z-index:10}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0 6px;border-radius:18px;color:var(--mute);font-size:8.5px;font-weight:600;letter-spacing:.2px}
+.tab.on{background:linear-gradient(180deg,#17A894,#0E9384 60%,#0B6B5F);color:#fff;box-shadow:0 6px 14px rgba(14,147,132,.42),inset 0 1px 0 rgba(255,255,255,.35)}
+
+/* header rows */
+.head{display:flex;align-items:center;justify-content:space-between}
+.avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#0E9384,#2DD4BF 60%,#7DD3FC);display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Outfit';font-weight:800;font-size:17px;box-shadow:0 6px 14px rgba(14,147,132,.35),inset 0 1px 0 rgba(255,255,255,.5);border:2px solid rgba(255,255,255,.7)}
+.syncpill{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:10px;font-weight:600;color:var(--tealDeep);padding:6px 11px}
+.syncpill svg{color:var(--teal)}
+.search{display:flex;align-items:center;gap:9px;margin-top:11px;padding:11px 14px}
+.search svg{color:var(--teal);flex:0 0 auto}
+.search span{font-size:12px;color:var(--mute)}
+
+/* timeline */
+.trow{display:flex;align-items:center;gap:10px;padding:7px 10px;margin-bottom:6px}
+.trow .tm{font-family:'Outfit';font-weight:700;font-size:10.5px;color:var(--tealDeep);width:38px;flex:0 0 auto}
+.trow .bar{flex:1}
+.trow .nm{font-size:11px;font-weight:600;color:var(--soft);margin-top:4px}
+
+/* categories */
+.cats{display:flex;gap:8px}
+.cat{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px}
+.cat .tile{width:100%;height:52px;border-radius:19px}
+.cat span{font-size:10px;font-weight:600;color:var(--soft)}
+
+/* task cards */
+.tcard{display:flex;align-items:center;gap:10px;padding:10px 11px;margin-bottom:7px}
+.tcard .tile{width:40px;height:40px;border-radius:14px}
+.tcard .tt{flex:1;min-width:0}
+.tcard .tt b{display:block;font-size:11.5px;color:var(--ink);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tcard .tt span{font-size:10px;color:var(--mute)}
+
+/* steps */
+.step{display:flex;align-items:center;gap:11px;padding:10px 12px;margin-bottom:7px}
+.step .n{width:26px;height:26px;border-radius:50%;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-family:'Outfit';font-weight:700;font-size:11px;background:#E7F2F0;color:var(--tealDeep);border:1px solid rgba(255,255,255,.7)}
+.step.done .n{background:linear-gradient(180deg,#17A894,#0B6B5F);color:#fff;box-shadow:0 4px 10px rgba(14,147,132,.4),inset 0 1px 0 rgba(255,255,255,.4)}
+.step b{font-size:11.5px;font-weight:600;color:var(--ink)}
+.step span{font-size:10px;color:var(--mute);display:block;margin-top:1px}
+.step.done b{color:var(--mute);text-decoration:line-through}
+
+/* preset cards */
+.preset{display:flex;align-items:center;gap:11px;padding:10px 12px;margin-bottom:7px}
+.preset .tile{width:44px;height:44px;border-radius:15px}
+.preset .pt{flex:1}
+.preset .pt b{font-size:11.5px;font-weight:600;color:var(--ink);display:block}
+.preset .pt span{font-size:10px;color:var(--mute)}
+
+/* stat cards */
+.stats{display:flex;gap:8px}
+.stat{flex:1;padding:11px 10px;text-align:center}
+.stat .v{font-family:'Outfit';font-weight:800;font-size:24px;color:var(--ink);letter-spacing:-0.5px}
+.stat .v em{font-style:normal;background:linear-gradient(120deg,#0E9384,#2DD4BF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat .k{font-size:9.5px;font-weight:600;color:var(--mute);margin-top:3px;letter-spacing:.4px}
+
+/* chart */
+.chart{display:flex;align-items:flex-end;gap:9px;padding:14px 16px 12px;height:118px}
+.chart .cb{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+.chart .cb i{display:block;width:100%;border-radius:8px;background:linear-gradient(180deg,#2DD4BF,#0E9384);box-shadow:0 3px 8px rgba(14,147,132,.35),inset 0 1px 0 rgba(255,255,255,.45)}
+.chart .cb.today i{background:linear-gradient(180deg,#FDE68A,#EAB308);box-shadow:0 3px 10px rgba(234,179,8,.5),inset 0 1px 0 rgba(255,255,255,.5)}
+.chart .cb span{font-size:8.5px;font-weight:600;color:var(--mute)}
+
+/* rows (yours) */
+.row{display:flex;align-items:center;gap:11px;padding:11px 13px;margin-bottom:7px}
+.row .tile{width:38px;height:38px;border-radius:13px}
+.row b{font-size:11.5px;font-weight:600;color:var(--ink);flex:1}
+.row .chev{color:var(--mute)}
+.sw{width:38px;height:22px;border-radius:99px;background:linear-gradient(180deg,#17A894,#0B6B5F);position:relative;flex:0 0 auto;box-shadow:inset 0 1px 3px rgba(0,0,0,.18),0 3px 8px rgba(14,147,132,.35)}
+.sw::after{content:"";position:absolute;top:3px;right:3px;width:16px;height:16px;border-radius:50%;background:linear-gradient(180deg,#fff,#F6FAF9);box-shadow:0 2px 5px rgba(0,0,0,.22),inset 0 1px 0 #fff}
+.sw.off{background:#DCE7E5;box-shadow:inset 0 1px 3px rgba(0,0,0,.12)}
+.sw.off::after{right:auto;left:3px}
+
+/* paywall */
+.perk{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.perk .pk{width:26px;height:26px;border-radius:50%;flex:0 0 auto;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#FDE68A,#EAB308 60%,#B45309);color:#3d2c02;box-shadow:0 4px 10px rgba(234,179,8,.45),inset 0 1px 0 rgba(255,255,255,.6)}
+.perk span{font-size:11.5px;font-weight:500;color:#fff}
+.plans{display:flex;gap:8px}
+.plan{flex:1;padding:12px 10px;border-radius:20px;text-align:center;position:relative}
+.plan.sel{border:1.5px solid transparent;background:linear-gradient(#fff,#F6FAF9) padding-box,linear-gradient(135deg,#FDE68A,#EAB308,#B45309) border-box;box-shadow:0 8px 22px rgba(234,179,8,.35),inset 0 1px 0 rgba(255,255,255,.5)}
+.plan.dim{opacity:.75}
+.plan .pbadge{position:absolute;top:-9px;left:50%;transform:translateX(-50%);font-family:'Outfit';font-weight:800;font-size:8px;letter-spacing:1px;background:linear-gradient(135deg,#FDE68A,#EAB308);color:#3d2c02;border-radius:99px;padding:3px 9px;box-shadow:0 3px 8px rgba(234,179,8,.5);white-space:nowrap}
+.plan b{font-family:'Outfit';font-size:12.5px;color:var(--ink);display:block}
+.plan .pr{font-family:'Outfit';font-weight:800;font-size:17px;color:var(--ink);margin-top:3px}
+.plan .pr small{font-size:10px;font-weight:600;color:var(--mute)}
+.plan span{font-size:9.5px;color:var(--mute)}
+.btn-gold{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:linear-gradient(180deg,#FDE68A,#EAB308 55%,#B45309);color:#3d2c02;border:none;border-radius:19px;font-family:'Outfit';font-weight:800;font-size:13.5px;padding:14px;box-shadow:0 10px 24px rgba(234,179,8,.45),inset 0 1px 0 rgba(255,255,255,.6);cursor:pointer}
+.tiny{font-size:9.5px;color:rgba(255,255,255,.75);text-align:center;line-height:1.7}
+.goldline{height:3px;border-radius:99px;background:linear-gradient(90deg,transparent,#FDE68A,#EAB308,transparent);box-shadow:0 0 14px rgba(234,179,8,.8)}
+</style>
+</head>
+<body>
+
+<!-- ======== SVG ICON LIBRARY (no emoji) ======== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6.5" y="5" width="4" height="14" rx="1.5" fill="currentColor"/><rect x="13.5" y="5" width="4" height="14" rx="1.5" fill="currentColor"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3.2 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 10a6 6 0 0112 0c0 4 1.5 5.5 1.5 5.5h-15S6 14 6 10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M10 19a2.2 2.2 0 004 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2.8v3M12 18.2v3M2.8 12h3M18.2 12h3M5.5 5.5l2.1 2.1M16.4 16.4l2.1 2.1M18.5 5.5l-2.1 2.1M7.6 16.4l-2.1 2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M5 19V10M12 19V5M19 19v-7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></symbol>
+  <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2.5L4.5 13.5H11L10 21.5L19.5 10H13z" fill="currentColor"/></symbol>
+  <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M5 19C5 9 13 4 20 4c0 8-5 15-14 15" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M5 19c3-5 7-9 11-11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z" fill="currentColor"/></symbol>
+  <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M7 4h10v5a5 5 0 01-10 0V4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M7 5H4a1 1 0 00-1 1c0 2.5 2 4.5 4.5 4.5M17 5h3a1 1 0 011 1c0 2.5-2 4.5-4.5 4.5M12 14v4M8.5 20h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4.8" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 11-2.3-5.6M20 3.5V8h-4.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 10.5h16M8.5 3.5v4M15.5 3.5v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M5 4.5A1.5 1.5 0 016.5 3H19v15.5H6.5A1.5 1.5 0 005 20V4.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M5 18.5A1.5 1.5 0 016.5 17H19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4.5 20a7.5 7.5 0 0115 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3s6.5 7.2 6.5 12a6.5 6.5 0 01-13 0C5.5 10.2 12 3 12 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5 5l2.1 2.1M16.9 16.9L19 19M19 5l-2.1 2.1M7.1 16.9L5 19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-wind" viewBox="0 0 24 24"><path d="M3 8h9.5a2.5 2.5 0 10-2.4-3.2M3 12h14.5a2.5 2.5 0 11-2.4 3.2M3 16h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-snow" viewBox="0 0 24 24"><path d="M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9M12 3l-2.5 2.5M12 3l2.5 2.5M12 21l-2.5-2.5M12 21l2.5-2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9.5 5.5L16 12l-6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-sync" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0113.6-5.7M20 12a8 8 0 01-13.6 5.7M17.5 2.8v4h-4M6.5 21.2v-4h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 2.5l2.2 6.3 6.3 2.2-6.3 2.2L12 19.5l-2.2-6.3-6.3-2.2 6.3-2.2z" fill="currentColor"/><path d="M19 15.5l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z" fill="currentColor"/></symbol>
+  <symbol id="i-quote" viewBox="0 0 24 24"><path d="M5 16c-1 0-2-1-2-2.5C3 8 7 4.5 11 3.5l.8 1.8C8.5 6.5 6.5 8.7 6.3 11H9a2 2 0 012 2v3a2 2 0 01-2 2H5zm11 0c-1 0-2-1-2-2.5 0-5.5 4-9 8-10l.8 1.8c-3.3 1.2-5.3 3.4-5.5 5.7H20a2 2 0 012 2v3a2 2 0 01-2 2h-4z" fill="currentColor"/></symbol>
+  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3s5.5 4.5 5.5 10a5.5 5.5 0 01-11 0c0-2 1-3.8 2-5 .3 1.5 1.2 2.5 2.5 3C10.6 8 11 5.5 12 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-mouse" viewBox="0 0 24 24"><rect x="7.5" y="3" width="9" height="18" rx="4.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7v3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+</svg>
+
+<div class="board">
+  <div class="blob-bg bb1"></div><div class="blob-bg bb2"></div><div class="blob-bg bb3"></div>
+
+  <div class="board-head">
+    <div class="kicker">Puduu &middot; Design System v11 &middot; Aurora Gloss</div>
+    <h1>Puduu &mdash; <span class="grad">Aurora Gloss</span> Redesign</h1>
+    <p class="sub">Total reskin dari repo Flutter Puduu: calm brand tetap, finish jadi premium &mdash; cahaya dari atas (top sheen), shadow berwarna teal 14% bukan abu, kaca frosted, aurora blobs, dan satu aksen teal dengan cahaya mint. Copy-voice asli app ("Done beats perfect", "Slow is still moving") tidak diubah.</p>
+    <div class="chips">
+      <span class="chip"><b>6</b>&nbsp;SCREENS</span>
+      <span class="chip">OUTFIT &middot; WORK SANS</span>
+      <span class="chip">TEAL <b>#0E9384</b></span>
+      <span class="chip">HERO <b>135&deg;</b> GRADIENT</span>
+      <span class="chip">GOLD SHEEN PRO</span>
+    </div>
+  </div>
+
+  <div class="phones">
+
+    <!-- ==================== 01 TODAY ==================== -->
+    <div class="phone-wrap">
+      <div class="phone"><div class="screen">
+        <div class="aurora"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+        <div class="notch"></div>
+        <div class="status"><span>9:41</span><span class="sic">
+          <svg width="15" height="11" viewBox="0 0 15 11"><rect x="0" y="7" width="2.6" height="4" rx="1" fill="#0F1F1E"/><rect x="4" y="4.6" width="2.6" height="6.4" rx="1" fill="#0F1F1E"/><rect x="8" y="2.3" width="2.6" height="8.7" rx="1" fill="#0F1F1E"/><rect x="12" y="0" width="2.6" height="11" rx="1" fill="#0F1F1E" opacity=".35"/></svg>
+          <svg width="22" height="11" viewBox="0 0 24 12"><rect x="0.5" y="0.5" width="19" height="11" rx="3" fill="none" stroke="#0F1F1E"/><rect x="2.5" y="2.5" width="13" height="7" rx="1.6" fill="#0E9384"/><rect x="21" y="4" width="2.4" height="4" rx="1.2" fill="#0F1F1E"/></svg>
+        </span></div>
+        <div class="content">
+          <div class="head">
+            <div><h2 class="st">Good morning</h2><p class="ssub">See your day, one block at a time.</p></div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end">
+              <div class="avatar">V</div>
+            </div>
+          </div>
+          <div class="glass syncpill"><svg width="13" height="13"><use href="#i-sync"/></svg>Synced &middot; just now</div>
+          <div class="glass search"><svg width="16" height="16"><use href="#i-search"/></svg><span>Search tasks, resets&hellip;</span></div>
+
+          <div class="hero" style="margin-top:11px;padding:14px 15px 15px">
+            <div class="hblob" style="width:150px;height:150px;right:-45px;top:-45px;background:radial-gradient(circle,rgba(45,212,191,.55),transparent 70%)"></div>
+            <div class="hblob" style="width:110px;height:110px;left:-35px;bottom:-40px;background:radial-gradient(circle,rgba(255,255,255,.28),transparent 70%)"></div>
+            <div style="position:relative;z-index:1">
+              <span class="tagpill"><span class="dot"></span>NOW &middot; 09:00 &middot; 25 MIN</span>
+              <div style="font-family:'Outfit';font-weight:700;font-size:19px;letter-spacing:-.3px;margin:9px 0 8px">Design review deck</div>
+              <div class="pbar"><i style="width:62%"></i></div>
+              <div style="display:flex;gap:8px;margin-top:11px">
+                <button class="btn-grad" style="flex:1"><svg width="13" height="13"><use href="#i-play"/></svg>Begin session</button>
+                <button class="btn-glass">Skip</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="lbl">Timeline</div>
+          <div class="glass trow"><span class="tm">09:00</span><div class="bar"><div class="pbar light"><i style="width:82%"></i></div><div class="nm">Design review deck</div></div></div>
+          <div class="glass trow"><span class="tm">10:00</span><div class="bar"><div class="pbar light"><i style="width:45%;background:linear-gradient(90deg,#0EA5E9,#7DD3FC);box-shadow:0 0 8px rgba(14,165,233,.6)"></i></div><div class="nm">Email batch</div></div></div>
+          <div class="glass trow"><span class="tm">11:30</span><div class="bar"><div class="pbar light"><i style="width:60%;background:linear-gradient(90deg,#4D7C0F,#A3E635);box-shadow:0 0 8px rgba(77,124,15,.5)"></i></div><div class="nm">Walk outside</div></div></div>
+
+          <div class="lbl">Categories</div>
+          <div class="cats">
+            <div class="cat"><div class="tile t-focus"><svg width="24" height="24"><use href="#i-target"/></svg></div><span>Focus</span></div>
+            <div class="cat"><div class="tile t-reset"><svg width="24" height="24"><use href="#i-zap"/></svg></div><span>Reset</span></div>
+            <div class="cat"><div class="tile t-habits"><svg width="24" height="24"><use href="#i-leaf"/></svg></div><span>Habits</span></div>
+            <div class="cat"><div class="tile t-evening"><svg width="24" height="24"><use href="#i-moon"/></svg></div><span>More</span></div>
+          </div>
+
+          <div class="lbl">Up next</div>
+          <div class="gloss tcard"><div class="tile t-teal"><svg width="19" height="19"><use href="#i-bell"/></svg></div><div class="tt"><b>Call dentist</b><span>10:30 &middot; 15 min</span></div><span class="pillbtn">Begin</span></div>
+          <div class="gloss tcard"><div class="tile t-reset"><svg width="19" height="19"><use href="#i-mouse"/></svg></div><div class="tt"><b>Bills and inbox, one pass</b><span>14:00 &middot; 20 min</span></div><span class="pillbtn">Begin</span></div>
+        </div>
+        <div class="nav">
+          <div class="tab on"><svg width="19" height="19"><use href="#i-clock"/></svg>Today</div>
+          <div class="tab"><svg width="19" height="19"><use href="#i-target"/></svg>Focus</div>
+          <div class="tab"><svg width="19" height="19"><use href="#i-refresh"/></svg>Reset</div>
+          <div class="tab"><svg width="19" height="19"><use href="#i-chart"/></svg>Progress</div>
+          <div class="tab"><svg width="19" height="19"><use href="#i-user"/></svg>Yours</div>
+        </div>
+      </div></div>
+      <div class="cap"><div class="n">01</div><div class="t">TODAY &mdash; home of the day</div></div>
+    </div>
+
+    <!-- ==================== 02 FOCUS ==================== -->
+    <div class="phone-wrap">
+      <div class="phone"><div class="screen">
+        <div class="aurora"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+        <div class="notch"></div>
+        <div class="status"><span>9:41</span><span class="sic">
+          <svg width="15" height="11" viewBox="0 0 15 11"><rect x="0" y="7" width="2.6" height="4" rx="1" fill="#0F1F1E"/><rect x="4" y="4.6" width="2.6" height="6.4" rx="1" fill="#0F1F1E"/><rect x="8" y="2.3" width="2.6" height="8.7" rx="1" fill="#0F1F1E"/><rect x="12" y="0" width="2.6" height="11" rx="1" fill="#0F1F1E" opacity=".35"/></svg>
+          <svg width="22" height="11" viewBox="0 0 24 12"><rect x="0.5" y="0.5" width="19" height="11" rx="3" fill="none" stroke="#0F1F1E"/><rect x="2.5" y="2.5" width="13" height="7" rx="1.6" fill="#0E9384"/><rect x="21" y="4" width="2.4" height="4" rx="1.2" fill="#0F1F1E"/></svg>
+        </span></div>
+        <div class="content">
+          <div class="head">
+            <div><h2 class="st">Stay with it</h2><p class="ssub">Hero section, timer on, phone away.</p></div>
+            <div class="glass" style="width:42px;height:42px;border-radius:15px;display:flex;align-items:center;justify-content:center;color:var(--teal)"><svg width="20" height="20"><use href="#i-target"/></svg></div>
+          </div>
+
+          <div class="hero" style="margin-top:12px;padding:26px 20px 22px;text-align:center">
+            <div class="hblob" style="width:200px;height:200px;left:50%;top:-90px;transform:translateX(-50%);background:radial-gradient(circle,rgba(45,212,191,.5),transparent 70%)"></div>
+            <div class="hblob" style="width:130px;height:130px;right:-40px;bottom:-50px;background:radial-gradient(circle,rgba(125,211,252,.4),transparent 70%)"></div>
+            <div style="position:relative;z-index:1">
+              <div style="font-family:'Outfit';font-weight:800;font-size:64px;letter-spacing:-1.5px;line-height:1;color:#fff;text-shadow:0 0 26px rgba(45,212,191,.85),0 2px 6px rgba(0,0,0,.25)">24:59</div>
+              <div style="font-family:'Outfit';font-weight:700;font-size:9.5px;letter-spacing:2px;color:rgba(255,255,255,.85);margin:10px 0 14px">MINUTES LEFT &middot; GENTLE CHIME AT END</div>
+              <div class="pbar" style="height:10px"><i style="width:17%"></i></div>
+              <div style="display:flex;gap:8px;margin-top:16px">
+                <button class="btn-grad" style="flex:1"><svg width="13" height="13"><use href="#i-pause"/></svg>Pause</button>
+                <button class="btn-glass" style="flex:1">End early</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="lbl">Session steps</div>
+          <div class="gloss step done"><div class="n"><svg width="13" height="13"><use href="#i-check"/></svg></div><div><b>Step one</b><span>Cleared the desk corner</span></div></div>
+          <div class="gloss step"><div class="n">2</div><div><b>Do the smallest slice</b><span>Just the first slide. Nothing more.</span></div></div>
+          <div class="gloss step"><div class="n">3</div><div><b>Wrap &amp; note next step</b><span>Leave a trail for tomorrow</span></div></div>
+        </div>
+        <div class="nav">
+          <div class="tab"><svg width="19" height="19"><use href="#i-clock"/></svg>Today</div>
+          <div class="tab on"><svg width="19" height="19"><use href="#i-target"/></svg>Focus</div>
+          <div class="tab"><svg width="19" height="19"><use href="#i-refresh"/></svg>Reset</div>
+          <div class="tab"><svg width="19" height="19"><use href="#i-chart"/></svg>Progress</div>
+          <div class="tab"><svg width="19" height="19"><use href="#i-user"/></svg>Yours</div>
+        </div>
+      </div></div>
+      <div class="cap"><div class="n">02</div><div class="t">FOCUS &mdash; deep work timer</div></div>
+    </div>
+
+    <!-- ==================== 03 RESET ==================== -->
+    <div class="phone-wrap">
+      <div class="phone"><div class="screen">
+        <div class="aurora"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+        <div class="notch"></div>
+        <div class="status"><span>9:41</span><span class="sic">
+          <svg width="15" height="11" viewBox="0 0 15 11"><rect x="0" y="7" width="2.6" height="4" rx="1" fill="#0F1F1E"/><rect x="4" y="4.6" width="2.6" height="6.4" rx="1" fill="#0F1F1E"/><rect x="8" y="2.3" width="2.6" height="8.7" rx="1" fill="#0F1F1E"/><rect x="12" y="0" width="2.6" height="11" rx="1" fill="#0F1F1E" opacity=".35"/></svg>
+          <svg width="22" height="11" viewBox="0 0 24 12"><rect x="0.5" y="0.5" width="19" height="11" rx="3" fill="none" stroke="#0F1F1E"/><rect x="2.5" y="2.5" width="13" height="7" rx="1.6" fill="#0E9384"/><rect x="21" y="4" width="2.4" height="4" rx="1.2" fill="#0F1F1E"/></svg>
+        </span></div>
+        <div class="content">
+          <div class="head">
+            <div><h2 class="st">Hit a wall?</h2><p class="ssub">Skipping is allowed &mdash; Puduu waits.</p></div>
+            <div class="tile t-reset" style="width:42px;height:42px;border-radius:15px"><svg width="20" height="20"><use href="#i-zap"/></svg></div>
+          </div>
+          <div class="glass search"><svg width="16" height="16"><use href="#i-search"/></svg><span>Search resets&hellip;</span></div>
+
+          <div class="lbl">Pick the smallest one</div>
+          <div class="gloss preset"><div class="tile t-habits"><svg width="21" height="21"><use href="#i-drop"/></svg></div><div class="pt"><b>Drink a glass of water</b><span>Body &middot; tiny &amp; kind</span></div><span class="pillbtn">Start &middot; 2m</span></div>
+          <div class="gloss preset"><div class="tile t-habits"><svg width="21" height="21"><use href="#i-sun"/></svg></div><div class="pt"><b>Walk outside</b><span>Body &middot; fresh air</span></div><span class="pillbtn">Start &middot; 5m</span></div>
+          <div class="gloss preset"><div class="tile t-reset"><svg width="21" height="21"><use href="#i-wind"/></svg></div><div class="pt"><b>Box breathing</b><span>Reset &middot; calm the noise</span></div><span class="pillbtn">Start &middot; 2m</span></div>
+          <div class="gloss preset"><div class="tile t-focus"><svg width="21" height="21"><use href="#i-snow"/></svg></div><div class="pt"><b>Cold splash</b><span>Reset &middot; wake up fast</span></div><span class="pillbtn">Start &middot; 1m</span></div>
+
+          <div class="glass" style="margin-top:12px;padding:14px 15px;display:flex;gap:11px;align-items:center">
+            <svg width="26" height="26" style="color:var(--teal);flex:0 0 auto"><use href="#i-quote"/></svg>
+            <div><div style="font-family:'Outfit';font-weight:700;font-size:13.5px;color:var(--ink)">Slow is still moving.</div><div style="font-size:10.5px;color:var(--mute);margin-top:2px">Done is a direction, not a speed.</div></div>
+          </div>
+        </div>
+        <div class="nav">
+          <div class="tab"><svg width="19" height="19"><use href="#i-clock"/></svg>Today</div>
+          <div class="tab"><svg width="19" height="19"><use href="#i-target"/></svg>Focus</div>
+          <div class="tab on"><svg width="19" height="19"><use href="#i-refresh"/></svg>Reset</div>
+          <div class="tab"><svg width="19" height="19"><use href="#i-chart"/></svg>Progress</div>
+          <div class="tab"><svg width="19" height="19"><use href="#i-user"/></svg>Yours</div>
+        </div>
+      </div></div>
+      <div class="cap"><div class="n">03</div><div class="t">RESET &mdash; tiny recoveries</div></div>
+    </div>
+
+    <!-- ==================== 04 PROGRESS ==================== -->
+    <div class="phone-wrap">
+      <div class="phone"><div class="screen">
+        <div class="aurora"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+        <div class="notch"></div>
+        <div class="status"><span>9:41</span><span class="sic">
+          <svg width="15" height="11" viewBox="0 0 15 11"><rect x="0" y="7" width="2.6" height="4" rx="1" fill="#0F1F1E"/><rect x="4" y="4.6" width="2.6" height="6.4" rx="1" fill="#0F1F1E"/><rect x="8" y="2.3" width="2.6" height="8.7" rx="1" fill="#0F1F1E"/><rect x="12" y="0" width="2.6" height="11" rx="1" fill="#0F1F1E" opacity=".35"/></svg>
+          <svg width="22" height="11" viewBox="0 0 24 12"><rect x="0.5" y="0.5" width="19" height="11" rx="3" fill="none" stroke="#0F1F1E"/><rect x="2.5" y="2.5" width="13" height="7" rx="1.6" fill="#0E9384"/><rect x="21" y="4" width="2.4" height="4" rx="1.2" fill="#0F1F1E"/></svg>
+        </span></div>
+        <div class="content">
+          <div class="head">
+            <div><h2 class="st">Keep growing</h2><p class="ssub">Repeatable calm, one day at a time.</p></div>
+            <div class="tile t-teal" style="width:42px;height:42px;border-radius:15px"><svg width="20" height="20"><use href="#i-chart"/></svg></div>
+          </div>
+
+          <div class="stats" style="margin-top:11px">
+            <div class="gloss stat"><div class="v"><em>12</em></div><div class="k">STREAK</div></div>
+            <div class="gloss stat"><div class="v"><em>18</em></div><div class="k">DONE THIS WEEK</div></div>
+            <div class="gloss stat"><div class="v"><em>214</em></div><div class="k">ALL TIME</div></div>
+          </div>
+
+          <div class="lbl">Trophies</div>
+          <div class="cats">
+            <div class="cat"><div class="tile t-gold"><svg width="24" height="24"><use href="#i-trophy"/></svg></div><span>7-day streak</span></div>
+            <div class="cat"><div class="tile t-focus"><svg width="24" height="24"><use href="#i-flame"/></svg></div><span>100 tasks</span></div>
+            <div class="cat"><div class="tile t-evening"><svg width="24" height="24"><use href="#i-spark"/></svg></div><span>Early bird</span></div>
+          </div>
+
+          <div class="gloss" style="margin-top:11px;padding:13px 15px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+              <div style="font-family:'Outfit';font-weight:700;font-size:12.5px">This week</div>
+              <div style="font-size:10px;font-weight:600;color:var(--tealDeep);background:#E0F3F0;border-radius:99px;padding:4px 10px">Trending up</div>
+            </div>
+            <div class="chart" style="padding:0;height:96px">
+              <div class="cb"><i style="height:38%"></i><span>M</span></div>
+              <div class="cb"><i style="height:55%"></i><span>T</span></div>
+              <div class="cb"><i style="height:44%"></i><span>W</span></div>
+              <div class="cb"><i style="height:70%"></i><span>T</span></div>
+              <div class="cb"><i style="height:62%"></i><span>F</span></div>
+              <div class="cb"><i style="height:84%"></i><span>S</span></div>
+              <div class="cb today"><i style="height:96%"></i><span>S</span></div>
+            </div>
+          </div>
+
+          <div class="hero" style="margin-top:11px;padding:14px 15px">
+            <div class="hblob" style="width:130px;height:130px;right:-40px;top:-45px;background:radial-gradient(circle,rgba(45,212,191,.5),transparent 70%)"></div>
+            <div style="position:relative;z-index:1;display:flex;gap:11px;align-items:center">
+              <svg width="24" height="24" style="color:#FDE68A;flex:0 0 auto"><use href="#i-quote"/></svg>
+              <div><div style="font-family:'Outfit';font-weight:700;font-size:14px">Done is a direction.</div><div style="font-size:10.5px;color:rgba(255,255,255,.8);margin-top:2px">Holding steady &mdash; keep logging.</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="nav">
+          <div class="tab"><svg width="19" height="19"><use href="#i-clock"/></svg>Today</div>
+          <div class="tab"><svg width="19" height="19"><use href="#i-target"/></svg>Focus</div>
+          <div class="tab"><svg width="19" height="19"><use href="#i-refresh"/></svg>Reset</div>
+          <div class="tab on"><svg width="19" height="19"><use href="#i-chart"/></svg>Progress</div>
+          <div class="tab"><svg width="19" height="19"><use href="#i-user"/></svg>Yours</div>
+        </div>
+      </div></div>
+      <div class="cap"><div class="n">04</div><div class="t">PROGRESS &mdash; streaks &amp; trophies</div></div>
+    </div>
+
+    <!-- ==================== 05 YOURS ==================== -->
+    <div class="phone-wrap">
+      <div class="phone"><div class="screen">
+        <div class="aurora"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+        <div class="notch"></div>
+        <div class="status"><span>9:41</span><span class="sic">
+          <svg width="15" height="11" viewBox="0 0 15 11"><rect x="0" y="7" width="2.6" height="4" rx="1" fill="#0F1F1E"/><rect x="4" y="4.6" width="2.6" height="6.4" rx="1" fill="#0F1F1E"/><rect x="8" y="2.3" width="2.6" height="8.7" rx="1" fill="#0F1F1E"/><rect x="12" y="0" width="2.6" height="11" rx="1" fill="#0F1F1E" opacity=".35"/></svg>
+          <svg width="22" height="11" viewBox="0 0 24 12"><rect x="0.5" y="0.5" width="19" height="11" rx="3" fill="none" stroke="#0F1F1E"/><rect x="2.5" y="2.5" width="13" height="7" rx="1.6" fill="#0E9384"/><rect x="21" y="4" width="2.4" height="4" rx="1.2" fill="#0F1F1E"/></svg>
+        </span></div>
+        <div class="content">
+          <div class="head">
+            <div><h2 class="st">Make it yours</h2><p class="ssub">Routines, sounds &amp; gentle nudges.</p></div>
+            <div class="avatar">V</div>
+          </div>
+
+          <div class="hero" style="margin-top:11px;padding:16px 16px 15px">
+            <div class="hblob" style="width:170px;height:170px;right:-50px;top:-60px;background:radial-gradient(circle,rgba(253,230,138,.45),transparent 70%)"></div>
+            <div class="hblob" style="width:120px;height:120px;left:-40px;bottom:-50px;background:radial-gradient(circle,rgba(45,212,191,.45),transparent 70%)"></div>
+            <div style="position:relative;z-index:1">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <span class="tagpill" style="border-color:rgba(253,230,138,.55);background:rgba(234,179,8,.18)"><span class="dot" style="background:#FDE68A;box-shadow:0 0 8px #FDE68A"></span>PUDUU PRO &middot; $6.99/MO</span>
+                <svg width="20" height="20" style="color:#FDE68A"><use href="#i-spark"/></svg>
+              </div>
+              <div style="font-family:'Outfit';font-weight:700;font-size:17px;margin:10px 0 3px">Unlimited resets</div>
+              <div style="font-size:11px;color:rgba(255,255,255,.82)">Plus unlimited nudges, imports &amp; more.</div>
+              <div class="goldline" style="margin:11px 0"></div>
+              <button style="width:100%;background:#fff;border:none;border-radius:16px;font-family:'Outfit';font-weight:800;font-size:13px;color:#0B3B36;padding:11px;box-shadow:0 8px 18px rgba(0,0,0,.25),inset 0 1px 0 #fff;cursor:pointer">Upgrade</button>
+            </div>
+          </div>
+
+          <div class="lbl">More</div>
+          <div class="gloss row"><div class="tile t-teal"><svg width="18" height="18"><use href="#i-refresh"/></svg></div><b>Routines</b><svg class="chev" width="16" height="16"><use href="#i-chev"/></svg></div>
+          <div class="gloss row"><div class="tile t-focus"><svg width="18" height="18"><use href="#i-book"/></svg></div><b>Library</b><svg class="chev" width="16" height="16"><use href="#i-chev"/></svg></div>
+          <div class="gloss row"><div class="tile t-evening"><svg width="18" height="18"><use href="#i-mouse"/></svg></div><b>Web planner</b><svg class="chev" width="16" height="16"><use href="#i-chev"/></svg></div>
+          <div class="gloss row"><div class="tile t-habits"><svg width="18" height="18"><use href="#i-cal"/></svg></div><b>Calendar sync</b><svg class="chev" width="16" height="16"><use href="#i-chev"/></svg></div>
+
+          <div class="lbl">Settings</div>
+          <div class="gloss row"><div class="tile t-reset"><svg width="18" height="18"><use href="#i-bell"/></svg></div><b>Gentle nudges</b><span class="sw"></span></div>
+          <div class="gloss row"><div class="tile t-evening"><svg width="18" height="18"><use href="#i-moon"/></svg></div><b>Quiet hours</b><span class="sw"></span></div>
+          <div class="gloss row"><div class="tile t-focus"><svg width="18" height="18"><use href="#i-gear"/></svg></div><b>Sounds and haptics</b><span class="sw off"></span></div>
+        </div>
+        <div class="nav">
+          <div class="tab"><svg width="19" height="19"><use href="#i-clock"/></svg>Today</div>
+          <div class="tab"><svg width="19" height="19"><use href="#i-target"/></svg>Focus</div>
+          <div class="tab"><svg width="19" height="19"><use href="#i-refresh"/></svg>Reset</div>
+          <div class="tab"><svg width="19" height="19"><use href="#i-chart"/></svg>Progress</div>
+          <div class="tab on"><svg width="19" height="19"><use href="#i-user"/></svg>Yours</div>
+        </div>
+      </div></div>
+      <div class="cap"><div class="n">05</div><div class="t">YOURS &mdash; pro &amp; settings</div></div>
+    </div>
+
+    <!-- ==================== 06 PAYWALL ==================== -->
+    <div class="phone-wrap">
+      <div class="phone"><div class="screen" style="background:#0B1F1D">
+        <div class="notch"></div>
+        <div class="status" style="color:#fff"><span>9:41</span><span class="sic">
+          <svg width="15" height="11" viewBox="0 0 15 11"><rect x="0" y="7" width="2.6" height="4" rx="1" fill="#fff"/><rect x="4" y="4.6" width="2.6" height="6.4" rx="1" fill="#fff"/><rect x="8" y="2.3" width="2.6" height="8.7" rx="1" fill="#fff"/><rect x="12" y="0" width="2.6" height="11" rx="1" fill="#fff" opacity=".35"/></svg>
+          <svg width="22" height="11" viewBox="0 0 24 12"><rect x="0.5" y="0.5" width="19" height="11" rx="3" fill="none" stroke="#fff"/><rect x="2.5" y="2.5" width="13" height="7" rx="1.6" fill="#2DD4BF"/><rect x="21" y="4" width="2.4" height="4" rx="1.2" fill="#fff"/></svg>
+        </span></div>
+        <div class="content" style="padding-top:52px">
+          <div style="text-align:center">
+            <div class="tile t-gold" style="width:58px;height:58px;border-radius:20px;margin:0 auto"><svg width="28" height="28"><use href="#i-spark"/></svg></div>
+            <div style="font-family:'Outfit';font-weight:800;font-size:11px;letter-spacing:2.4px;color:#FDE68A;margin-top:12px">PUDUU PRO</div>
+            <div style="font-family:'Outfit';font-weight:800;font-size:30px;letter-spacing:-.5px;color:#fff;margin-top:6px">Unlimited calm</div>
+            <div style="font-size:11.5px;color:rgba(255,255,255,.72);margin-top:5px">Done beats perfect &mdash; every single day.</div>
+          </div>
+
+          <div style="margin-top:16px">
+            <div class="perk"><span class="pk"><svg width="13" height="13"><use href="#i-check"/></svg></span><span>Unlimited resets</span></div>
+            <div class="perk"><span class="pk"><svg width="13" height="13"><use href="#i-check"/></svg></span><span>Unlimited nudges</span></div>
+            <div class="perk"><span class="pk"><svg width="13" height="13"><use href="#i-check"/></svg></span><span>Apple, Google, Outlook import</span></div>
+            <div class="perk"><span class="pk"><svg width="13" height="13"><use href="#i-check"/></svg></span><span>Cancel anytime</span></div>
+          </div>
+
+          <div class="plans" style="margin-top:14px">
+            <div class="gloss plan dim"><b>Monthly</b><div class="pr">$9.99<small>/mo</small></div><span>Billed monthly</span></div>
+            <div class="gloss plan sel"><span class="pbadge">SAVE 30%</span><b>Yearly</b><div class="pr">$6.99<small>/mo</small></div><span>Billed yearly</span></div>
+          </div>
+
+          <button class="btn-gold" style="margin-top:13px"><svg width="15" height="15"><use href="#i-spark"/></svg>Start 7-day free trial</button>
+          <div class="tiny" style="margin-top:11px">Free for 7 days, then $6.99/month.<br>Restore purchase &middot; Terms &middot; Privacy</div>
+        </div>
+      </div></div>
+      <div class="cap"><div class="n">06</div><div class="t">PAYWALL &mdash; puduu pro</div></div>
+    </div>
+
+  </div><!-- /phones -->
+</div><!-- /board -->
+</body>
+</html>

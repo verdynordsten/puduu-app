@@ -60,33 +60,25 @@ class _RoutinesPageBodyState extends ConsumerState<RoutinesPageBody> {
             action: '+ New',
             onAction: () => _newRoutineSheet(context, ref)),
         if (routines.isEmpty)
-          const Card(
-            child: Padding(
-              padding: EdgeInsets.all(12),
-              child: Text(
-                  'No routines yet — tap + New or add a preset below.',
-                  style: PuduuType.meta),
-            ),
+          const GlossCard(
+            padding: EdgeInsets.all(12),
+            child: Text(
+                'No routines yet — tap + New or add a preset below.',
+                style: PuduuType.meta),
           )
         else
           for (final r in routines) ...[
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                              color: PuduuColors.tealWash,
-                              borderRadius: BorderRadius.circular(12)),
-                          child: const Icon(Icons.refresh_outlined,
-                              size: 19, color: PuduuColors.soft),
-                        ),
+            GlossCard(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      GlossTile.fromColor(
+                          icon: Icons.refresh_outlined,
+                          color: PuduuColors.teal,
+                          size: 36),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
@@ -143,10 +135,11 @@ class _RoutinesPageBodyState extends ConsumerState<RoutinesPageBody> {
                         ),
                       ),
                     const SizedBox(height: 6),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton.icon(
-                        onPressed: () async {
+                    GlossButton(
+                      expanded: true,
+                      icon: Icons.play_arrow,
+                      label: 'Start routine',
+                      onPressed: () async {
                           // Start = fan steps out as timed tasks anchored
                           // at the routine's next daily occurrence.
                           final base = routineNextAt(r.rrule);
@@ -173,15 +166,10 @@ class _RoutinesPageBodyState extends ConsumerState<RoutinesPageBody> {
                                         const Duration(seconds: 2)));
                           }
                         },
-                        icon:
-                            const Icon(Icons.play_arrow, size: 17),
-                        label: const Text('Start routine'),
-                      ),
                     ),
                   ],
                 ),
               ),
-            ),
             const SizedBox(height: 8),
           ],
         const SectionHead(label: 'SUGGESTED'),
@@ -261,10 +249,10 @@ Future<void> _newRoutineSheet(BuildContext context, WidgetRef ref) async {
               },
             ),
             const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: () async {
+            GlossButton(
+              expanded: true,
+              label: 'Save routine',
+              onPressed: () async {
                   final name = nameCtl.text.trim();
                   if (name.isEmpty) return;
                   final steps = stepsCtl.text
@@ -284,8 +272,6 @@ Future<void> _newRoutineSheet(BuildContext context, WidgetRef ref) async {
                   bumpTasks(ref);
                   nav.pop();
                 },
-                child: const Text('Save routine'),
-              ),
             ),
           ],
         ),
@@ -337,22 +323,31 @@ class CalendarPageBody extends ConsumerWidget {
       children: [
         HelloHead(hello: 'Calendar', sub: '◉ $weekLabel'),
         const SizedBox(height: 12),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              children: [
-                for (var i = 0; i < 7; i++)
-                  Expanded(
-                    child: Container(
-                      padding:
-                          const EdgeInsets.symmetric(vertical: 8),
-                      decoration: BoxDecoration(
-                        color: i == now.weekday - 1
-                            ? PuduuColors.dark
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+        GlossCard(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              for (var i = 0; i < 7; i++)
+                Expanded(
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      gradient: i == now.weekday - 1
+                          ? PuduuGloss.btnTeal
+                          : null,
+                      color: i == now.weekday - 1
+                          ? null
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                      border: i == now.weekday - 1
+                          ? Border.all(
+                              color: Colors.white.withAlpha(70))
+                          : null,
+                      boxShadow: i == now.weekday - 1
+                          ? PuduuGloss.glow(PuduuColors.teal)
+                          : null,
+                    ),
                       child: Column(
                         children: [
                           Text(
@@ -379,25 +374,23 @@ class CalendarPageBody extends ConsumerWidget {
                                 height: 5,
                                 margin:
                                     const EdgeInsets.only(top: 3),
-                                decoration: const BoxDecoration(
+                                decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: PuduuColors.teal)),
+                                    color: i == now.weekday - 1
+                                        ? Colors.white
+                                        : PuduuColors.teal)),
                         ],
                       ),
                     ),
                   ),
               ],
-            ),
-          ),
-        ),
+            )),
         SectionHead(label: dayName.toUpperCase(), action: 'Sync calendars'),
         if (timed.isEmpty)
-          const Card(
-            child: Padding(
-              padding: EdgeInsets.all(12),
-              child: Text('Nothing scheduled — add timed tasks from Today.',
-                  style: PuduuType.meta),
-            ),
+          const GlossCard(
+            padding: EdgeInsets.all(12),
+            child: Text('Nothing scheduled — add timed tasks from Today.',
+                style: PuduuType.meta),
           )
         else
           for (final t in timed.take(10))
@@ -446,20 +439,24 @@ class _TimeBlock extends StatelessWidget {
               width: 3,
               height: 58,
               decoration: BoxDecoration(
-                  color: color, borderRadius: BorderRadius.circular(2))),
+                  gradient: PuduuGloss.barTeal,
+                  borderRadius: BorderRadius.circular(2),
+                  boxShadow: [
+                    BoxShadow(
+                        color: PuduuColors.teal.withAlpha(70),
+                        blurRadius: 6),
+                  ])),
           const SizedBox(width: 10),
           Expanded(
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title, style: PuduuType.strong),
-                    Text(detail, style: PuduuType.meta),
-                  ],
-                ),
+            child: GlossCard(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 12, vertical: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: PuduuType.strong),
+                  Text(detail, style: PuduuType.meta),
+                ],
               ),
             ),
           ),
@@ -520,13 +517,12 @@ class _MoodPageBodyState extends ConsumerState<MoodPageBody> {
       children: [
         const HelloHead(hello: 'Mood', sub: '◉ How today felt'),
         const SizedBox(height: 12),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Text(faces[picked - 1],
-                    style: PuduuType.title.copyWith(fontSize: 19)),
+        GlossCard(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Text(faces[picked - 1],
+                  style: PuduuType.title.copyWith(fontSize: 19)),
                 const SizedBox(height: 4),
                 const Text('Tap how today felt overall',
                     style: PuduuType.meta),
@@ -542,14 +538,20 @@ class _MoodPageBodyState extends ConsumerState<MoodPageBody> {
                           height: 52,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
+                            gradient: i == picked
+                                ? PuduuGloss.btnTeal
+                                : null,
                             color: i == picked
-                                ? PuduuColors.teal
+                                ? null
                                 : Colors.transparent,
                             border: Border.all(
                                 color: i == picked
-                                    ? PuduuColors.teal
+                                    ? Colors.white.withAlpha(90)
                                     : PuduuColors.line,
                                 width: 1.4),
+                            boxShadow: i == picked
+                                ? PuduuGloss.glow(PuduuColors.teal)
+                                : null,
                           ),
                           child: Icon(icons[i - 1],
                               size: 26,
@@ -568,10 +570,10 @@ class _MoodPageBodyState extends ConsumerState<MoodPageBody> {
                       hintText: 'Note (optional) — what shaped today?'),
                 ),
                 const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    onPressed: () async {
+                GlossButton(
+                  expanded: true,
+                  label: 'Log today',
+                  onPressed: () async {
                       final note = _noteCtl.text.trim();
                       await ref.read(repoProvider).logMoodAt(
                           DateTime.now(), picked,
@@ -580,40 +582,47 @@ class _MoodPageBodyState extends ConsumerState<MoodPageBody> {
                       bumpTasks(ref);
                       _noteCtl.clear();
                     },
-                    child: const Text('Log today'),
-                  ),
                 ),
               ],
-            ),
-          ),
-        ),
+            )),
         const SectionHead(label: 'PATTERNS'),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: moods.isEmpty
-                ? const Text('No check-ins yet — log your first mood above.',
-                    style: PuduuType.meta)
-                : Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
+        GlossCard(
+          padding: const EdgeInsets.all(14),
+          child: moods.isEmpty
+              ? const Text('No check-ins yet — log your first mood above.',
+                  style: PuduuType.meta)
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       for (final m in moods.reversed.take(7))
                         Expanded(
                           child: Column(
                             children: [
-                              Container(
-                                height: (m.score * 16).toDouble(),
-                                margin: const EdgeInsets.symmetric(
-                                    horizontal: 6),
-                                decoration: BoxDecoration(
-                                    color: m.score >= 4
-                                        ? PuduuColors.teal
-                                        : m.score == 3
-                                            ? PuduuColors.amber
-                                            : PuduuColors.danger,
-                                    borderRadius:
-                                        BorderRadius.circular(6)),
-                              ),
+                              Builder(builder: (ctx) {
+                                final base = m.score >= 4
+                                    ? PuduuColors.teal
+                                    : m.score == 3
+                                        ? PuduuColors.amber
+                                        : PuduuColors.danger;
+                                return Container(
+                                  height: (m.score * 16).toDouble(),
+                                  margin: const EdgeInsets.symmetric(
+                                      horizontal: 6),
+                                  decoration: BoxDecoration(
+                                      gradient: LinearGradient(colors: [
+                                        Color.lerp(base, Colors.white, 0.35) ??
+                                            base,
+                                        base,
+                                      ]),
+                                      borderRadius:
+                                          BorderRadius.circular(8),
+                                      boxShadow: [
+                                        BoxShadow(
+                                            color: base.withAlpha(70),
+                                            blurRadius: 8),
+                                      ]),
+                                );
+                              }),
                               const SizedBox(height: 6),
                               Text('${m.day.day}',
                                   style: PuduuType.meta),
@@ -621,9 +630,7 @@ class _MoodPageBodyState extends ConsumerState<MoodPageBody> {
                           ),
                         ),
                     ],
-                  ),
-          ),
-        ),
+                  )),
         const SizedBox(height: 8),
         TaskCard(
             dot: PuduuColors.teal,
@@ -711,20 +718,52 @@ class _PaywallPageBodyState extends ConsumerState<PaywallPageBody> {
         const HelloHead(hello: 'Puduu Pro', sub: '◉ Calm, unlimited'),
         Container(
           margin: const EdgeInsets.only(top: 12),
-          padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-              color: PuduuColors.dark,
-              borderRadius: BorderRadius.circular(20)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('PUDUU PRO',
-                  style: TextStyle(
-                      fontFamily: 'Outfit',
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.6,
-                      color: Color(0xFF7DD3C7))),
+            gradient: PuduuGloss.heroTeal,
+            borderRadius: BorderRadius.circular(PuduuGloss.rHero),
+            border: Border.all(color: Colors.white.withAlpha(70)),
+            boxShadow: PuduuGloss.glow(PuduuColors.teal),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(PuduuGloss.rHero),
+            child: Stack(
+              children: [
+                Positioned(
+                  top: -50,
+                  right: -30,
+                  child: Container(
+                    width: 190,
+                    height: 190,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(colors: [
+                        PuduuColors.gold.withAlpha(90),
+                        PuduuColors.gold.withAlpha(0),
+                      ]),
+                    ),
+                  ),
+                ),
+                const Positioned.fill(
+                  child: IgnorePointer(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: PuduuGloss.topSheen,
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(18),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('PUDUU PRO',
+                          style: TextStyle(
+                              fontFamily: 'Outfit',
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1.6,
+                              color: PuduuColors.gold)),
               const SizedBox(height: 5),
               const Text('Unlimited calm',
                   style: TextStyle(
@@ -746,7 +785,7 @@ class _PaywallPageBodyState extends ConsumerState<PaywallPageBody> {
                   child: Row(
                     children: [
                       Icon(p.$1,
-                          size: 18, color: const Color(0xFF7DD3C7)),
+                          size: 18, color: PuduuColors.gold),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Column(
@@ -768,11 +807,15 @@ class _PaywallPageBodyState extends ConsumerState<PaywallPageBody> {
                         ),
                       ),
                       const Icon(Icons.check,
-                          size: 17, color: Color(0xFF7DD3C7)),
+                          size: 17, color: PuduuColors.gold),
                     ],
                   ),
                 ),
-            ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 10),
@@ -790,18 +833,17 @@ class _PaywallPageBodyState extends ConsumerState<PaywallPageBody> {
             picked: _pick == 1,
             onTap: () => setState(() => _pick = 1)),
         const SizedBox(height: 10),
-        SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-                onPressed: () {
-                  final plan = _pick == 0 ? 'Yearly' : 'Monthly';
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text(
-                          '$plan trial is not wired to a store yet — your pick is saved locally'),
-                      duration: const Duration(seconds: 3)));
-                },
-                child: Text(
-                    'Start 7-day free trial · ${_pick == 0 ? 'Yearly' : 'Monthly'}'))),
+        GlossButton(
+            expanded: true,
+            onPressed: () {
+              final plan = _pick == 0 ? 'Yearly' : 'Monthly';
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(
+                      '$plan trial is not wired to a store yet — your pick is saved locally'),
+                  duration: const Duration(seconds: 3)));
+            },
+            label:
+                'Start 7-day free trial · ${_pick == 0 ? 'Yearly' : 'Monthly'}'),
         const SizedBox(height: 6),
         const Center(
             child:
@@ -823,24 +865,24 @@ class _PlanTile extends StatelessWidget {
       required this.onTap});
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Container(
+    return Container(
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        gradient: picked ? PuduuGloss.goldSheen : null,
+        borderRadius: BorderRadius.circular(PuduuGloss.rCard),
+        boxShadow: picked ? PuduuGloss.glow(PuduuColors.gold) : null,
+      ),
+      child: GlossCard(
+        tint: picked ? PuduuColors.gold : PuduuColors.teal,
         padding: const EdgeInsets.all(12),
-        decoration: picked
-            ? BoxDecoration(
-                border: Border.all(color: PuduuColors.teal, width: 1.6),
-                borderRadius: BorderRadius.circular(16))
-            : null,
+        onTap: onTap,
         child: Row(
           children: [
             Icon(
                 picked
                     ? Icons.radio_button_checked
                     : Icons.radio_button_unchecked,
-                color: picked ? PuduuColors.teal : PuduuColors.mute,
+                color: picked ? PuduuColors.gold : PuduuColors.mute,
                 size: 20),
             const SizedBox(width: 10),
             Expanded(
@@ -848,19 +890,20 @@ class _PlanTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(tag,
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontFamily: 'Outfit',
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 1.2,
-                          color: PuduuColors.tealDeep)),
+                          color: picked
+                              ? PuduuColors.goldDeep
+                              : PuduuColors.tealDeep)),
                   Text(title, style: PuduuType.strong),
                   Text(detail, style: PuduuType.meta),
                 ],
               ),
             ),
           ],
-        ),
         ),
       ),
     );
@@ -904,14 +947,7 @@ class _OnboardingFlowCompatState extends State<OnboardingFlowCompat> {
       padding: _pad,
       children: [
         const SizedBox(height: 24),
-        Container(
-          width: 72,
-          height: 72,
-          decoration: BoxDecoration(
-              color: PuduuColors.tealWash,
-              borderRadius: BorderRadius.circular(22)),
-          child: Icon(s.$3, size: 34, color: PuduuColors.tealDeep),
-        ),
+        GlossTile(icon: s.$3, gradient: PuduuGloss.btnTeal, size: 84),
         const SizedBox(height: 20),
         Text(s.$1, style: PuduuType.display.copyWith(fontSize: 26)),
         const SizedBox(height: 6),
@@ -925,23 +961,25 @@ class _OnboardingFlowCompatState extends State<OnboardingFlowCompat> {
                   height: 8,
                   margin: const EdgeInsets.only(right: 6),
                   decoration: BoxDecoration(
-                      color: i == step ? PuduuColors.teal : PuduuColors.line,
-                      borderRadius: BorderRadius.circular(4))),
+                      gradient: i == step ? PuduuGloss.btnTeal : null,
+                      color: i == step ? null : PuduuColors.line,
+                      borderRadius: BorderRadius.circular(4),
+                      boxShadow: i == step
+                          ? PuduuGloss.glow(PuduuColors.teal)
+                          : null)),
           ],
         ),
         const SizedBox(height: 24),
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton(
-            onPressed: () {
-              if (step < 2) {
-                setState(() => step++);
-              } else {
-                widget.onDone();
-              }
-            },
-            child: Text(step == 2 ? 'Start planning' : 'Next'),
-          ),
+        GlossButton(
+          expanded: true,
+          label: step == 2 ? 'Start planning' : 'Next',
+          onPressed: () {
+            if (step < 2) {
+              setState(() => step++);
+            } else {
+              widget.onDone();
+            }
+          },
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

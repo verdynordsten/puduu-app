@@ -102,92 +102,126 @@ class _FocusPageState extends ConsumerState<FocusPage> {
                 : '◷ Focus session · ${current.title}'),
         Container(
           margin: const EdgeInsets.only(top: 12),
-          padding: const EdgeInsets.fromLTRB(18, 20, 18, 18),
           decoration: BoxDecoration(
-            color: PuduuColors.dark,
-            borderRadius: BorderRadius.circular(20),
+            gradient: PuduuGloss.heroTeal,
+            borderRadius: BorderRadius.circular(PuduuGloss.rHero),
+            border: Border.all(color: Colors.white.withAlpha(70)),
+            boxShadow: PuduuGloss.glow(PuduuColors.teal),
           ),
-          child: Column(
-            children: [
-              Text(clock,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      fontFamily: 'Outfit',
-                      fontSize: 58,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                      height: 1.0)),
-              const SizedBox(height: 6),
-              const Text('MINUTES LEFT · GENTLE CHIME AT END',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontFamily: 'Work Sans',
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.2,
-                      color: Color(0xFF7DD3C7))),
-              const SizedBox(height: 14),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  minHeight: 6,
-                  backgroundColor: const Color(0x29FFFFFF),
-                  valueColor:
-                      const AlwaysStoppedAnimation(Color(0xFF2DD4BF)),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(PuduuGloss.rHero),
+            child: Stack(
+              children: [
+                Positioned(
+                  top: -50,
+                  right: -30,
+                  child: Container(
+                    width: 190,
+                    height: 190,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(colors: [
+                        PuduuColors.mint.withAlpha(70),
+                        PuduuColors.mint.withAlpha(0),
+                      ]),
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                current?.note?.isNotEmpty == true
-                    ? current!.note!
-                    : (current == null
-                        ? 'Add a timed task on Today, then come back.'
-                        : 'Phone in another room. One block at a time.'),
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                    fontFamily: 'Work Sans',
-                    fontSize: 12,
-                    color: Color(0xFFB9CDC9))),
-              const SizedBox(height: 14),
-              Row(
-                children: [
-                  Expanded(
-                    child: FilledButton.icon(
-                      onPressed: current == null ? null : _toggle,
-                      icon: Icon(
-                          _running ? PuduuIcons.pause : PuduuIcons.play,
-                          size: 18),
-                      label: Text(_running ? 'Pause' : 'Start'),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: FilledButton(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Colors.white.withAlpha(28),
-                        foregroundColor: Colors.white,
+                const Positioned.fill(
+                  child: IgnorePointer(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: PuduuGloss.topSheen,
                       ),
-                      onPressed: current == null
-                          ? null
-                          : () => _endEarly(current.id),
-                      child: const Text('End early'),
                     ),
                   ),
-                ],
-              ),
-            ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 20, 18, 18),
+                  child: Column(
+                    children: [
+                      Text(clock,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontFamily: 'Outfit',
+                              fontSize: 64,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                              height: 1.0,
+                              shadows: [
+                                Shadow(
+                                    color: PuduuColors.mint.withAlpha(110),
+                                    blurRadius: 24),
+                              ])),
+                      const SizedBox(height: 6),
+                      const Text('MINUTES LEFT · GENTLE CHIME AT END',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontFamily: 'Work Sans',
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1.2,
+                              color: Color(0xFF7DD3C7))),
+                      const SizedBox(height: 14),
+                      GlossBar(
+                        value: progress,
+                        height: 6,
+                        gradient: const LinearGradient(
+                            colors: [Colors.white, Color(0xFF2DD4BF)]),
+                        track: Colors.white.withAlpha(48),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        current?.note?.isNotEmpty == true
+                            ? current!.note!
+                            : (current == null
+                                ? 'Add a timed task on Today, then come back.'
+                                : 'Phone in another room. One block at a time.'),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                            fontFamily: 'Work Sans',
+                            fontSize: 12,
+                            color: Color(0xFFB9CDC9))),
+                      const SizedBox(height: 14),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: GlossButton(
+                              light: true,
+                              icon: _running
+                                  ? PuduuIcons.pause
+                                  : PuduuIcons.play,
+                              label: _running ? 'Pause' : 'Start',
+                              onPressed:
+                                  current == null ? null : _toggle,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: GlossButton(
+                              ghost: true,
+                              label: 'End early',
+                              onPressed: current == null
+                                  ? null
+                                  : () => _endEarly(current.id),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         const SectionHead(label: 'SESSION STEPS'),
         if (steps.isEmpty)
-          const Card(
-            child: Padding(
-              padding: EdgeInsets.all(12),
-              child: Text(
-                  'No subtasks on this block — split it from Today for step-by-step calm.',
-                  style: PuduuType.meta),
-            ),
+          const GlossCard(
+            padding: EdgeInsets.all(12),
+            child: Text(
+                'No subtasks on this block — split it from Today for step-by-step calm.',
+                style: PuduuType.meta),
           )
         else
           for (final s in steps) ...[
@@ -275,20 +309,18 @@ class _RescuePageState extends ConsumerState<RescuePage> {
               }),
           const SizedBox(height: 8),
         ],
-        const Card(
-          color: PuduuColors.tealWash,
-          child: Padding(
-            padding: EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Slow is still moving.',
-                    style: PuduuType.strong),
-                SizedBox(height: 2),
-                Text('Skipping is allowed — Puduu waits.',
-                    style: PuduuType.meta),
-              ],
-            ),
+        const GlossCard(
+          tint: PuduuColors.amber,
+          padding: EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Slow is still moving.',
+                  style: PuduuType.strong),
+              SizedBox(height: 2),
+              Text('Skipping is allowed — Puduu waits.',
+                  style: PuduuType.meta),
+            ],
           ),
         ),
       ],
@@ -350,21 +382,19 @@ class GrowsPage extends ConsumerWidget {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(right: 8),
-                  child: Card(
-                    child: Padding(
-                      padding:
-                          const EdgeInsets.symmetric(vertical: 10),
-                      child: Column(
-                        children: [
-                          Text(c.$1,
-                              style: const TextStyle(
-                                  fontFamily: 'Outfit',
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: PuduuColors.ink)),
-                          Text(c.$2, style: PuduuType.meta),
-                        ],
-                      ),
+                  child: GlossCard(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 10),
+                    child: Column(
+                      children: [
+                        Text(c.$1,
+                            style: const TextStyle(
+                                fontFamily: 'Outfit',
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                                color: PuduuColors.ink)),
+                        Text(c.$2, style: PuduuType.meta),
+                      ],
                     ),
                   ),
                 ),
@@ -376,39 +406,34 @@ class GrowsPage extends ConsumerWidget {
           children: [
             for (final t in [
               ('×$streak', 'Streak', Icons.wb_sunny_outlined,
-                  PuduuColors.amberWash),
+                  PuduuGloss.tileReset, PuduuColors.amber),
               ('×$doneToday', 'Today', Icons.bolt_outlined,
-                  PuduuColors.tealWash),
+                  PuduuGloss.tileFocus, PuduuColors.sky),
               ('×$doneTotal', 'All time', Icons.timer_outlined,
-                  PuduuColors.mossWash)
+                  PuduuGloss.tileHabits, PuduuColors.moss)
             ])
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(right: 8),
-                  child: Card(
-                    child: Padding(
-                      padding:
-                          const EdgeInsets.symmetric(vertical: 10),
-                      child: Column(
-                        children: [
-                          Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                                color: t.$4, shape: BoxShape.circle),
-                            child: Icon(t.$3,
-                                size: 19, color: PuduuColors.soft),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(t.$1,
-                              style: const TextStyle(
-                                  fontFamily: 'Outfit',
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                  color: PuduuColors.ink)),
-                          Text(t.$2, style: PuduuType.meta),
-                        ],
-                      ),
+                  child: GlossCard(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 10),
+                    child: Column(
+                      children: [
+                        GlossTile(
+                            icon: t.$3,
+                            gradient: t.$4,
+                            size: 36,
+                            shadowTint: t.$5),
+                        const SizedBox(height: 4),
+                        Text(t.$1,
+                            style: const TextStyle(
+                                fontFamily: 'Outfit',
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: PuduuColors.ink)),
+                        Text(t.$2, style: PuduuType.meta),
+                      ],
                     ),
                   ),
                 ),
@@ -437,25 +462,46 @@ class GrowsPage extends ConsumerWidget {
             icon: PuduuIcons.focus,
             tile: PuduuColors.amberWash),
         const SizedBox(height: 8),
-        const Card(
-          color: PuduuColors.dark,
-          child: Padding(
-            padding: EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        Container(
+          decoration: BoxDecoration(
+            gradient: PuduuGloss.heroTeal,
+            borderRadius: BorderRadius.circular(PuduuGloss.rHero),
+            border: Border.all(color: Colors.white.withAlpha(70)),
+            boxShadow: PuduuGloss.glow(PuduuColors.teal),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(PuduuGloss.rHero),
+            child: const Stack(
               children: [
-                Text('Done is a direction.',
-                    style: TextStyle(
-                        fontFamily: 'Work Sans',
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white)),
-                SizedBox(height: 2),
-                Text('Not a streak. Never resets to zero.',
-                    style: TextStyle(
-                        fontFamily: 'Work Sans',
-                        fontSize: 11.5,
-                        color: Color(0xFFB9CDC9))),
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: PuduuGloss.topSheen,
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Done is a direction.',
+                          style: TextStyle(
+                              fontFamily: 'Work Sans',
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white)),
+                      SizedBox(height: 2),
+                      Text('Not a streak. Never resets to zero.',
+                          style: TextStyle(
+                              fontFamily: 'Work Sans',
+                              fontSize: 11.5,
+                              color: Color(0xFFB9CDC9))),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -513,53 +559,83 @@ class YoursPage extends ConsumerWidget {
             sub: '⚙ Plan, sounds, reminders'),
         Container(
           margin: const EdgeInsets.only(top: 12),
-          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: PuduuColors.teal,
-            borderRadius: BorderRadius.circular(20),
+            gradient: PuduuGloss.heroTeal,
+            borderRadius: BorderRadius.circular(PuduuGloss.rHero),
+            border: Border.all(color: Colors.white.withAlpha(70)),
+            boxShadow: PuduuGloss.glow(PuduuColors.teal),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('PUDUU PRO · \$6.99/MO',
-                  style: TextStyle(
-                      fontFamily: 'Outfit',
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.6,
-                      color: Color(0xFFDDF3F0))),
-              const SizedBox(height: 5),
-              const Text('Unlimited resets',
-                  style: TextStyle(
-                      fontFamily: 'Outfit',
-                      fontSize: 19,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white)),
-              const SizedBox(height: 2),
-              Text(
-                  'Yearly \$49.99 · calm history · backup · synced ${DateFormat('d MMM').format(DateTime.now())}',
-                  style: const TextStyle(
-                      fontFamily: 'Work Sans',
-                      fontSize: 12,
-                      color: Color(0xFFDDF3F0))),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: PuduuColors.tealDeep,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(PuduuGloss.rHero),
+            child: Stack(
+              children: [
+                Positioned(
+                  top: -50,
+                  right: -30,
+                  child: Container(
+                    width: 190,
+                    height: 190,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(colors: [
+                        PuduuColors.gold.withAlpha(80),
+                        PuduuColors.gold.withAlpha(0),
+                      ]),
+                    ),
                   ),
-                  onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) => const SubShell(
-                            title: 'Puduu Pro',
-                            child: PaywallPageBody())));
-                  },
-                  child: const Text('Upgrade'),
                 ),
-              ),
-            ],
+                const Positioned.fill(
+                  child: IgnorePointer(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: PuduuGloss.topSheen,
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('PUDUU PRO · \$6.99/MO',
+                          style: TextStyle(
+                              fontFamily: 'Outfit',
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1.6,
+                              color: PuduuColors.gold)),
+                      const SizedBox(height: 5),
+                      const Text('Unlimited resets',
+                          style: TextStyle(
+                              fontFamily: 'Outfit',
+                              fontSize: 19,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white)),
+                      const SizedBox(height: 2),
+                      Text(
+                          'Yearly \$49.99 · calm history · backup · synced ${DateFormat('d MMM').format(DateTime.now())}',
+                          style: const TextStyle(
+                              fontFamily: 'Work Sans',
+                              fontSize: 12,
+                              color: Color(0xFFDDF3F0))),
+                      const SizedBox(height: 12),
+                      GlossButton(
+                        light: true,
+                        expanded: true,
+                        label: 'Upgrade',
+                        onPressed: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (_) => const SubShell(
+                                  title: 'Puduu Pro',
+                                  child: PaywallPageBody())));
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         const SectionHead(label: 'MORE'),
@@ -644,37 +720,28 @@ class _SettingTile extends StatelessWidget {
       required this.onFlip});
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                  color: tile,
-                  borderRadius: BorderRadius.circular(12)),
-              child: Icon(icon, size: 19, color: PuduuColors.soft),
+    return GlossCard(
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        children: [
+          GlossTile.fromColor(icon: icon, color: tile, size: 36),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: PuduuType.strong),
+                const SizedBox(height: 2),
+                Text(detail, style: PuduuType.meta),
+              ],
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: PuduuType.strong),
-                  const SizedBox(height: 2),
-                  Text(detail, style: PuduuType.meta),
-                ],
-              ),
-            ),
-            Switch(
-              value: value,
-              activeThumbColor: PuduuColors.teal,
-              onChanged: onFlip,
-            ),
-          ],
-        ),
+          ),
+          Switch(
+            value: value,
+            activeThumbColor: PuduuColors.teal,
+            onChanged: onFlip,
+          ),
+        ],
       ),
     );
   }

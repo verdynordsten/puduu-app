@@ -1,24 +1,116 @@
 import 'package:flutter/material.dart';
 
-/// Puduu tokens v10 — "Fresh Start" (DocSpot-class).
-/// White cards, teal accent, dark ink, Outfit display + Work Sans UI.
-/// Ledger DNA is dead: no paper/ember/serif anywhere.
+/// Puduu tokens v11 — "Aurora Gloss".
+/// Calm brand, premium finish: light aurora background, glass cards with a
+/// top sheen, tinted depth (never grey shadows), one teal accent with light.
 class PuduuColors {
-  static const bg = Color(0xFFF2F5F4);
+  static const bg = Color(0xFFF3F7F6);
   static const card = Color(0xFFFFFFFF);
+  static const cardDeep = Color(0xFFF6FAF9);
   static const ink = Color(0xFF0F1F1E);
   static const soft = Color(0xFF3E5452);
   static const mute = Color(0xFF7A8F8D);
   static const line = Color(0xFFE4EBEA);
   static const teal = Color(0xFF0E9384);
-  static const tealDeep = Color(0xFF0B7468);
-  static const tealWash = Color(0xFFDDF3F0);
+  static const tealDeep = Color(0xFF0B6B5F);
+  static const mint = Color(0xFF2DD4BF);
   static const amber = Color(0xFFF59E0B);
-  static const amberWash = Color(0xFFFEF3DF);
+  static const peach = Color(0xFFFDBA74);
   static const moss = Color(0xFF4D7C0F);
-  static const mossWash = Color(0xFFEFF6DF);
-  static const dark = Color(0xFF101E1D);
+  static const lime = Color(0xFFA3E635);
+  static const sky = Color(0xFF0EA5E9);
+  static const ice = Color(0xFF7DD3FC);
+  static const lav = Color(0xFF8B5CF6);
+  static const lilac = Color(0xFFC4B5FD);
+  static const gold = Color(0xFFEAB308);
+  static const goldDeep = Color(0xFFB45309);
+  static const dark = Color(0xFF0B1F1D);
   static const danger = Color(0xFFDC2626);
+
+  // legacy washes (kept for API compat)
+  static const tealWash = Color(0xFFDDF3F0);
+  static const amberWash = Color(0xFFFEF3DF);
+  static const mossWash = Color(0xFFEFF6DF);
+}
+
+/// Gloss material: gradients, tinted shadows, radii, sheens.
+class PuduuGloss {
+  PuduuGloss._();
+
+  // ---------- gradients ----------
+  static const heroTeal = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF0B3B36), Color(0xFF0E9384), Color(0xFF14B8A6)],
+    stops: [0.0, 0.55, 1.0],
+  );
+  static const btnTeal = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFF1FB69F), Color(0xFF0E9384), Color(0xFF0B6B5F)],
+    stops: [0.0, 0.45, 1.0],
+  );
+  static const cardSheen = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFFFFFFFF), Color(0xFFF6FAF9)],
+    stops: [0.0, 1.0],
+  );
+  /// white 55% -> transparent across the top 35%: the "gloss" streak.
+  static const topSheen = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0x8CFFFFFF), Color(0x00FFFFFF)],
+    stops: [0.0, 0.38],
+  );
+  static const barTeal = LinearGradient(
+    colors: [Color(0xFF2DD4BF), Color(0xFF0E9384)],
+  );
+  static const goldSheen = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFFFDE68A), Color(0xFFEAB308), Color(0xFFB45309)],
+  );
+  static const tileFocus =
+      LinearGradient(colors: [Color(0xFF0EA5E9), Color(0xFF7DD3FC)]);
+  static const tileReset =
+      LinearGradient(colors: [Color(0xFFF59E0B), Color(0xFFFDBA74)]);
+  static const tileHabits =
+      LinearGradient(colors: [Color(0xFF65A30D), Color(0xFFA3E635)]);
+  static const tileEvening =
+      LinearGradient(colors: [Color(0xFF8B5CF6), Color(0xFFC4B5FD)]);
+
+  // aurora blobs for the page background
+  static const blobMint = Color(0xFFDDF3F0);
+  static const blobPeach = Color(0xFFFDEBD3);
+  static const blobLilac = Color(0xFFE9E4FA);
+
+  // ---------- tinted shadows (depth is colored, never grey) ----------
+  static List<BoxShadow> cardShadow([Color tint = PuduuColors.teal]) => [
+        BoxShadow(
+          color: tint.withAlpha(30),
+          blurRadius: 18,
+          offset: const Offset(0, 8),
+        ),
+      ];
+  static List<BoxShadow> glow([Color tint = PuduuColors.teal]) => [
+        BoxShadow(
+          color: tint.withAlpha(90),
+          blurRadius: 28,
+          offset: const Offset(0, 10),
+        ),
+      ];
+
+  // ---------- radii ----------
+  static const rCard = 24.0;
+  static const rHero = 28.0;
+  static const rPill = 999.0;
+  static const rTile = 20.0;
+  static const rInput = 20.0;
+
+  // ---------- glass ----------
+  static const glassWhite = Color(0xB8FFFFFF); // 72%
+  static const glassBorder = Color(0x66FFFFFF); // 40%
 }
 
 class PuduuType {
@@ -26,20 +118,21 @@ class PuduuType {
     fontFamily: 'Outfit',
     fontWeight: FontWeight.w700,
     color: PuduuColors.ink,
-    height: 1.15,
-    letterSpacing: -0.2,
+    height: 1.12,
+    letterSpacing: -0.5,
   );
   static const title = TextStyle(
     fontFamily: 'Outfit',
     fontWeight: FontWeight.w600,
     color: PuduuColors.ink,
     height: 1.25,
+    letterSpacing: -0.2,
   );
-  static TextStyle label([Color color = PuduuColors.soft]) => TextStyle(
+  static TextStyle label([Color color = PuduuColors.tealDeep]) => TextStyle(
         fontFamily: 'Outfit',
-        fontSize: 12.5,
+        fontSize: 11,
         fontWeight: FontWeight.w700,
-        letterSpacing: 0.4,
+        letterSpacing: 1.6,
         color: color,
       );
   static const body = TextStyle(
@@ -119,7 +212,7 @@ ThemeData puduuTheme() {
       space: 1,
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: PuduuColors.bg,
+      backgroundColor: Colors.transparent,
       foregroundColor: PuduuColors.ink,
       elevation: 0,
       scrolledUnderElevation: 0,
@@ -129,8 +222,8 @@ ThemeData puduuTheme() {
       elevation: 0,
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: PuduuColors.line),
+        borderRadius: BorderRadius.circular(PuduuGloss.rCard),
+        side: const BorderSide(color: PuduuGloss.glassBorder),
       ),
     ),
     filledButtonTheme: FilledButtonThemeData(
@@ -138,7 +231,7 @@ ThemeData puduuTheme() {
         backgroundColor: PuduuColors.teal,
         foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(18),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         textStyle: const TextStyle(
@@ -160,30 +253,30 @@ ThemeData puduuTheme() {
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: PuduuColors.card,
+      fillColor: PuduuGloss.glassWhite,
       hintStyle: const TextStyle(
         fontFamily: 'Work Sans',
         fontSize: 13.5,
         color: PuduuColors.mute,
       ),
       contentPadding:
-          const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: PuduuColors.line),
+        borderRadius: BorderRadius.circular(PuduuGloss.rInput),
+        borderSide: const BorderSide(color: PuduuGloss.glassBorder),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: PuduuColors.line),
+        borderRadius: BorderRadius.circular(PuduuGloss.rInput),
+        borderSide: const BorderSide(color: PuduuGloss.glassBorder),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(PuduuGloss.rInput),
         borderSide:
-            const BorderSide(color: PuduuColors.teal, width: 1.4),
+            const BorderSide(color: PuduuColors.teal, width: 1.6),
       ),
     ),
     navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: PuduuColors.dark,
+      backgroundColor: Colors.transparent,
       indicatorColor: Colors.white,
       elevation: 0,
       labelTextStyle: WidgetStateProperty.resolveWith((states) {

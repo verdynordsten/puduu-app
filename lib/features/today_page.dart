@@ -35,10 +35,9 @@ class TimelineStrip extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final timedAsync = ref.watch(timedProvider);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: timedAsync.when(
+    return GlossCard(
+      padding: const EdgeInsets.all(12),
+      child: timedAsync.when(
           loading: () => const Padding(
             padding: EdgeInsets.symmetric(vertical: 18),
             child: Center(
@@ -92,16 +91,21 @@ class TimelineStrip extends ConsumerWidget {
                                 ],
                               ),
                               const SizedBox(height: 4),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(4),
-                                child: LinearProgressIndicator(
-                                  value: t.status == 'done' ? 1.0 : 0.04,
-                                  minHeight: 7,
-                                  backgroundColor: PuduuColors.bg,
-                                  valueColor: AlwaysStoppedAnimation(
+                              GlossBar(
+                                value: t.status == 'done' ? 1.0 : 0.04,
+                                height: 7,
+                                gradient: LinearGradient(colors: [
+                                  Color.lerp(
+                                          _dotPalette[t.colorIndex %
+                                              _dotPalette.length],
+                                          Colors.white,
+                                          0.35) ??
                                       _dotPalette[t.colorIndex %
-                                          _dotPalette.length]),
-                                ),
+                                          _dotPalette.length],
+                                  _dotPalette[t.colorIndex %
+                                      _dotPalette.length],
+                                ]),
+                                track: PuduuColors.line,
                               ),
                             ],
                           ),
@@ -112,9 +116,7 @@ class TimelineStrip extends ConsumerWidget {
               ],
             );
           },
-        ),
-      ),
-    );
+        ));
   }
 }
 
@@ -172,10 +174,10 @@ class _TodayPageState extends ConsumerState<TodayPage> {
     final timed =
         timedAsync.maybeWhen(data: (v) => v, orElse: () => <PuduuTask>[]);
     const cats = [
-      (PuduuIcons.focus, 'Focus', PuduuColors.tealWash),
-      (PuduuIcons.reset, 'Reset', PuduuColors.amberWash),
-      (PuduuIcons.check, 'Habits', PuduuColors.mossWash),
-      (PuduuIcons.sort, 'More', Color(0xFFE8F1F6)),
+      (PuduuIcons.focus, 'Focus', PuduuGloss.tileFocus, PuduuColors.sky),
+      (PuduuIcons.reset, 'Reset', PuduuGloss.tileReset, PuduuColors.amber),
+      (PuduuIcons.check, 'Habits', PuduuGloss.tileHabits, PuduuColors.moss),
+      (PuduuIcons.sort, 'More', PuduuGloss.tileEvening, PuduuColors.lav),
     ];
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 110),
@@ -236,31 +238,24 @@ class _TodayPageState extends ConsumerState<TodayPage> {
           childAspectRatio: 0.86,
           children: [
             for (final c in cats)
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 34,
-                        height: 34,
-                        decoration: BoxDecoration(
-                          color: c.$3,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(c.$1,
-                            size: 18, color: PuduuColors.soft),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(c.$2,
-                          style: const TextStyle(
-                              fontFamily: 'Work Sans',
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w600,
-                              color: PuduuColors.ink)),
-                    ],
-                  ),
+              GlossCard(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    GlossTile(
+                        icon: c.$1,
+                        gradient: c.$3,
+                        size: 34,
+                        shadowTint: c.$4),
+                    const SizedBox(height: 6),
+                    Text(c.$2,
+                        style: const TextStyle(
+                            fontFamily: 'Work Sans',
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w600,
+                            color: PuduuColors.ink)),
+                  ],
                 ),
               ),
           ],
@@ -271,12 +266,10 @@ class _TodayPageState extends ConsumerState<TodayPage> {
         // UP NEXT: real planned tasks from drift.
         // Tap card = open detail sheet, tap Begin = mark done.
         if (today.isEmpty)
-          const Card(
-            child: Padding(
-              padding: EdgeInsets.all(12),
-              child: Text('Nothing planned yet — sort your inbox into today.',
-                  style: PuduuType.meta),
-            ),
+          const GlossCard(
+            padding: EdgeInsets.all(12),
+            child: Text('Nothing planned yet — sort your inbox into today.',
+                style: PuduuType.meta),
           )
         else
           for (final t in today.take(4)) ...[
@@ -300,30 +293,29 @@ class _TodayPageState extends ConsumerState<TodayPage> {
             const SizedBox(height: 8),
           ],
         const SectionHead(label: 'INBOX'),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _ctl,
-                        decoration: const InputDecoration(
-                            hintText:
-                                'Capture a task, idea, or reminder…'),
-                        onSubmitted: (_) => _addTask(),
-                      ),
+        GlossCard(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _ctl,
+                      decoration: const InputDecoration(
+                          hintText:
+                              'Capture a task, idea, or reminder…'),
+                      onSubmitted: (_) => _addTask(),
                     ),
-                    const SizedBox(width: 8),
-                    FilledButton.icon(
-                      onPressed: _addTask,
-                      icon: const Icon(PuduuIcons.plus, size: 17),
-                      label: const Text('Add'),
-                    ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 8),
+                  GlossButton(
+                    icon: PuduuIcons.plus,
+                    label: 'Add',
+                    onPressed: _addTask,
+                  ),
+                ],
+              ),
                 if (inbox.isNotEmpty) ...[
                   const SizedBox(height: 10),
                   for (final t in inbox.take(5))
@@ -352,19 +344,13 @@ class _TodayPageState extends ConsumerState<TodayPage> {
                     ),
                 ],
                 const SizedBox(height: 10),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: PuduuColors.tealDeep,
-                      side: const BorderSide(
-                          color: PuduuColors.tealDeep, width: 1.2),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 13),
-                    ),
-                    onPressed: () async {
+                GlossButton(
+                  expanded: true,
+                  icon: PuduuIcons.sort,
+                  label: inbox.isEmpty
+                      ? 'Inbox empty — nothing to sort'
+                      : 'Sort ${inbox.length} into my day',
+                  onPressed: () async {
                       final ai = ref.read(aiProvider);
                       final repo = ref.read(repoProvider);
                       final planned = await ai.plan(inboxAll);
@@ -399,16 +385,9 @@ class _TodayPageState extends ConsumerState<TodayPage> {
                                     const Duration(seconds: 2)));
                       }
                     },
-                    icon: const Icon(PuduuIcons.sort, size: 17),
-                    label: Text(inbox.isEmpty
-                        ? 'Inbox empty — nothing to sort'
-                        : 'Sort ${inbox.length} into my day'),
-                  ),
                 ),
               ],
-            ),
-          ),
-        ),
+            )),
       ],
     );
   }

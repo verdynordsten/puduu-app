@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'dart:ui';
 import 'core/theme/puduu_theme.dart';
+import 'widgets/puduu_widgets.dart' show AuroraBackground;
 import 'core/models.dart';
 import 'core/db/puduu_db.dart';
 import 'core/db/repo.dart';
@@ -100,8 +102,29 @@ class _Root extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final ready = ref.watch(dbReadyProvider);
     if (ready.isLoading) {
-      return const Scaffold(
-          body: Center(child: CircularProgressIndicator()));
+      return Scaffold(
+        backgroundColor: Colors.transparent,
+        body: AuroraBackground(
+          child: Center(
+            child: Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                gradient: PuduuGloss.btnTeal,
+                shape: BoxShape.circle,
+                boxShadow: PuduuGloss.glow(PuduuColors.teal),
+              ),
+              child: const Padding(
+                padding: EdgeInsets.all(18),
+                child: CircularProgressIndicator(
+                  strokeWidth: 3,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
     }
     final seen = ref.watch(onboardedProvider);
     if (!seen) return const OnboardingGate();
@@ -175,43 +198,55 @@ class _ShellState extends ConsumerState<Shell> {
       YoursPage()
     ];
     return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 560),
-            child: pages[tab],
+      backgroundColor: Colors.transparent,
+      body: AuroraBackground(
+        child: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 560),
+              child: pages[tab],
+            ),
           ),
         ),
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
-        child: Container(
-          decoration: BoxDecoration(
-            color: PuduuColors.dark,
-            borderRadius: BorderRadius.circular(26),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-          child: Row(
-            children: [
-              for (var i = 0; i < titles.length; i++)
-                Expanded(
-                  child: _PillTab(
-                    label: titles[i],
-                    icon: tab == i ? iconsFill[i] : icons[i],
-                    active: tab == i,
-                    badge: i == 0
-                        ? ref
-                            .watch(inboxProvider)
-                            .maybeWhen(
+        padding: const EdgeInsets.fromLTRB(18, 0, 18, 16),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(30),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+            child: Container(
+              decoration: BoxDecoration(
+                color: PuduuGloss.glassWhite,
+                borderRadius: BorderRadius.circular(30),
+                border:
+                    Border.all(color: PuduuGloss.glassBorder, width: 1.2),
+                boxShadow: PuduuGloss.cardShadow(),
+              ),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              child: Row(
+                children: [
+                  for (var i = 0; i < titles.length; i++)
+                    Expanded(
+                      child: _PillTab(
+                        label: titles[i],
+                        icon: tab == i ? iconsFill[i] : icons[i],
+                        active: tab == i,
+                        badge: i == 0
+                            ? ref.watch(inboxProvider).maybeWhen(
                                 data: (v) => v.length, orElse: () => 0)
-                        : 0,
-                    onTap: () => _go(i),
-                  ),
-                ),
-            ],
+                            : 0,
+                        onTap: () => _go(i),
+                      ),
+                    ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
+      extendBody: true,
     );
   }
 }
@@ -232,11 +267,16 @@ class _PillTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 7),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          color: active ? Colors.white : Colors.transparent,
-          borderRadius: BorderRadius.circular(18),
+          gradient: active ? PuduuGloss.btnTeal : null,
+          borderRadius: BorderRadius.circular(22),
+          border: active
+              ? Border.all(color: Colors.white.withAlpha(70))
+              : null,
+          boxShadow: active ? PuduuGloss.glow(PuduuColors.teal) : null,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -245,15 +285,15 @@ class _PillTab extends StatelessWidget {
               isLabelVisible: badge > 0,
               label: Text('$badge',
                   style: const TextStyle(fontSize: 10)),
-              backgroundColor: PuduuColors.teal,
+              backgroundColor: PuduuColors.amber,
               textColor: Colors.white,
               smallSize: 14,
               largeSize: 16,
               child: Icon(icon,
                   size: 22,
                   color: active
-                      ? PuduuColors.dark
-                      : const Color(0xFF8FA3A1)),
+                      ? Colors.white
+                      : PuduuColors.soft),
             ),
             const SizedBox(height: 2),
             Text(label,
@@ -263,8 +303,8 @@ class _PillTab extends StatelessWidget {
                     fontWeight:
                         active ? FontWeight.w700 : FontWeight.w500,
                     color: active
-                        ? PuduuColors.dark
-                        : const Color(0xFF8FA3A1))),
+                        ? Colors.white
+                        : PuduuColors.soft)),
           ],
         ),
       ),
