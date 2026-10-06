@@ -129,6 +129,7 @@ class GlossButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final enabled = onPressed != null;
+    final iconData = icon;
     final labelColor = light
         ? PuduuColors.tealDeep
         : (ghost ? Colors.white : Colors.white);
@@ -167,8 +168,8 @@ class GlossButton extends StatelessWidget {
             mainAxisSize: expanded ? MainAxisSize.max : MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (icon != null) ...[
-                Icon(icon, size: 18, color: labelColor),
+              if (iconData != null) ...[
+                Icon(iconData, size: 18, color: labelColor),
                 const SizedBox(width: 8),
               ],
               Flexible(
@@ -724,14 +725,15 @@ class TaskCard extends StatelessWidget {
       this.onSideTap});
   @override
   Widget build(BuildContext context) {
+    final iconData = icon;
     final card = GlossCard(
-      tint: icon != null ? (tile ?? PuduuColors.teal) : dot,
+      tint: iconData != null ? (tile ?? PuduuColors.teal) : dot,
       padding: const EdgeInsets.all(13),
       child: Row(
         children: [
-          if (icon != null)
+          if (iconData != null)
             GlossTile.fromColor(
-                icon: icon, color: tile ?? PuduuColors.teal, size: 42)
+                icon: iconData, color: tile ?? PuduuColors.teal, size: 42)
           else
             Container(
                 width: 12,
