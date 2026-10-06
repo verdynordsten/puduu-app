@@ -366,6 +366,7 @@ class GrowsPage extends ConsumerWidget {
                             text: c.$2.toUpperCase(),
                             color: c.$3,
                             rotate: 0,
+                            expand: true,
                             textColor: c.$3 == PuduuColors.sun
                                 ? PuduuColors.ink
                                 : Colors.white),

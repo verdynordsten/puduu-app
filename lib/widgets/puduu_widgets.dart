@@ -282,18 +282,35 @@ class Sticker extends StatelessWidget {
   final Color color;
   final Color textColor;
   final double rotate;
+  /// When true, the sticker fills the available width and the label
+  /// shrinks to fit (never grows the sticker). Use for labels of
+  /// varying length that must look uniform side by side.
+  final bool expand;
   const Sticker({
     super.key,
     required this.text,
     this.color = PuduuColors.sun,
     this.textColor = PuduuColors.ink,
     this.rotate = -0.1,
+    this.expand = false,
   });
   @override
   Widget build(BuildContext context) {
+    final label = Text(text,
+        textAlign: TextAlign.center,
+        maxLines: 1,
+        softWrap: false,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+            fontFamily: 'Baloo2',
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.1,
+            color: textColor));
     return Transform.rotate(
       angle: rotate,
       child: Container(
+        width: expand ? double.infinity : null,
         padding:
             const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
@@ -302,13 +319,9 @@ class Sticker extends StatelessWidget {
           border: Border.all(color: PuduuColors.ink, width: 2.5),
           boxShadow: PopStyle.hardShadow(dx: 3, dy: 3),
         ),
-        child: Text(text,
-            style: TextStyle(
-                fontFamily: 'Baloo2',
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1.1,
-                color: textColor)),
+        child: expand
+            ? FittedBox(fit: BoxFit.scaleDown, child: label)
+            : label,
       ),
     );
   }
