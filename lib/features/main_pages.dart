@@ -99,126 +99,83 @@ class _FocusPageState extends ConsumerState<FocusPage> {
             hello: 'Stay with it',
             sub: current == null
                 ? '◷ No timed task — plan one first'
-                : '◷ Focus session · ${current.title}'),
-        Container(
-          margin: const EdgeInsets.only(top: 12),
-          decoration: BoxDecoration(
-            gradient: PuduuGloss.heroTeal,
-            borderRadius: BorderRadius.circular(PuduuGloss.rHero),
-            border: Border.all(color: Colors.white.withAlpha(70)),
-            boxShadow: PuduuGloss.glow(PuduuColors.teal),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(PuduuGloss.rHero),
-            child: Stack(
+                : '◷ Focus session · ${current.title}',
+            accent: PuduuColors.sun),
+        Padding(
+          padding: const EdgeInsets.only(top: 14),
+          child: PopCard(
+            color: PuduuColors.grape,
+            padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
+            child: Column(
               children: [
-                Positioned(
-                  top: -50,
-                  right: -30,
-                  child: Container(
-                    width: 190,
-                    height: 190,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(colors: [
-                        PuduuColors.mint.withAlpha(70),
-                        PuduuColors.mint.withAlpha(0),
-                      ]),
-                    ),
-                  ),
-                ),
-                const Positioned.fill(
-                  child: IgnorePointer(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: PuduuGloss.topSheen,
+                const Sticker(
+                    text: 'FOCUS MODE',
+                    color: PuduuColors.sun,
+                    rotate: -0.07),
+                const SizedBox(height: 16),
+                Text(clock,
+                    textAlign: TextAlign.center,
+                    style: PuduuType.display.copyWith(
+                        fontSize: 72,
+                        color: Colors.white,
+                        height: 1.0)),
+                const SizedBox(height: 10),
+                const Sticker(
+                    text: 'MINUTES LEFT · GENTLE CHIME AT END',
+                    color: PuduuColors.sun,
+                    rotate: 0.04),
+                const SizedBox(height: 18),
+                PopBar(
+                    value: progress,
+                    fill: PuduuColors.sun,
+                    height: 20),
+                const SizedBox(height: 12),
+                Text(
+                  current?.note?.isNotEmpty == true
+                      ? current!.note!
+                      : (current == null
+                          ? 'Add a timed task on Today, then come back.'
+                          : 'Phone in another room. One block at a time.'),
+                  textAlign: TextAlign.center,
+                  style: PuduuType.body
+                      .copyWith(color: Colors.white)),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    Expanded(
+                      child: PopButton(
+                        icon: _running
+                            ? PuduuIcons.pause
+                            : PuduuIcons.play,
+                        label: _running ? 'Pause' : 'Start',
+                        color: PuduuColors.paper,
+                        textColor: PuduuColors.ink,
+                        onPressed:
+                            current == null ? null : _toggle,
                       ),
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(18, 20, 18, 18),
-                  child: Column(
-                    children: [
-                      Text(clock,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontFamily: 'Outfit',
-                              fontSize: 64,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                              height: 1.0,
-                              shadows: [
-                                Shadow(
-                                    color: PuduuColors.mint.withAlpha(110),
-                                    blurRadius: 24),
-                              ])),
-                      const SizedBox(height: 6),
-                      const Text('MINUTES LEFT · GENTLE CHIME AT END',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontFamily: 'Work Sans',
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 1.2,
-                              color: Color(0xFF7DD3C7))),
-                      const SizedBox(height: 14),
-                      GlossBar(
-                        value: progress,
-                        height: 6,
-                        gradient: const LinearGradient(
-                            colors: [Colors.white, Color(0xFF2DD4BF)]),
-                        track: Colors.white.withAlpha(48),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: PopButton(
+                        label: 'End early',
+                        color: PuduuColors.ink,
+                        textColor: Colors.white,
+                        onPressed: current == null
+                            ? null
+                            : () => _endEarly(current.id),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        current?.note?.isNotEmpty == true
-                            ? current!.note!
-                            : (current == null
-                                ? 'Add a timed task on Today, then come back.'
-                                : 'Phone in another room. One block at a time.'),
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                            fontFamily: 'Work Sans',
-                            fontSize: 12,
-                            color: Color(0xFFB9CDC9))),
-                      const SizedBox(height: 14),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: GlossButton(
-                              light: true,
-                              icon: _running
-                                  ? PuduuIcons.pause
-                                  : PuduuIcons.play,
-                              label: _running ? 'Pause' : 'Start',
-                              onPressed:
-                                  current == null ? null : _toggle,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: GlossButton(
-                              ghost: true,
-                              label: 'End early',
-                              onPressed: current == null
-                                  ? null
-                                  : () => _endEarly(current.id),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
         ),
-        const SectionHead(label: 'SESSION STEPS'),
+        const SectionHead(
+            label: 'SESSION STEPS', accent: PuduuColors.sun),
         if (steps.isEmpty)
-          const GlossCard(
-            padding: EdgeInsets.all(12),
+          const PopCard(
+            padding: EdgeInsets.all(14),
             child: Text(
                 'No subtasks on this block — split it from Today for step-by-step calm.',
                 style: PuduuType.meta),
@@ -226,7 +183,7 @@ class _FocusPageState extends ConsumerState<FocusPage> {
         else
           for (final s in steps) ...[
             TaskCard(
-              dot: s.done ? PuduuColors.moss : PuduuColors.line,
+              dot: s.done ? PuduuColors.mint : PuduuColors.clay,
               title: s.title,
               detail: s.done
                   ? 'Done${s.timerMin != null ? ' · ${s.timerMin} min' : ''} · tap to uncheck'
@@ -240,7 +197,7 @@ class _FocusPageState extends ConsumerState<FocusPage> {
                 bumpTasks(ref);
               },
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
           ],
       ],
     );
@@ -258,13 +215,13 @@ class RescuePage extends ConsumerStatefulWidget {
 class _RescuePageState extends ConsumerState<RescuePage> {
   String _query = '';
   static const rows = [
-    (PuduuIcons.drop, PuduuColors.tealWash, 'Drink a glass of water',
+    (PuduuIcons.drop, PuduuColors.sky, 'Drink a glass of water',
         'Stand up, sip slowly, look far away.', 2),
-    (PuduuIcons.reset, PuduuColors.amberWash, 'Clear one surface',
+    (PuduuIcons.reset, PuduuColors.grape, 'Clear one surface',
         'Just the desk corner. Nothing more.', 2),
-    (PuduuIcons.mail, PuduuColors.mossWash, 'Open the difficult email',
+    (PuduuIcons.mail, PuduuColors.sun, 'Open the difficult email',
         'Read it only. Reply comes later.', 2),
-    (PuduuIcons.sort, Color(0xFFE8F1F6), 'Sort the inbox',
+    (PuduuIcons.sort, PuduuColors.coral, 'Sort the inbox',
         'Rule-based now, assisted later.', 3),
   ];
   @override
@@ -274,19 +231,23 @@ class _RescuePageState extends ConsumerState<RescuePage> {
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 110),
       children: [
         const HelloHead(
-            hello: 'Hit a wall?', sub: '✦ Two minutes counts'),
+            hello: 'Hit a wall?',
+            sub: '✦ Two minutes counts',
+            accent: PuduuColors.grape),
         const SizedBox(height: 12),
         SearchField2(
             hint: 'Search resets',
             onChanged: (v) =>
                 setState(() => _query = v.trim().toLowerCase())),
-        const SectionHead(label: 'PICK THE SMALLEST ONE'),
+        const SectionHead(
+            label: 'PICK THE SMALLEST ONE',
+            accent: PuduuColors.grape),
         for (final r in rows.where((r) =>
             _query.isEmpty ||
             r.$3.toLowerCase().contains(_query) ||
             r.$4.toLowerCase().contains(_query))) ...[
           TaskCard(
-              dot: PuduuColors.teal,
+              dot: PuduuColors.grape,
               title: r.$3,
               detail: '${r.$4} · ${r.$5} min',
               side: 'Start · ${r.$5}m',
@@ -307,14 +268,19 @@ class _RescuePageState extends ConsumerState<RescuePage> {
                       duration: const Duration(seconds: 2)));
                 }
               }),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
         ],
-        const GlossCard(
-          tint: PuduuColors.amber,
-          padding: EdgeInsets.all(12),
+        const PopCard(
+          color: PuduuColors.butter,
+          padding: EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Sticker(
+                  text: 'YOU GOT THIS',
+                  color: PuduuColors.sun,
+                  rotate: -0.06),
+              SizedBox(height: 10),
               Text('Slow is still moving.',
                   style: PuduuType.strong),
               SizedBox(height: 2),
@@ -365,16 +331,21 @@ class GrowsPage extends ConsumerWidget {
         : moods.map((m) => m.score).reduce((a, b) => a + b) /
             moods.length;
     final chips = [
-      ('$doneToday', 'done today'),
-      ('×$streak', 'day streak'),
-      (avgMood == 0.0 ? '—' : avgMood.toStringAsFixed(1), 'avg mood'),
+      ('$doneToday', 'done today', PuduuColors.sun),
+      ('×$streak', 'day streak', PuduuColors.coral),
+      (
+        avgMood == 0.0 ? '—' : avgMood.toStringAsFixed(1),
+        'avg mood',
+        PuduuColors.grape
+      ),
     ];
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 110),
       children: [
         HelloHead(
             hello: 'Keep growing',
-            sub: '▥ $doneTotal done · streak $streak'),
+            sub: '▥ $doneTotal done · streak $streak',
+            accent: PuduuColors.mint),
         const SizedBox(height: 12),
         Row(
           children: [
@@ -382,18 +353,22 @@ class GrowsPage extends ConsumerWidget {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(right: 8),
-                  child: GlossCard(
+                  child: PopCard(
                     padding:
-                        const EdgeInsets.symmetric(vertical: 10),
+                        const EdgeInsets.symmetric(vertical: 14),
                     child: Column(
                       children: [
                         Text(c.$1,
-                            style: const TextStyle(
-                                fontFamily: 'Outfit',
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
-                                color: PuduuColors.ink)),
-                        Text(c.$2, style: PuduuType.meta),
+                            style: PuduuType.display
+                                .copyWith(fontSize: 26)),
+                        const SizedBox(height: 8),
+                        Sticker(
+                            text: c.$2.toUpperCase(),
+                            color: c.$3,
+                            rotate: 0,
+                            textColor: c.$3 == PuduuColors.sun
+                                ? PuduuColors.ink
+                                : Colors.white),
                       ],
                     ),
                   ),
@@ -401,37 +376,32 @@ class GrowsPage extends ConsumerWidget {
               ),
           ],
         ),
-        const SectionHead(label: 'TROPHIES'),
+        const SectionHead(
+            label: 'TROPHIES', accent: PuduuColors.mint),
         Row(
           children: [
             for (final t in [
-              ('×$streak', 'Streak', Icons.wb_sunny_outlined,
-                  PuduuGloss.tileReset, PuduuColors.amber),
-              ('×$doneToday', 'Today', Icons.bolt_outlined,
-                  PuduuGloss.tileFocus, PuduuColors.sky),
-              ('×$doneTotal', 'All time', Icons.timer_outlined,
-                  PuduuGloss.tileHabits, PuduuColors.moss)
+              ('×$streak', 'Streak', Icons.wb_sunny_rounded,
+                  PuduuColors.sun),
+              ('×$doneToday', 'Today', Icons.bolt_rounded,
+                  PuduuColors.grape),
+              ('×$doneTotal', 'All time', Icons.timer_rounded,
+                  PuduuColors.mint)
             ])
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(right: 8),
-                  child: GlossCard(
+                  child: PopCard(
                     padding:
-                        const EdgeInsets.symmetric(vertical: 10),
+                        const EdgeInsets.symmetric(vertical: 12),
                     child: Column(
                       children: [
-                        GlossTile(
-                            icon: t.$3,
-                            gradient: t.$4,
-                            size: 36,
-                            shadowTint: t.$5),
-                        const SizedBox(height: 4),
+                        PopTile(
+                            icon: t.$3, color: t.$4, size: 42),
+                        const SizedBox(height: 6),
                         Text(t.$1,
-                            style: const TextStyle(
-                                fontFamily: 'Outfit',
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                color: PuduuColors.ink)),
+                            style: PuduuType.display
+                                .copyWith(fontSize: 18)),
                         Text(t.$2, style: PuduuType.meta),
                       ],
                     ),
@@ -440,18 +410,19 @@ class GrowsPage extends ConsumerWidget {
               ),
           ],
         ),
-        const SectionHead(label: 'THIS WEEK'),
+        const SectionHead(
+            label: 'THIS WEEK', accent: PuduuColors.mint),
         TaskCard(
-            dot: PuduuColors.teal,
+            dot: PuduuColors.mint,
             title: 'Done this week',
             detail:
                 '$doneTotal finished all time · $doneToday today · streak $streak',
             side: 'W${_weekNo()}',
             icon: PuduuIcons.grows,
-            tile: PuduuColors.tealWash),
-        const SizedBox(height: 8),
+            tile: PuduuColors.mint),
+        const SizedBox(height: 10),
         TaskCard(
-            dot: PuduuColors.teal,
+            dot: PuduuColors.mint,
             title: 'Mood trend',
             detail: moods.isEmpty
                 ? 'Log your first mood to see the pattern'
@@ -460,50 +431,27 @@ class GrowsPage extends ConsumerWidget {
                 ? '—'
                 : '+${moods.first.score}',
             icon: PuduuIcons.focus,
-            tile: PuduuColors.amberWash),
-        const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            gradient: PuduuGloss.heroTeal,
-            borderRadius: BorderRadius.circular(PuduuGloss.rHero),
-            border: Border.all(color: Colors.white.withAlpha(70)),
-            boxShadow: PuduuGloss.glow(PuduuColors.teal),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(PuduuGloss.rHero),
-            child: const Stack(
-              children: [
-                Positioned.fill(
-                  child: IgnorePointer(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: PuduuGloss.topSheen,
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Done is a direction.',
-                          style: TextStyle(
-                              fontFamily: 'Work Sans',
-                              fontSize: 13.5,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white)),
-                      SizedBox(height: 2),
-                      Text('Not a streak. Never resets to zero.',
-                          style: TextStyle(
-                              fontFamily: 'Work Sans',
-                              fontSize: 11.5,
-                              color: Color(0xFFB9CDC9))),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+            tile: PuduuColors.sun),
+        const SizedBox(height: 10),
+        PopCard(
+          color: PuduuColors.ink,
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Sticker(
+                  text: 'MANTRA',
+                  color: PuduuColors.mint,
+                  rotate: -0.05),
+              const SizedBox(height: 10),
+              Text('Done is a direction.',
+                  style: PuduuType.title.copyWith(
+                      color: Colors.white, fontSize: 19)),
+              const SizedBox(height: 2),
+              Text('Not a streak. Never resets to zero.',
+                  style: PuduuType.body
+                      .copyWith(color: Colors.white)),
+            ],
           ),
         ),
       ],
@@ -556,117 +504,80 @@ class YoursPage extends ConsumerWidget {
       children: [
         const HelloHead(
             hello: 'Make it yours',
-            sub: '⚙ Plan, sounds, reminders'),
-        Container(
-          margin: const EdgeInsets.only(top: 12),
-          decoration: BoxDecoration(
-            gradient: PuduuGloss.heroTeal,
-            borderRadius: BorderRadius.circular(PuduuGloss.rHero),
-            border: Border.all(color: Colors.white.withAlpha(70)),
-            boxShadow: PuduuGloss.glow(PuduuColors.teal),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(PuduuGloss.rHero),
-            child: Stack(
+            sub: '⚙ Plan, sounds, reminders',
+            accent: PuduuColors.sky),
+        Padding(
+          padding: const EdgeInsets.only(top: 14),
+          child: PopCard(
+            color: PuduuColors.ink,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Positioned(
-                  top: -50,
-                  right: -30,
-                  child: Container(
-                    width: 190,
-                    height: 190,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(colors: [
-                        PuduuColors.gold.withAlpha(80),
-                        PuduuColors.gold.withAlpha(0),
-                      ]),
-                    ),
-                  ),
-                ),
-                const Positioned.fill(
-                  child: IgnorePointer(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: PuduuGloss.topSheen,
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('PUDUU PRO · \$6.99/MO',
-                          style: TextStyle(
-                              fontFamily: 'Outfit',
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 1.6,
-                              color: PuduuColors.gold)),
-                      const SizedBox(height: 5),
-                      const Text('Unlimited resets',
-                          style: TextStyle(
-                              fontFamily: 'Outfit',
-                              fontSize: 19,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white)),
-                      const SizedBox(height: 2),
-                      Text(
-                          'Yearly \$49.99 · calm history · backup · synced ${DateFormat('d MMM').format(DateTime.now())}',
-                          style: const TextStyle(
-                              fontFamily: 'Work Sans',
-                              fontSize: 12,
-                              color: Color(0xFFDDF3F0))),
-                      const SizedBox(height: 12),
-                      GlossButton(
-                        light: true,
-                        expanded: true,
-                        label: 'Upgrade',
-                        onPressed: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (_) => const SubShell(
-                                  title: 'Puduu Pro',
-                                  child: PaywallPageBody())));
-                        },
-                      ),
-                    ],
-                  ),
+                const Sticker(
+                    text: 'PUDUU PRO · \$6.99/MO',
+                    color: PuduuColors.sun,
+                    rotate: -0.05),
+                const SizedBox(height: 12),
+                Text('Unlimited resets',
+                    style: PuduuType.display.copyWith(
+                        fontSize: 26, color: Colors.white)),
+                const SizedBox(height: 4),
+                Text(
+                    'Yearly \$49.99 · calm history · backup · synced ${DateFormat('d MMM').format(DateTime.now())}',
+                    style: PuduuType.body
+                        .copyWith(color: Colors.white)),
+                const SizedBox(height: 16),
+                PopButton(
+                  expanded: true,
+                  label: 'Upgrade',
+                  icon: PuduuIcons.crown,
+                  color: PuduuColors.paper,
+                  textColor: PuduuColors.ink,
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const SubShell(
+                            title: 'Puduu Pro',
+                            child: PaywallPageBody())));
+                  },
                 ),
               ],
             ),
           ),
         ),
-        const SectionHead(label: 'MORE'),
+        const SectionHead(label: 'MORE', accent: PuduuColors.sky),
         const NavRow(
-            icon: Icons.refresh_outlined,
+            icon: Icons.refresh_rounded,
+            iconColor: PuduuColors.grape,
             title: 'Routines',
             detail: 'Repeatable calm',
             page: RoutinesPageBody()),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         const NavRow(
-            icon: Icons.calendar_month_outlined,
+            icon: Icons.calendar_month_rounded,
+            iconColor: PuduuColors.sky,
             title: 'Calendar',
             detail: 'Week view · sync',
             page: CalendarPageBody()),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         const NavRow(
-            icon: Icons.auto_awesome_outlined,
+            icon: Icons.auto_awesome_rounded,
+            iconColor: PuduuColors.sun,
             title: 'Library',
             detail: 'Ready-made activities',
             page: LibraryPageBody()),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         const NavRow(
-            icon: Icons.sentiment_satisfied_outlined,
+            icon: Icons.sentiment_satisfied_rounded,
+            iconColor: PuduuColors.coral,
             title: 'Mood',
             detail: 'Check-ins + patterns',
             page: MoodPageBody()),
-        const SizedBox(height: 8),
-        const SectionHead(label: 'SETTINGS'),
+        const SizedBox(height: 10),
+        const SectionHead(label: 'SETTINGS', accent: PuduuColors.sky),
         _SettingTile(
           icon: PuduuIcons.bell,
-          tile: PuduuColors.amberWash,
+          tile: PuduuColors.butter,
           title: 'Gentle nudges',
           detail: 'Max 6 per day · quiet 22:00–07:00',
           value: ref.watch(SettingsState.nudgesProvider),
@@ -675,10 +586,10 @@ class YoursPage extends ConsumerWidget {
             await SettingsState.saveBool(SettingsState._kNudges, v);
           },
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         _SettingTile(
           icon: PuduuIcons.sound,
-          tile: PuduuColors.tealWash,
+          tile: PuduuColors.frost,
           title: 'Sounds and haptics',
           detail: 'Calm chime · soft vibration',
           value: ref.watch(SettingsState.soundsProvider),
@@ -687,10 +598,10 @@ class YoursPage extends ConsumerWidget {
             await SettingsState.saveBool(SettingsState._kSounds, v);
           },
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         _SettingTile(
           icon: PuduuIcons.shield,
-          tile: const Color(0xFFE8F1F6),
+          tile: PuduuColors.lilac,
           title: 'Quiet hours',
           detail: 'Mute 22:00–07:00 · calm only',
           value: ref.watch(SettingsState.quietProvider),
@@ -720,12 +631,12 @@ class _SettingTile extends StatelessWidget {
       required this.onFlip});
   @override
   Widget build(BuildContext context) {
-    return GlossCard(
-      padding: const EdgeInsets.all(12),
+    return PopCard(
+      padding: const EdgeInsets.all(14),
       child: Row(
         children: [
-          GlossTile.fromColor(icon: icon, color: tile, size: 36),
-          const SizedBox(width: 12),
+          PopTile(icon: icon, color: tile, size: 44),
+          const SizedBox(width: 13),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -738,7 +649,7 @@ class _SettingTile extends StatelessWidget {
           ),
           Switch(
             value: value,
-            activeThumbColor: PuduuColors.teal,
+            activeThumbColor: PuduuColors.mint,
             onChanged: onFlip,
           ),
         ],

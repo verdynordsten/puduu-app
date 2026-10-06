@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -11,62 +9,85 @@ import '../core/db/repo.dart';
 import '../main.dart' show syncProvider, syncLiveProvider, bumpTasks;
 
 // =====================================================================
-// Aurora Gloss primitives
+// Candy Pop primitives
 // =====================================================================
 
-/// Soft radial color wash, no blur filter needed (cheap + soft).
-class _Blob extends StatelessWidget {
-  final Color color;
-  final double size;
-  const _Blob(this.color, this.size);
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: RadialGradient(
-          colors: [color, color.withAlpha(0)],
-          stops: const [0.0, 1.0],
-        ),
-      ),
-    );
-  }
-}
-
-/// Page background: base color + three aurora washes.
-class AuroraBackground extends StatelessWidget {
+/// Cream canvas with a subtle dot grid + a few floating candy shapes.
+class PopBackground extends StatelessWidget {
   final Widget child;
-  const AuroraBackground({super.key, required this.child});
+  const PopBackground({super.key, required this.child});
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Container(color: PuduuColors.bg),
+        Container(color: PuduuColors.cream),
+        const Positioned.fill(
+          child: IgnorePointer(child: CustomPaint(painter: _DotPainter())),
+        ),
         const Positioned(
-            top: -90, left: -70, child: _Blob(PuduuGloss.blobMint, 300)),
+            top: -40, right: -30, child: _CandyShape(PuduuColors.blush, 120)),
         const Positioned(
-            top: 140, right: -80, child: _Blob(PuduuGloss.blobPeach, 250)),
+            top: 220, left: -50, child: _CandyShape(PuduuColors.butter, 150)),
         const Positioned(
-            bottom: -70, left: 30, child: _Blob(PuduuGloss.blobLilac, 270)),
+            bottom: -40,
+            right: 60,
+            child: _CandyShape(PuduuColors.lilac, 130)),
         child,
       ],
     );
   }
 }
 
-/// Glossy white card: sheen gradient, hairline glass border, tinted shadow.
-class GlossCard extends StatelessWidget {
+class _DotPainter extends CustomPainter {
+  const _DotPainter();
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = PuduuColors.clay.withAlpha(38);
+    const gap = 34.0;
+    for (var y = gap / 2; y < size.height; y += gap) {
+      for (var x = gap / 2; x < size.width; x += gap) {
+        canvas.drawCircle(Offset(x, y), 2.2, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _CandyShape extends StatelessWidget {
+  final Color color;
+  final double size;
+  const _CandyShape(this.color, this.size);
+  @override
+  Widget build(BuildContext context) {
+    return Transform.rotate(
+      angle: 0.35,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: color.withAlpha(130),
+          borderRadius: BorderRadius.circular(36),
+          border: Border.all(
+              color: PuduuColors.ink.withAlpha(40), width: 3),
+        ),
+      ),
+    );
+  }
+}
+
+/// Chunky card: paper white, 3px ink border, hard offset shadow.
+class PopCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
-  final Color tint;
+  final Color color;
   final VoidCallback? onTap;
-  const GlossCard({
+  const PopCard({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.all(14),
-    this.tint = PuduuColors.teal,
+    this.padding = const EdgeInsets.all(16),
+    this.color = PuduuColors.paper,
     this.onTap,
   });
 
@@ -75,138 +96,91 @@ class GlossCard extends StatelessWidget {
     final card = Container(
       padding: padding,
       decoration: BoxDecoration(
-        gradient: PuduuGloss.cardSheen,
-        borderRadius: BorderRadius.circular(PuduuGloss.rCard),
-        border: Border.all(color: PuduuGloss.glassBorder),
-        boxShadow: PuduuGloss.cardShadow(tint),
+        color: color,
+        borderRadius: BorderRadius.circular(PopStyle.rCard),
+        border: PopStyle.inkBorder(),
+        boxShadow: PopStyle.hardShadow(),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(PuduuGloss.rCard - 2),
-        child: Stack(
-          children: [
-            child,
-            const Positioned.fill(
-              child: IgnorePointer(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: PuduuGloss.topSheen,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+      child: child,
     );
     if (onTap == null) return card;
     return InkWell(
-      borderRadius: BorderRadius.circular(PuduuGloss.rCard),
+      borderRadius: BorderRadius.circular(PopStyle.rCard),
       onTap: onTap,
       child: card,
     );
   }
 }
 
-/// Gradient pill button with gloss + glow. Set [ghost] for the glass
-/// secondary style, [light] for the white pill used on dark heroes.
-class GlossButton extends StatelessWidget {
+/// Chunky button: bold color, 3px ink border, hard shadow, Baloo 2 label.
+class PopButton extends StatelessWidget {
   final String label;
   final IconData? icon;
   final VoidCallback? onPressed;
-  final bool ghost;
-  final bool light;
+  final Color color;
+  final Color textColor;
   final bool expanded;
-  const GlossButton({
+  final bool small;
+  const PopButton({
     super.key,
     required this.label,
     this.icon,
     this.onPressed,
-    this.ghost = false,
-    this.light = false,
+    this.color = PuduuColors.coral,
+    this.textColor = Colors.white,
     this.expanded = false,
+    this.small = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final enabled = onPressed != null;
     final iconData = icon;
-    final labelColor = light
-        ? PuduuColors.tealDeep
-        : (ghost ? Colors.white : Colors.white);
     final body = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      padding: EdgeInsets.symmetric(
+          horizontal: small ? 14 : 22, vertical: small ? 9 : 14),
       decoration: BoxDecoration(
-        gradient: light
-            ? const LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Colors.white, Color(0xFFE6F4F1)],
-              )
-            : ghost
-                ? null
-                : (enabled
-                    ? PuduuGloss.btnTeal
-                    : const LinearGradient(
-                        colors: [Color(0xFFB9CDC9), Color(0xFF9DB5B1)])),
-        color: ghost && !light ? Colors.white.withAlpha(38) : null,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withAlpha(light ? 140 : 70)),
-        boxShadow: (ghost && !light) || !enabled
-            ? null
-            : [
-                BoxShadow(
-                  color: (light ? Colors.white : PuduuColors.teal)
-                      .withAlpha(light ? 90 : 110),
-                  blurRadius: 18,
-                  offset: const Offset(0, 8),
-                ),
-              ],
+        color: enabled ? color : PuduuColors.clay.withAlpha(120),
+        borderRadius: BorderRadius.circular(small ? 14 : 20),
+        border: PopStyle.inkBorder(small ? 2.5 : 3),
+        boxShadow:
+            enabled ? PopStyle.hardShadow(dx: 4, dy: 4) : null,
       ),
-      child: Stack(
+      child: Row(
+        mainAxisSize:
+            expanded ? MainAxisSize.max : MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Row(
-            mainAxisSize: expanded ? MainAxisSize.max : MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (iconData != null) ...[
-                Icon(iconData, size: 18, color: labelColor),
-                const SizedBox(width: 8),
-              ],
-              Flexible(
-                child: Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: 'Outfit',
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: enabled ? labelColor : labelColor.withAlpha(180),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const Positioned.fill(
-            child: IgnorePointer(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: PuduuGloss.topSheen,
-                ),
+          if (iconData != null) ...[
+            Icon(iconData,
+                size: small ? 16 : 20, color: textColor),
+            const SizedBox(width: 8),
+          ],
+          Flexible(
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'Baloo2',
+                fontSize: small ? 13 : 16,
+                fontWeight: FontWeight.w800,
+                color: enabled
+                    ? textColor
+                    : Colors.white.withAlpha(200),
               ),
             ),
           ),
         ],
       ),
     );
-    final btn = expanded
-        ? SizedBox(width: double.infinity, child: body)
-        : body;
+    final btn =
+        expanded ? SizedBox(width: double.infinity, child: body) : body;
     return Opacity(
-      opacity: enabled ? 1 : 0.55,
+      opacity: enabled ? 1 : 0.6,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(small ? 14 : 20),
           onTap: onPressed,
           child: btn,
         ),
@@ -215,40 +189,17 @@ class GlossButton extends StatelessWidget {
   }
 }
 
-/// Glossy gradient icon tile (category tiles, nav rows, task icons).
-class GlossTile extends StatelessWidget {
+/// Chunky icon tile: loud color, ink border, mini hard shadow.
+class PopTile extends StatelessWidget {
   final IconData icon;
-  final Gradient gradient;
+  final Color color;
   final double size;
-  final Color shadowTint;
-  const GlossTile({
+  const PopTile({
     super.key,
     required this.icon,
-    required this.gradient,
-    this.size = 44,
-    this.shadowTint = PuduuColors.teal,
+    required this.color,
+    this.size = 48,
   });
-
-  /// Build a glossy tile from a flat wash color (keeps old call-sites alive).
-  factory GlossTile.fromColor({
-    Key? key,
-    required IconData icon,
-    required Color color,
-    double size = 44,
-  }) {
-    final light = Color.lerp(color, Colors.white, 0.35) ?? color;
-    return GlossTile(
-      key: key,
-      icon: icon,
-      gradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [color, light],
-      ),
-      size: size,
-      shadowTint: color,
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -256,119 +207,122 @@ class GlossTile extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        gradient: gradient,
-        borderRadius: BorderRadius.circular(PuduuGloss.rTile),
-        border: Border.all(color: Colors.white.withAlpha(90)),
-        boxShadow: [
-          BoxShadow(
-            color: shadowTint.withAlpha(70),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
-          ),
-        ],
+        color: color,
+        borderRadius: BorderRadius.circular(PopStyle.rTile),
+        border: PopStyle.inkBorder(2.5),
+        boxShadow: PopStyle.hardShadow(dx: 3, dy: 3),
       ),
-      child: Stack(
-        children: [
-          Center(child: Icon(icon, size: size * 0.44, color: Colors.white)),
-          const Positioned.fill(
-            child: IgnorePointer(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: PuduuGloss.topSheen,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+      child: Icon(icon, size: size * 0.46, color: Colors.white),
     );
   }
 }
 
-/// Gradient progress bar with a glowing tip.
-class GlossBar extends StatelessWidget {
+/// Thick striped progress bar — pure Duolingo energy.
+class PopBar extends StatelessWidget {
   final double value;
+  final Color fill;
   final double height;
-  final Gradient gradient;
-  final Color track;
-  const GlossBar({
+  const PopBar({
     super.key,
     required this.value,
-    this.height = 8,
-    this.gradient = PuduuGloss.barTeal,
-    this.track = const Color(0x29FFFFFF),
+    this.fill = PuduuColors.sun,
+    this.height = 18,
   });
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(99),
-      child: Stack(
-        children: [
-          Container(height: height, color: track),
-          FractionallySizedBox(
-            widthFactor: value.clamp(0.02, 1.0),
-            child: Container(
-              height: height,
-              decoration: BoxDecoration(
-                gradient: gradient,
-                borderRadius: BorderRadius.circular(99),
-                boxShadow: [
-                  BoxShadow(
-                    color: PuduuColors.mint.withAlpha(120),
-                    blurRadius: 10,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+    return Container(
+      height: height,
+      decoration: BoxDecoration(
+        color: PuduuColors.paper,
+        borderRadius: BorderRadius.circular(PopStyle.rPill),
+        border: Border.all(color: PuduuColors.ink, width: 2.5),
       ),
-    );
-  }
-}
-
-/// Frosted glass pill (tags, search, nav).
-class GlassPill extends StatelessWidget {
-  final Widget child;
-  final EdgeInsetsGeometry padding;
-  const GlassPill({
-    super.key,
-    required this.child,
-    this.padding = const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-  });
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(PuduuGloss.rPill),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-        child: Container(
-          padding: padding,
-          decoration: BoxDecoration(
-            color: PuduuGloss.glassWhite,
-            borderRadius: BorderRadius.circular(PuduuGloss.rPill),
-            border: Border.all(color: PuduuGloss.glassBorder),
-          ),
-          child: child,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(PopStyle.rPill),
+        child: Stack(
+          children: [
+            FractionallySizedBox(
+              widthFactor: value.clamp(0.03, 1.0),
+              child: Container(color: fill),
+            ),
+            const Positioned.fill(
+              child: IgnorePointer(
+                  child: CustomPaint(painter: _StripePainter())),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-// ---------- cloud status line: green dot + CLOUD / grey dot + LOCAL ----------
+class _StripePainter extends CustomPainter {
+  const _StripePainter();
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withAlpha(70)
+      ..strokeWidth = 7;
+    for (var x = -size.height; x < size.width + size.height; x += 22) {
+      canvas.drawLine(Offset(x, size.height + 4),
+          Offset(x + size.height, -4), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// Rotated sticker badge — the playful signature element.
+class Sticker extends StatelessWidget {
+  final String text;
+  final Color color;
+  final Color textColor;
+  final double rotate;
+  const Sticker({
+    super.key,
+    required this.text,
+    this.color = PuduuColors.sun,
+    this.textColor = PuduuColors.ink,
+    this.rotate = -0.1,
+  });
+  @override
+  Widget build(BuildContext context) {
+    return Transform.rotate(
+      angle: rotate,
+      child: Container(
+        padding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(PopStyle.rPill),
+          border: Border.all(color: PuduuColors.ink, width: 2.5),
+          boxShadow: PopStyle.hardShadow(dx: 3, dy: 3),
+        ),
+        child: Text(text,
+            style: TextStyle(
+                fontFamily: 'Baloo2',
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.1,
+                color: textColor)),
+      ),
+    );
+  }
+}
+
+// ---------- cloud status: chunky sticker ----------
 
 class SyncLine extends ConsumerWidget {
   const SyncLine({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final live = ref.watch(syncLiveProvider);
-    final dot = live == true ? PuduuColors.mint : PuduuColors.mute;
     final label = live == null
-        ? 'Syncing…'
+        ? 'SYNCING…'
         : live
-            ? '◉ Morning plan · Cloud'
-            : '◉ Morning plan · Local';
+            ? '◉ MORNING PLAN · CLOUD'
+            : '◉ MORNING PLAN · LOCAL';
     return GestureDetector(
       onTap: () async {
         final r = await ref.read(syncProvider).syncAll();
@@ -380,31 +334,10 @@ class SyncLine extends ConsumerWidget {
               duration: const Duration(seconds: 2)));
         }
       },
-      child: GlassPill(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: dot,
-                    boxShadow: [
-                      BoxShadow(
-                          color: dot.withAlpha(140),
-                          blurRadius: 6)
-                    ])),
-            const SizedBox(width: 6),
-            Text(label,
-                style: const TextStyle(
-                    fontFamily: 'Work Sans',
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: PuduuColors.tealDeep)),
-          ],
-        ),
+      child: Sticker(
+        text: label,
+        color: live == true ? PuduuColors.frost : PuduuColors.butter,
+        rotate: -0.06,
       ),
     );
   }
@@ -415,12 +348,15 @@ class HelloHead extends ConsumerWidget {
   final String sub;
   final bool showBell;
   final bool showSync;
-  const HelloHead(
-      {super.key,
-      required this.hello,
-      required this.sub,
-      this.showBell = false,
-      this.showSync = false});
+  final Color accent;
+  const HelloHead({
+    super.key,
+    required this.hello,
+    required this.sub,
+    this.showBell = false,
+    this.showSync = false,
+    this.accent = PuduuColors.coral,
+  });
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Row(
@@ -431,61 +367,55 @@ class HelloHead extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(hello,
-                  style: PuduuType.display.copyWith(fontSize: 26)),
-              const SizedBox(height: 4),
+                  style:
+                      PuduuType.display.copyWith(fontSize: 30)),
+              const SizedBox(height: 6),
               if (!showSync)
-                Text(sub,
-                    style: const TextStyle(
-                        fontFamily: 'Work Sans',
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w600,
-                        color: PuduuColors.tealDeep)),
-              if (showSync) const SyncLine(),
+                Sticker(
+                    text: sub.toUpperCase(),
+                    color: PuduuColors.butter,
+                    rotate: -0.04)
+              else
+                const SyncLine(),
             ],
           ),
         ),
         if (showBell) ...[
           Container(
-            width: 42,
-            height: 42,
+            width: 46,
+            height: 46,
             decoration: BoxDecoration(
-              gradient: PuduuGloss.cardSheen,
-              border: Border.all(color: PuduuGloss.glassBorder),
+              color: PuduuColors.paper,
+              border: PopStyle.inkBorder(2.5),
               shape: BoxShape.circle,
-              boxShadow: PuduuGloss.cardShadow(),
+              boxShadow: PopStyle.hardShadow(dx: 3, dy: 3),
             ),
             child: const Badge(
               isLabelVisible: true,
-              backgroundColor: PuduuColors.danger,
-              smallSize: 8,
+              backgroundColor: PuduuColors.coral,
+              smallSize: 9,
               child: Icon(PuduuIcons.bell,
-                  size: 20, color: PuduuColors.soft),
+                  size: 21, color: PuduuColors.ink),
             ),
           ),
           const SizedBox(width: 10),
         ],
         Container(
-          width: 44,
-          height: 44,
-          padding: const EdgeInsets.all(2.5),
+          width: 48,
+          height: 48,
+          alignment: Alignment.center,
           decoration: BoxDecoration(
+            color: accent,
             shape: BoxShape.circle,
-            gradient: PuduuGloss.btnTeal,
-            boxShadow: PuduuGloss.glow(PuduuColors.teal),
+            border: PopStyle.inkBorder(2.5),
+            boxShadow: PopStyle.hardShadow(dx: 3, dy: 3),
           ),
-          child: Container(
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: PuduuGloss.btnTeal,
-            ),
-            child: const Text('A',
-                style: TextStyle(
-                    fontFamily: 'Outfit',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white)),
-          ),
+          child: const Text('A',
+              style: TextStyle(
+                  fontFamily: 'Baloo2',
+                  fontSize: 19,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white)),
         ),
       ],
     );
@@ -516,16 +446,16 @@ class SearchField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(PuduuGloss.rInput),
-        boxShadow: PuduuGloss.cardShadow(),
+        borderRadius: BorderRadius.circular(PopStyle.rInput),
+        boxShadow: PopStyle.hardShadow(dx: 4, dy: 4),
       ),
       child: TextField(
         controller: controller,
         onChanged: onChanged,
         decoration: InputDecoration(
           hintText: hint,
-          prefixIcon:
-              const Icon(PuduuIcons.search, color: PuduuColors.teal),
+          prefixIcon: const Icon(PuduuIcons.search,
+              color: PuduuColors.coral),
         ),
       ),
     );
@@ -541,15 +471,15 @@ class SearchField2 extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(PuduuGloss.rInput),
-        boxShadow: PuduuGloss.cardShadow(),
+        borderRadius: BorderRadius.circular(PopStyle.rInput),
+        boxShadow: PopStyle.hardShadow(dx: 4, dy: 4),
       ),
       child: TextField(
           onChanged: onChanged,
           decoration: InputDecoration(
               hintText: hint,
-              prefixIcon:
-                  const Icon(PuduuIcons.search, color: PuduuColors.teal))),
+              prefixIcon: const Icon(PuduuIcons.search,
+                  color: PuduuColors.coral))),
     );
   }
 }
@@ -558,145 +488,134 @@ class SectionHead extends StatelessWidget {
   final String label;
   final String? action;
   final VoidCallback? onAction;
-  const SectionHead(
-      {super.key, required this.label, this.action, this.onAction});
+  final Color accent;
+  const SectionHead({
+    super.key,
+    required this.label,
+    this.action,
+    this.onAction,
+    this.accent = PuduuColors.coral,
+  });
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 20, bottom: 10),
+      padding: const EdgeInsets.only(top: 22, bottom: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: PuduuType.label()),
+          Row(
+            children: [
+              Container(
+                width: 10,
+                height: 22,
+                decoration: BoxDecoration(
+                  color: accent,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                      color: PuduuColors.ink, width: 2),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(label.toUpperCase(),
+                  style: PuduuType.label()),
+            ],
+          ),
           if (action != null)
-            TextButton(onPressed: onAction ?? () {}, child: Text(action!)),
+            TextButton(
+                onPressed: onAction ?? () {},
+                child: Text(action!)),
         ],
       ),
     );
   }
 }
 
-/// Aurora hero: deep teal gradient + light blobs + glass sheen + glow.
-class DarkHero extends StatelessWidget {
+/// Big loud hero: solid candy color, ink border, hard shadow, sticker tag.
+class PopHero extends StatelessWidget {
   final String tag;
   final String title;
   final String meta;
   final double progress;
+  final Color progressFill;
   final String primary;
   final String secondary;
+  final IconData? primaryIcon;
   final VoidCallback? onPrimary;
   final VoidCallback? onSecondary;
-  const DarkHero(
-      {super.key,
-      required this.tag,
-      required this.title,
-      required this.meta,
-      required this.progress,
-      required this.primary,
-      required this.secondary,
-      this.onPrimary,
-      this.onSecondary});
+  final Color color;
+  final Color tagColor;
+  const PopHero({
+    super.key,
+    required this.tag,
+    required this.title,
+    required this.meta,
+    required this.progress,
+    this.progressFill = PuduuColors.sun,
+    required this.primary,
+    required this.secondary,
+    this.primaryIcon,
+    this.onPrimary,
+    this.onSecondary,
+    this.color = PuduuColors.coral,
+    this.tagColor = PuduuColors.sun,
+  });
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(top: 14),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: PuduuGloss.heroTeal,
-        borderRadius: BorderRadius.circular(PuduuGloss.rHero),
-        border: Border.all(color: Colors.white.withAlpha(70)),
-        boxShadow: PuduuGloss.glow(PuduuColors.teal),
+        color: color,
+        borderRadius: BorderRadius.circular(PopStyle.rHero),
+        border: PopStyle.inkBorder(),
+        boxShadow: PopStyle.hardShadow(dx: 6, dy: 6),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(PuduuGloss.rHero),
-        child: Stack(
-          children: [
-            const Positioned(
-                top: -50, right: -30, child: _Blob(Color(0x402DD4BF), 190)),
-            const Positioned(
-                bottom: -60,
-                left: -40,
-                child: _Blob(Color(0x300B6B5F), 200)),
-            const Positioned.fill(
-              child: IgnorePointer(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: PuduuGloss.topSheen,
-                  ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Sticker(text: tag.toUpperCase(), color: tagColor),
+          const SizedBox(height: 12),
+          Text(title,
+              style: const TextStyle(
+                  fontFamily: 'Baloo2',
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  height: 1.08,
+                  letterSpacing: -0.3)),
+          const SizedBox(height: 6),
+          Text(meta,
+              style: TextStyle(
+                  fontFamily: 'Nunito',
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white.withAlpha(235))),
+          const SizedBox(height: 14),
+          PopBar(value: progress, fill: progressFill, height: 20),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: PopButton(
+                  label: primary,
+                  icon: primaryIcon,
+                  onPressed: onPrimary,
+                  color: PuduuColors.paper,
+                  textColor: PuduuColors.ink,
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withAlpha(36),
-                      borderRadius:
-                          BorderRadius.circular(PuduuGloss.rPill),
-                      border:
-                          Border.all(color: Colors.white.withAlpha(80)),
-                    ),
-                    child: Text(tag,
-                        style: const TextStyle(
-                            fontFamily: 'Outfit',
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 1.6,
-                            color: Colors.white)),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(title,
-                      style: const TextStyle(
-                          fontFamily: 'Outfit',
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                          height: 1.2,
-                          letterSpacing: -0.3)),
-                  const SizedBox(height: 4),
-                  Text(meta,
-                      style: TextStyle(
-                          fontFamily: 'Work Sans',
-                          fontSize: 12.5,
-                          color: Colors.white.withAlpha(200))),
-                  const SizedBox(height: 14),
-                  GlossBar(
-                    value: progress,
-                    height: 8,
-                    gradient: const LinearGradient(
-                        colors: [Colors.white, Color(0xFF2DD4BF)]),
-                    track: Colors.white.withAlpha(48),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: GlossButton(
-                          label: primary,
-                          icon: PuduuIcons.play,
-                          onPressed: onPrimary,
-                          light: true,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: GlossButton(
-                          label: secondary,
-                          onPressed: onSecondary,
-                          ghost: true,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+              const SizedBox(width: 10),
+              Expanded(
+                child: PopButton(
+                  label: secondary,
+                  onPressed: onSecondary,
+                  color: PuduuColors.ink,
+                  textColor: Colors.white,
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -712,42 +631,40 @@ class TaskCard extends StatelessWidget {
   final Color? tile;
   final VoidCallback? onTap;
   final VoidCallback? onSideTap;
-  const TaskCard(
-      {super.key,
-      required this.dot,
-      required this.title,
-      required this.detail,
-      this.side,
-      this.sideDone = false,
-      this.icon,
-      this.tile,
-      this.onTap,
-      this.onSideTap});
+  const TaskCard({
+    super.key,
+    required this.dot,
+    required this.title,
+    required this.detail,
+    this.side,
+    this.sideDone = false,
+    this.icon,
+    this.tile,
+    this.onTap,
+    this.onSideTap,
+  });
   @override
   Widget build(BuildContext context) {
     final iconData = icon;
-    final card = GlossCard(
-      tint: iconData != null ? (tile ?? PuduuColors.teal) : dot,
-      padding: const EdgeInsets.all(13),
+    final sideText = side;
+    final card = PopCard(
+      padding: const EdgeInsets.all(14),
       child: Row(
         children: [
           if (iconData != null)
-            GlossTile.fromColor(
-                icon: iconData, color: tile ?? PuduuColors.teal, size: 42)
+            PopTile(
+                icon: iconData,
+                color: tile ?? PuduuColors.coral,
+                size: 46)
           else
             Container(
-                width: 12,
-                height: 12,
+                width: 16,
+                height: 16,
                 decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: LinearGradient(colors: [
-                      Color.lerp(dot, Colors.white, 0.25) ?? dot,
-                      dot
-                    ]),
-                    boxShadow: [
-                      BoxShadow(
-                          color: dot.withAlpha(110), blurRadius: 8)
-                    ])),
+                    color: dot,
+                    border: Border.all(
+                        color: PuduuColors.ink, width: 2.5))),
           const SizedBox(width: 13),
           Expanded(
             child: Column(
@@ -759,40 +676,28 @@ class TaskCard extends StatelessWidget {
               ],
             ),
           ),
-          if (side != null)
+          if (sideText != null)
             GestureDetector(
               onTap: onSideTap ?? onTap,
               child: Container(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 13, vertical: 8),
+                    horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
-                  gradient: sideDone
-                      ? const LinearGradient(colors: [
-                          Color(0xFF65A30D),
-                          Color(0xFF4D7C0F)
-                        ])
-                      : PuduuGloss.btnTeal,
+                  color: sideDone
+                      ? PuduuColors.mint
+                      : PuduuColors.sun,
                   borderRadius:
-                      BorderRadius.circular(PuduuGloss.rPill),
-                  border:
-                      Border.all(color: Colors.white.withAlpha(70)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: (sideDone
-                              ? PuduuColors.moss
-                              : PuduuColors.teal)
-                          .withAlpha(80),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+                      BorderRadius.circular(PopStyle.rPill),
+                  border: Border.all(
+                      color: PuduuColors.ink, width: 2.5),
+                  boxShadow: PopStyle.hardShadow(dx: 3, dy: 3),
                 ),
-                child: Text(side!,
+                child: Text(sideText,
                     style: const TextStyle(
-                        fontFamily: 'Work Sans',
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white)),
+                        fontFamily: 'Baloo2',
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w800,
+                        color: PuduuColors.ink)),
               ),
             ),
         ],
@@ -800,7 +705,7 @@ class TaskCard extends StatelessWidget {
     );
     if (onTap == null) return card;
     return InkWell(
-      borderRadius: BorderRadius.circular(PuduuGloss.rCard),
+      borderRadius: BorderRadius.circular(PopStyle.rCard),
       onTap: onTap,
       child: card,
     );
@@ -814,7 +719,8 @@ class SubShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AuroraBackground(
+      backgroundColor: Colors.transparent,
+      body: PopBackground(
         child: SafeArea(
           child: Column(
             children: [
@@ -823,14 +729,25 @@ class SubShell extends StatelessWidget {
                     const EdgeInsets.fromLTRB(8, 8, 16, 4),
                 child: Row(
                   children: [
-                    IconButton(
-                        icon: const Icon(Icons.arrow_back),
-                        onPressed: () =>
-                            Navigator.of(context).pop()),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: PuduuColors.paper,
+                        shape: BoxShape.circle,
+                        border: PopStyle.inkBorder(2.5),
+                        boxShadow:
+                            PopStyle.hardShadow(dx: 3, dy: 3),
+                      ),
+                      child: IconButton(
+                          icon: const Icon(
+                              Icons.arrow_back_rounded),
+                          onPressed: () =>
+                              Navigator.of(context).pop()),
+                    ),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Text(title,
                           style: PuduuType.title
-                              .copyWith(fontSize: 18)),
+                              .copyWith(fontSize: 21)),
                     ),
                   ],
                 ),
@@ -854,24 +771,26 @@ class SubShell extends StatelessWidget {
 
 class NavRow extends StatelessWidget {
   final IconData icon;
+  final Color iconColor;
   final String title, detail;
   final Widget page;
-  const NavRow(
-      {super.key,
-      required this.icon,
-      required this.title,
-      required this.detail,
-      required this.page});
+  const NavRow({
+    super.key,
+    required this.icon,
+    this.iconColor = PuduuColors.coral,
+    required this.title,
+    required this.detail,
+    required this.page,
+  });
   @override
   Widget build(BuildContext context) {
-    return GlossCard(
-      padding: const EdgeInsets.all(13),
+    return PopCard(
+      padding: const EdgeInsets.all(14),
       onTap: () => Navigator.of(context).push(MaterialPageRoute(
           builder: (_) => SubShell(title: title, child: page))),
       child: Row(
         children: [
-          GlossTile.fromColor(
-              icon: icon, color: PuduuColors.teal, size: 42),
+          PopTile(icon: icon, color: iconColor, size: 46),
           const SizedBox(width: 13),
           Expanded(
             child: Column(
@@ -883,7 +802,18 @@ class NavRow extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: PuduuColors.mute),
+          Container(
+            width: 30,
+            height: 30,
+            decoration: BoxDecoration(
+              color: PuduuColors.sun,
+              shape: BoxShape.circle,
+              border:
+                  Border.all(color: PuduuColors.ink, width: 2.5),
+            ),
+            child: const Icon(PuduuIcons.chevron,
+                color: PuduuColors.ink, size: 18),
+          ),
         ],
       ),
     );
@@ -906,7 +836,8 @@ Future<void> showTaskSheet(BuildContext context, PuduuRepo repo,
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (ctx) => _TaskSheet(repo: repo, task: task, onChanged: onChanged),
+    builder: (ctx) =>
+        _TaskSheet(repo: repo, task: task, onChanged: onChanged),
   );
 }
 
@@ -965,25 +896,31 @@ class _TaskSheetState extends ConsumerState<_TaskSheet> {
   }
 
   static const _dots = [
-    PuduuColors.teal,
-    PuduuColors.amber,
-    PuduuColors.moss,
-    PuduuColors.tealDeep,
+    PuduuColors.coral,
+    PuduuColors.sun,
+    PuduuColors.grape,
+    PuduuColors.mint,
+    PuduuColors.sky,
   ];
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        gradient: PuduuGloss.cardSheen,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-        border: Border(top: BorderSide(color: PuduuGloss.glassBorder)),
+      decoration: BoxDecoration(
+        color: PuduuColors.cream,
+        borderRadius:
+            const BorderRadius.vertical(top: Radius.circular(32)),
+        border: const Border(
+          top: BorderSide(color: PuduuColors.ink, width: 3),
+          left: BorderSide(color: PuduuColors.ink, width: 3),
+          right: BorderSide(color: PuduuColors.ink, width: 3),
+        ),
       ),
       child: Padding(
         padding: EdgeInsets.only(
             left: 20,
             right: 20,
-            top: 12,
+            top: 14,
             bottom: MediaQuery.of(context).viewInsets.bottom + 20),
         child: SingleChildScrollView(
           child: Column(
@@ -992,44 +929,58 @@ class _TaskSheetState extends ConsumerState<_TaskSheet> {
             children: [
               Center(
                 child: Container(
-                    width: 44,
-                    height: 5,
+                    width: 56,
+                    height: 10,
                     decoration: BoxDecoration(
-                        gradient: const LinearGradient(colors: [
-                          Color(0xFF2DD4BF),
-                          Color(0xFF0E9384)
-                        ]),
-                        borderRadius: BorderRadius.circular(3))),
+                        color: PuduuColors.ink,
+                        borderRadius: BorderRadius.circular(6))),
               ),
               const SizedBox(height: 14),
               TextField(
                   controller: _titleCtl,
-                  style: PuduuType.title.copyWith(fontSize: 19),
-                  decoration:
-                      const InputDecoration(hintText: 'Task title')),
+                  style:
+                      PuduuType.title.copyWith(fontSize: 21),
+                  decoration: const InputDecoration(
+                      hintText: 'Task title')),
               const SizedBox(height: 8),
               TextField(
                   controller: _noteCtl,
                   style: PuduuType.body,
-                  decoration:
-                      const InputDecoration(hintText: 'Note (optional)')),
+                  decoration: const InputDecoration(
+                      hintText: 'Note (optional)')),
               const SizedBox(height: 14),
               Text('DURATION', style: PuduuType.label()),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
+                runSpacing: 8,
                 children: [
                   for (final m in [5, 10, 15, 25, 50])
-                    ChoiceChip(
-                      label: Text('${m}m'),
-                      selected: _minutes == m,
-                      selectedColor: PuduuColors.teal,
-                      labelStyle: TextStyle(
+                    GestureDetector(
+                      onTap: () => setState(() => _minutes = m),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 9),
+                        decoration: BoxDecoration(
                           color: _minutes == m
-                              ? Colors.white
-                              : PuduuColors.soft,
-                          fontWeight: FontWeight.w600),
-                      onSelected: (_) => setState(() => _minutes = m),
+                              ? PuduuColors.sun
+                              : PuduuColors.paper,
+                          borderRadius: BorderRadius.circular(
+                              PopStyle.rPill),
+                          border: Border.all(
+                              color: PuduuColors.ink,
+                              width: 2.5),
+                          boxShadow: _minutes == m
+                              ? PopStyle.hardShadow(dx: 3, dy: 3)
+                              : null,
+                        ),
+                        child: Text('${m}m',
+                            style: const TextStyle(
+                                fontFamily: 'Baloo2',
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                                color: PuduuColors.ink)),
+                      ),
                     ),
                 ],
               ),
@@ -1039,11 +990,14 @@ class _TaskSheetState extends ConsumerState<_TaskSheet> {
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton.icon(
-                      icon: const Icon(Icons.schedule, size: 17),
-                      label: Text(_at == null
+                    child: PopButton(
+                      label: _at == null
                           ? 'No time — inbox'
-                          : DateFormat('EEE HH:mm').format(_at!)),
+                          : DateFormat('EEE HH:mm').format(_at!),
+                      icon: Icons.schedule_rounded,
+                      color: PuduuColors.paper,
+                      textColor: PuduuColors.ink,
+                      small: true,
                       onPressed: () async {
                         final now = DateTime.now();
                         final t = await showTimePicker(
@@ -1052,16 +1006,30 @@ class _TaskSheetState extends ConsumerState<_TaskSheet> {
                                 _at ?? now));
                         if (t == null) return;
                         setState(() => _at = DateTime(
-                            now.year, now.month, now.day, t.hour, t.minute));
+                            now.year,
+                            now.month,
+                            now.day,
+                            t.hour,
+                            t.minute));
                       },
                     ),
                   ),
                   if (_at != null) ...[
                     const SizedBox(width: 8),
-                    IconButton(
-                      icon: const Icon(Icons.clear,
-                          color: PuduuColors.mute),
-                      onPressed: () => setState(() => _at = null),
+                    GestureDetector(
+                      onTap: () => setState(() => _at = null),
+                      child: Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: PuduuColors.paper,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                              color: PuduuColors.ink, width: 2.5),
+                        ),
+                        child: const Icon(Icons.clear_rounded,
+                            color: PuduuColors.ink),
+                      ),
                     ),
                   ],
                 ],
@@ -1075,87 +1043,73 @@ class _TaskSheetState extends ConsumerState<_TaskSheet> {
                     GestureDetector(
                       onTap: () => setState(() => _color = i),
                       child: Container(
-                        width: 38,
-                        height: 38,
-                        margin: const EdgeInsets.only(right: 10),
+                        width: 40,
+                        height: 40,
+                        margin:
+                            const EdgeInsets.only(right: 10),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          gradient: LinearGradient(colors: [
-                            Color.lerp(_dots[i], Colors.white, 0.25) ??
-                                _dots[i],
-                            _dots[i]
-                          ]),
+                          color: _dots[i],
                           border: Border.all(
-                              color: _color == i
-                                  ? PuduuColors.dark
-                                  : Colors.white.withAlpha(90),
-                              width: _color == i ? 2.4 : 1.2),
-                          boxShadow: [
-                            BoxShadow(
-                                color: _dots[i].withAlpha(80),
-                                blurRadius: 10)
-                          ],
+                              color: PuduuColors.ink,
+                              width: _color == i ? 3.5 : 2.5),
+                          boxShadow: _color == i
+                              ? PopStyle.hardShadow(dx: 3, dy: 3)
+                              : null,
                         ),
                         child: _color == i
-                            ? const Icon(Icons.check,
-                                size: 17, color: Colors.white)
+                            ? const Icon(Icons.check_rounded,
+                                size: 18,
+                                color: Colors.white)
                             : null,
                       ),
                     ),
                 ],
               ),
               const SizedBox(height: 14),
-              Text('SUBTASKS (${_subs.where((s) => s.done).length}/${_subs.length})',
+              Text(
+                  'SUBTASKS (${_subs.where((s) => s.done).length}/${_subs.length})',
                   style: PuduuType.label()),
               const SizedBox(height: 8),
               for (final s in _subs)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
+                  padding: const EdgeInsets.only(bottom: 6),
                   child: Row(
                     children: [
                       GestureDetector(
                         onTap: () async {
-                          await _repo.toggleSubtask(s.id, !s.done);
+                          final done = !s.done;
+                          await _repo.toggleSubtask(s.id, done);
                           setState(() {
-                            final i = _subs
-                                .indexWhere((e) => e.id == s.id);
+                            final i = _subs.indexWhere(
+                                (e) => e.id == s.id);
                             _subs[i] = PuduuSubtask(
                                 id: s.id,
                                 title: s.title,
                                 timerMin: s.timerMin,
-                                done: !s.done);
+                                done: done);
                           });
                           await widget.onChanged();
                         },
                         child: Container(
-                          width: 26,
-                          height: 26,
+                          width: 30,
+                          height: 30,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            gradient: s.done
-                                ? const LinearGradient(colors: [
-                                    Color(0xFF2DD4BF),
-                                    Color(0xFF0E9384)
-                                  ])
-                                : null,
-                            color: s.done ? null : Colors.white,
+                            color: s.done
+                                ? PuduuColors.mint
+                                : PuduuColors.paper,
                             border: Border.all(
-                                color: s.done
-                                    ? Colors.transparent
-                                    : PuduuColors.line,
-                                width: 1.6),
+                                color: PuduuColors.ink,
+                                width: 2.5),
                             boxShadow: s.done
-                                ? [
-                                    BoxShadow(
-                                        color: PuduuColors.teal
-                                            .withAlpha(90),
-                                        blurRadius: 8)
-                                  ]
+                                ? PopStyle.hardShadow(dx: 2, dy: 2)
                                 : null,
                           ),
                           child: s.done
-                              ? const Icon(Icons.check,
-                                  size: 15, color: Colors.white)
+                              ? const Icon(Icons.check_rounded,
+                                  size: 16,
+                                  color: Colors.white)
                               : null,
                         ),
                       ),
@@ -1164,16 +1118,18 @@ class _TaskSheetState extends ConsumerState<_TaskSheet> {
                           child: Text(s.title,
                               style: s.done
                                   ? PuduuType.meta.copyWith(
-                                      decoration:
-                                          TextDecoration.lineThrough)
+                                      decoration: TextDecoration
+                                          .lineThrough)
                                   : PuduuType.body)),
                       IconButton(
-                        icon: const Icon(Icons.delete_outline,
-                            size: 19, color: PuduuColors.mute),
+                        icon: const Icon(
+                            Icons.delete_outline_rounded,
+                            size: 20,
+                            color: PuduuColors.cocoa),
                         onPressed: () async {
                           await _repo.deleteSubtask(s.id);
-                          setState(() => _subs
-                              .removeWhere((e) => e.id == s.id));
+                          setState(() => _subs.removeWhere(
+                              (e) => e.id == s.id));
                           await widget.onChanged();
                         },
                       ),
@@ -1191,24 +1147,27 @@ class _TaskSheetState extends ConsumerState<_TaskSheet> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  GlossTile.fromColor(
+                  PopTile(
                       icon: PuduuIcons.plus,
-                      color: PuduuColors.teal,
-                      size: 42),
+                      color: PuduuColors.grape,
+                      size: 46),
                 ],
               ),
               const SizedBox(height: 16),
-              GlossButton(
+              PopButton(
                   label: 'Save changes',
                   expanded: true,
                   onPressed: _save),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton.icon(
-                      icon: const Icon(Icons.check, size: 17),
-                      label: const Text('Mark done'),
+                    child: PopButton(
+                      label: 'Mark done',
+                      icon: Icons.check_rounded,
+                      color: PuduuColors.mint,
+                      textColor: PuduuColors.ink,
+                      small: true,
                       onPressed: () async {
                         final nav = Navigator.of(context);
                         await _repo.setTaskStatus(
@@ -1220,11 +1179,12 @@ class _TaskSheetState extends ConsumerState<_TaskSheet> {
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                          foregroundColor: PuduuColors.danger),
-                      icon: const Icon(Icons.delete_outline, size: 17),
-                      label: const Text('Delete'),
+                    child: PopButton(
+                      label: 'Delete',
+                      icon: Icons.delete_outline_rounded,
+                      color: PuduuColors.paper,
+                      textColor: PuduuColors.danger,
+                      small: true,
                       onPressed: () async {
                         final nav = Navigator.of(context);
                         await _repo.deleteTask(widget.task.id);

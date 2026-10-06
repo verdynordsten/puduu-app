@@ -32,9 +32,9 @@ flutter:
     - assets/fonts/
     - .env
   fonts:
-    - family: Outfit
+    - family: Baloo2
       fonts:
-        - asset: assets/fonts/Outfit.ttf
-    - family: Work Sans
+        - asset: assets/fonts/Baloo2.ttf
+    - family: Nunito
       fonts:
-        - asset: assets/fonts/WorkSans.ttf
+        - asset: assets/fonts/Nunito.ttf

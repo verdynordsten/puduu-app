@@ -20,10 +20,18 @@ import 'sub_pages.dart' show LibraryPageBody;
 const _uuid = Uuid();
 
 const _dotPalette = [
-  PuduuColors.teal,
-  PuduuColors.amber,
-  PuduuColors.moss,
-  PuduuColors.tealDeep,
+  PuduuColors.coral,
+  PuduuColors.sun,
+  PuduuColors.grape,
+  PuduuColors.mint,
+];
+
+const _barFills = [
+  PuduuColors.coral,
+  PuduuColors.sun,
+  PuduuColors.grape,
+  PuduuColors.mint,
+  PuduuColors.sky,
 ];
 
 String _clock(DateTime? dt) =>
@@ -35,16 +43,18 @@ class TimelineStrip extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final timedAsync = ref.watch(timedProvider);
-    return GlossCard(
-      padding: const EdgeInsets.all(12),
+    return PopCard(
+      padding: const EdgeInsets.all(14),
       child: timedAsync.when(
           loading: () => const Padding(
             padding: EdgeInsets.symmetric(vertical: 18),
             child: Center(
                 child: SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(strokeWidth: 2.4))),
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                        color: PuduuColors.coral))),
           ),
           error: (_, _) =>
               const Text('Could not load timeline.', style: PuduuType.meta),
@@ -61,11 +71,11 @@ class TimelineStrip extends ConsumerWidget {
               children: [
                 for (final t in items.take(6))
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.only(bottom: 10),
                     child: Row(
                       children: [
                         SizedBox(
-                            width: 40,
+                            width: 42,
                             child: Text(_clock(t.scheduledAt),
                                 style: PuduuType.meta)),
                         const SizedBox(width: 8),
@@ -83,29 +93,30 @@ class TimelineStrip extends ConsumerWidget {
                                           overflow:
                                               TextOverflow.ellipsis)),
                                   if (t.status == 'done')
-                                    const Text('✓',
-                                        style: TextStyle(
-                                            fontSize: 12,
-                                            color: PuduuColors.moss,
-                                            fontWeight: FontWeight.w700)),
+                                    Container(
+                                      width: 22,
+                                      height: 22,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: PuduuColors.mint,
+                                        border: Border.all(
+                                            color: PuduuColors.ink,
+                                            width: 2),
+                                      ),
+                                      child: const Icon(
+                                          Icons.check_rounded,
+                                          size: 13,
+                                          color: Colors.white),
+                                    ),
                                 ],
                               ),
-                              const SizedBox(height: 4),
-                              GlossBar(
-                                value: t.status == 'done' ? 1.0 : 0.04,
-                                height: 7,
-                                gradient: LinearGradient(colors: [
-                                  Color.lerp(
-                                          _dotPalette[t.colorIndex %
-                                              _dotPalette.length],
-                                          Colors.white,
-                                          0.35) ??
-                                      _dotPalette[t.colorIndex %
-                                          _dotPalette.length],
-                                  _dotPalette[t.colorIndex %
-                                      _dotPalette.length],
-                                ]),
-                                track: PuduuColors.line,
+                              const SizedBox(height: 6),
+                              PopBar(
+                                value:
+                                    t.status == 'done' ? 1.0 : 0.04,
+                                fill: _barFills[t.colorIndex %
+                                    _barFills.length],
+                                height: 16,
                               ),
                             ],
                           ),
@@ -174,16 +185,20 @@ class _TodayPageState extends ConsumerState<TodayPage> {
     final timed =
         timedAsync.maybeWhen(data: (v) => v, orElse: () => <PuduuTask>[]);
     const cats = [
-      (PuduuIcons.focus, 'Focus', PuduuGloss.tileFocus, PuduuColors.sky),
-      (PuduuIcons.reset, 'Reset', PuduuGloss.tileReset, PuduuColors.amber),
-      (PuduuIcons.check, 'Habits', PuduuGloss.tileHabits, PuduuColors.moss),
-      (PuduuIcons.sort, 'More', PuduuGloss.tileEvening, PuduuColors.lav),
+      (PuduuIcons.focus, 'Focus', PuduuColors.coral),
+      (PuduuIcons.reset, 'Reset', PuduuColors.grape),
+      (PuduuIcons.check, 'Habits', PuduuColors.mint),
+      (PuduuIcons.sort, 'More', PuduuColors.sky),
     ];
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 110),
       children: [
         HelloHead(
-            hello: dayGreeting(), sub: daySubline(), showBell: true, showSync: true),
+            hello: dayGreeting(),
+            sub: daySubline(),
+            showBell: true,
+            showSync: true,
+            accent: PuduuColors.coral),
         const SizedBox(height: 12),
         SearchField(
             hint: 'Search tasks — filters inbox + today',
@@ -192,7 +207,10 @@ class _TodayPageState extends ConsumerState<TodayPage> {
                 setState(() => _query = v.trim())),
         // NOW hero: first timed task with a clock, else empty-state card.
         if (timed.isNotEmpty)
-          DarkHero(
+          PopHero(
+            color: PuduuColors.coral,
+            tagColor: PuduuColors.sun,
+            primaryIcon: PuduuIcons.play,
             tag:
                 'NOW · ${_clock(timed.first.scheduledAt)} · ${timed.first.durationMin ?? 25} MIN',
             title: timed.first.title,
@@ -213,7 +231,10 @@ class _TodayPageState extends ConsumerState<TodayPage> {
             },
           )
         else
-          const DarkHero(
+          const PopHero(
+            color: PuduuColors.coral,
+            tagColor: PuduuColors.sun,
+            primaryIcon: PuduuIcons.play,
             tag: 'NO PLAN YET',
             title: 'Add your first block',
             meta: 'Capture below, then sort into your day',
@@ -221,10 +242,11 @@ class _TodayPageState extends ConsumerState<TodayPage> {
             primary: 'Begin session',
             secondary: 'Skip',
           ),
-        const SectionHead(label: 'TIMELINE'),
+        const SectionHead(label: 'TIMELINE', accent: PuduuColors.coral),
         const TimelineStrip(),
         SectionHead(
             label: 'CATEGORIES',
+            accent: PuduuColors.coral,
             action: 'See all ›',
             onAction: () => Navigator.of(context).push(MaterialPageRoute(
                 builder: (_) =>
@@ -233,28 +255,21 @@ class _TodayPageState extends ConsumerState<TodayPage> {
           crossAxisCount: 4,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 8,
-          crossAxisSpacing: 8,
-          childAspectRatio: 0.86,
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+          childAspectRatio: 0.88,
           children: [
             for (final c in cats)
-              GlossCard(
-                padding: const EdgeInsets.symmetric(vertical: 10),
+              PopCard(
+                padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    GlossTile(
-                        icon: c.$1,
-                        gradient: c.$3,
-                        size: 34,
-                        shadowTint: c.$4),
-                    const SizedBox(height: 6),
+                    PopTile(icon: c.$1, color: c.$3, size: 46),
+                    const SizedBox(height: 8),
                     Text(c.$2,
-                        style: const TextStyle(
-                            fontFamily: 'Work Sans',
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w600,
-                            color: PuduuColors.ink)),
+                        style: PuduuType.label(PuduuColors.ink)
+                            .copyWith(fontSize: 11)),
                   ],
                 ),
               ),
@@ -262,12 +277,13 @@ class _TodayPageState extends ConsumerState<TodayPage> {
         ),
         SectionHead(
             label: 'UP NEXT',
+            accent: PuduuColors.coral,
             action: today.isEmpty ? null : '${today.length} today'),
         // UP NEXT: real planned tasks from drift.
         // Tap card = open detail sheet, tap Begin = mark done.
         if (today.isEmpty)
-          const GlossCard(
-            padding: EdgeInsets.all(12),
+          const PopCard(
+            padding: EdgeInsets.all(14),
             child: Text('Nothing planned yet — sort your inbox into today.',
                 style: PuduuType.meta),
           )
@@ -290,11 +306,11 @@ class _TodayPageState extends ConsumerState<TodayPage> {
                 bumpTasks(ref);
               },
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
           ],
-        const SectionHead(label: 'INBOX'),
-        GlossCard(
-          padding: const EdgeInsets.all(12),
+        const SectionHead(label: 'INBOX', accent: PuduuColors.coral),
+        PopCard(
+          padding: const EdgeInsets.all(14),
           child: Column(
             children: [
               Row(
@@ -309,85 +325,89 @@ class _TodayPageState extends ConsumerState<TodayPage> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  GlossButton(
+                  PopButton(
+                    small: true,
+                    color: PuduuColors.coral,
                     icon: PuduuIcons.plus,
                     label: 'Add',
                     onPressed: _addTask,
                   ),
                 ],
               ),
-                if (inbox.isNotEmpty) ...[
-                  const SizedBox(height: 10),
-                  for (final t in inbox.take(5))
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 6),
-                      child: TaskCard(
-                        dot: _dotPalette[
-                            t.colorIndex % _dotPalette.length],
-                        title: t.title,
-                        detail: t.note?.isNotEmpty == true
-                            ? t.note!
-                            : 'From inbox · tap card to edit',
-                        side: '✓',
-                        onTap: () => showTaskSheet(
-                            context,
-                            ref.read(repoProvider),
-                            t,
-                            () async => bumpTasks(ref)),
-                        onSideTap: () async {
-                          await ref
-                              .read(repoProvider)
-                              .setTaskStatus(t.id, 'planned');
-                          bumpTasks(ref);
-                        },
-                      ),
-                    ),
-                ],
+              if (inbox.isNotEmpty) ...[
                 const SizedBox(height: 10),
-                GlossButton(
-                  expanded: true,
-                  icon: PuduuIcons.sort,
-                  label: inbox.isEmpty
-                      ? 'Inbox empty — nothing to sort'
-                      : 'Sort ${inbox.length} into my day',
-                  onPressed: () async {
-                      final ai = ref.read(aiProvider);
-                      final repo = ref.read(repoProvider);
-                      final planned = await ai.plan(inboxAll);
-                      // AI subtask split: tasks without steps get a
-                      // 3-step breakdown so Focus shows SESSION STEPS.
-                      for (final t in planned) {
-                        if (t.subtasks.isEmpty) {
-                          final steps = await ai.breakdown(t);
-                          await repo.moveAllToToday([
-                            PuduuTask(
-                              id: t.id,
-                              title: t.title,
-                              note: t.note,
-                              durationMin: t.durationMin,
-                              scheduledAt: t.scheduledAt,
-                              colorIndex: t.colorIndex,
-                              status: t.status,
-                              subtasks: steps,
-                            )
-                          ]);
-                        } else {
-                          await repo.moveAllToToday([t]);
-                        }
-                      }
-                      bumpTasks(ref);
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content: Text(
-                                    'Sorted ${planned.length} into today with steps'),
-                                duration:
-                                    const Duration(seconds: 2)));
-                      }
-                    },
-                ),
+                for (final t in inbox.take(5))
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: TaskCard(
+                      dot: _dotPalette[
+                          t.colorIndex % _dotPalette.length],
+                      title: t.title,
+                      detail: t.note?.isNotEmpty == true
+                          ? t.note!
+                          : 'From inbox · tap card to edit',
+                      side: '✓',
+                      onTap: () => showTaskSheet(
+                          context,
+                          ref.read(repoProvider),
+                          t,
+                          () async => bumpTasks(ref)),
+                      onSideTap: () async {
+                        await ref
+                            .read(repoProvider)
+                            .setTaskStatus(t.id, 'planned');
+                        bumpTasks(ref);
+                      },
+                    ),
+                  ),
               ],
-            )),
+              const SizedBox(height: 10),
+              PopButton(
+                expanded: true,
+                color: PuduuColors.grape,
+                icon: PuduuIcons.sort,
+                label: inbox.isEmpty
+                    ? 'Inbox empty — nothing to sort'
+                    : 'Sort ${inbox.length} into my day',
+                onPressed: () async {
+                  final ai = ref.read(aiProvider);
+                  final repo = ref.read(repoProvider);
+                  final planned = await ai.plan(inboxAll);
+                  // AI subtask split: tasks without steps get a
+                  // 3-step breakdown so Focus shows SESSION STEPS.
+                  for (final t in planned) {
+                    if (t.subtasks.isEmpty) {
+                      final steps = await ai.breakdown(t);
+                      await repo.moveAllToToday([
+                        PuduuTask(
+                          id: t.id,
+                          title: t.title,
+                          note: t.note,
+                          durationMin: t.durationMin,
+                          scheduledAt: t.scheduledAt,
+                          colorIndex: t.colorIndex,
+                          status: t.status,
+                          subtasks: steps,
+                        )
+                      ]);
+                    } else {
+                      await repo.moveAllToToday([t]);
+                    }
+                  }
+                  bumpTasks(ref);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content: Text(
+                                'Sorted ${planned.length} into today with steps'),
+                            duration:
+                                const Duration(seconds: 2)));
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -400,4 +420,3 @@ class LibraryPage extends StatelessWidget {
   Widget build(BuildContext context) =>
       const LibraryPageBody();
 }
-

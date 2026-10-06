@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'dart:ui';
 import 'core/theme/puduu_theme.dart';
-import 'widgets/puduu_widgets.dart' show AuroraBackground;
+import 'widgets/puduu_widgets.dart' show PopBackground;
 import 'core/models.dart';
 import 'core/db/puduu_db.dart';
 import 'core/db/repo.dart';
@@ -104,20 +103,21 @@ class _Root extends ConsumerWidget {
     if (ready.isLoading) {
       return Scaffold(
         backgroundColor: Colors.transparent,
-        body: AuroraBackground(
+        body: PopBackground(
           child: Center(
             child: Container(
-              width: 64,
-              height: 64,
+              width: 72,
+              height: 72,
               decoration: BoxDecoration(
-                gradient: PuduuGloss.btnTeal,
+                color: PuduuColors.coral,
                 shape: BoxShape.circle,
-                boxShadow: PuduuGloss.glow(PuduuColors.teal),
+                border: PopStyle.inkBorder(),
+                boxShadow: PopStyle.hardShadow(),
               ),
               child: const Padding(
                 padding: EdgeInsets.all(18),
                 child: CircularProgressIndicator(
-                  strokeWidth: 3,
+                  strokeWidth: 4,
                   color: Colors.white,
                 ),
               ),
@@ -199,7 +199,7 @@ class _ShellState extends ConsumerState<Shell> {
     ];
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: AuroraBackground(
+      body: PopBackground(
         child: SafeArea(
           child: Center(
             child: ConstrainedBox(
@@ -210,39 +210,33 @@ class _ShellState extends ConsumerState<Shell> {
         ),
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.fromLTRB(18, 0, 18, 16),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(30),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-            child: Container(
-              decoration: BoxDecoration(
-                color: PuduuGloss.glassWhite,
-                borderRadius: BorderRadius.circular(30),
-                border:
-                    Border.all(color: PuduuGloss.glassBorder, width: 1.2),
-                boxShadow: PuduuGloss.cardShadow(),
-              ),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-              child: Row(
-                children: [
-                  for (var i = 0; i < titles.length; i++)
-                    Expanded(
-                      child: _PillTab(
-                        label: titles[i],
-                        icon: tab == i ? iconsFill[i] : icons[i],
-                        active: tab == i,
-                        badge: i == 0
-                            ? ref.watch(inboxProvider).maybeWhen(
-                                data: (v) => v.length, orElse: () => 0)
-                            : 0,
-                        onTap: () => _go(i),
-                      ),
-                    ),
-                ],
-              ),
-            ),
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        child: Container(
+          decoration: BoxDecoration(
+            color: PuduuColors.paper,
+            borderRadius: BorderRadius.circular(26),
+            border: PopStyle.inkBorder(),
+            boxShadow: PopStyle.hardShadow(dx: 5, dy: 5),
+          ),
+          padding:
+              const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          child: Row(
+            children: [
+              for (var i = 0; i < titles.length; i++)
+                Expanded(
+                  child: _PillTab(
+                    label: titles[i],
+                    icon: tab == i ? iconsFill[i] : icons[i],
+                    color: _tabColors[i],
+                    active: tab == i,
+                    badge: i == 0
+                        ? ref.watch(inboxProvider).maybeWhen(
+                            data: (v) => v.length, orElse: () => 0)
+                        : 0,
+                    onTap: () => _go(i),
+                  ),
+                ),
+            ],
           ),
         ),
       ),
@@ -251,15 +245,25 @@ class _ShellState extends ConsumerState<Shell> {
   }
 }
 
+const _tabColors = [
+  PuduuColors.coral,
+  PuduuColors.sun,
+  PuduuColors.grape,
+  PuduuColors.mint,
+  PuduuColors.sky,
+];
+
 class _PillTab extends StatelessWidget {
   final String label;
   final IconData icon;
+  final Color color;
   final bool active;
   final int badge;
   final VoidCallback onTap;
   const _PillTab(
       {required this.label,
       required this.icon,
+      required this.color,
       required this.active,
       this.badge = 0,
       required this.onTap});
@@ -268,15 +272,16 @@ class _PillTab extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 220),
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 9),
         decoration: BoxDecoration(
-          gradient: active ? PuduuGloss.btnTeal : null,
-          borderRadius: BorderRadius.circular(22),
+          color: active ? color : Colors.transparent,
+          borderRadius: BorderRadius.circular(18),
           border: active
-              ? Border.all(color: Colors.white.withAlpha(70))
+              ? Border.all(color: PuduuColors.ink, width: 2.5)
               : null,
-          boxShadow: active ? PuduuGloss.glow(PuduuColors.teal) : null,
+          boxShadow:
+              active ? PopStyle.hardShadow(dx: 3, dy: 3) : null,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -284,27 +289,32 @@ class _PillTab extends StatelessWidget {
             Badge(
               isLabelVisible: badge > 0,
               label: Text('$badge',
-                  style: const TextStyle(fontSize: 10)),
-              backgroundColor: PuduuColors.amber,
+                  style: const TextStyle(
+                      fontFamily: 'Baloo2',
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800)),
+              backgroundColor: PuduuColors.ink,
               textColor: Colors.white,
-              smallSize: 14,
-              largeSize: 16,
+              smallSize: 15,
+              largeSize: 17,
               child: Icon(icon,
-                  size: 22,
+                  size: 23,
                   color: active
-                      ? Colors.white
-                      : PuduuColors.soft),
+                      ? (color == PuduuColors.sun
+                          ? PuduuColors.ink
+                          : Colors.white)
+                      : PuduuColors.clay),
             ),
             const SizedBox(height: 2),
             Text(label,
                 style: TextStyle(
-                    fontFamily: 'Work Sans',
-                    fontSize: 10,
+                    fontFamily: 'Nunito',
+                    fontSize: 10.5,
                     fontWeight:
-                        active ? FontWeight.w700 : FontWeight.w500,
+                        active ? FontWeight.w800 : FontWeight.w700,
                     color: active
-                        ? Colors.white
-                        : PuduuColors.soft)),
+                        ? PuduuColors.ink
+                        : PuduuColors.clay)),
           ],
         ),
       ),

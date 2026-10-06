@@ -49,7 +49,10 @@ class _RoutinesPageBodyState extends ConsumerState<RoutinesPageBody> {
     return ListView(
       padding: _pad,
       children: [
-        const HelloHead(hello: 'Routines', sub: '◉ Repeatable calm'),
+        const HelloHead(
+            hello: 'Routines',
+            sub: '◉ Repeatable calm',
+            accent: PuduuColors.grape),
         const SizedBox(height: 12),
         SearchField2(
             hint: 'Search routines + steps',
@@ -57,44 +60,54 @@ class _RoutinesPageBodyState extends ConsumerState<RoutinesPageBody> {
                 setState(() => _query = v.trim().toLowerCase())),
         SectionHead(
             label: 'YOUR ROUTINES',
+            accent: PuduuColors.grape,
             action: '+ New',
             onAction: () => _newRoutineSheet(context, ref)),
         if (routines.isEmpty)
-          const GlossCard(
-            padding: EdgeInsets.all(12),
+          const PopCard(
+            padding: EdgeInsets.all(14),
             child: Text(
                 'No routines yet — tap + New or add a preset below.',
                 style: PuduuType.meta),
           )
         else
           for (final r in routines) ...[
-            GlossCard(
-              padding: const EdgeInsets.all(12),
+            PopCard(
+              padding: const EdgeInsets.all(14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      GlossTile.fromColor(
-                          icon: Icons.refresh_outlined,
-                          color: PuduuColors.teal,
-                          size: 36),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
-                            children: [
-                              Text(r.name, style: PuduuType.strong),
-                              Text(
-                                  '${r.stepTitles.length} steps · ${_rruleLabel(r.rrule)}',
-                                  style: PuduuType.meta),
-                            ],
-                          ),
+                      const PopTile(
+                          icon: Icons.refresh_rounded,
+                          color: PuduuColors.grape,
+                          size: 44),
+                      const SizedBox(width: 13),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                          children: [
+                            Text(r.name, style: PuduuType.strong),
+                            Text(
+                                '${r.stepTitles.length} steps · ${_rruleLabel(r.rrule)}',
+                                style: PuduuType.meta),
+                          ],
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.delete_outline,
-                              color: PuduuColors.mute, size: 20),
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: PuduuColors.paper,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                              color: PuduuColors.ink, width: 2.5),
+                        ),
+                        child: IconButton(
+                          icon: const Icon(
+                              Icons.delete_outline_rounded,
+                              color: PuduuColors.cocoa,
+                              size: 20),
                           onPressed: () async {
                             await ref
                                 .read(repoProvider)
@@ -105,81 +118,92 @@ class _RoutinesPageBodyState extends ConsumerState<RoutinesPageBody> {
                             bumpTasks(ref);
                           },
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    for (var i = 0; i < r.stepTitles.length; i++)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 6),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 22,
-                              height: 22,
-                              decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                      color: PuduuColors.line,
-                                      width: 1.6)),
-                              child: const Icon(Icons.check,
-                                  size: 13,
-                                  color: Colors.transparent),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                                child: Text(r.stepTitles[i],
-                                    style: PuduuType.body)),
-                            Text('${(i + 1) * 5} min',
-                                style: PuduuType.meta),
-                          ],
-                        ),
                       ),
-                    const SizedBox(height: 6),
-                    GlossButton(
-                      expanded: true,
-                      icon: Icons.play_arrow,
-                      label: 'Start routine',
-                      onPressed: () async {
-                          // Start = fan steps out as timed tasks anchored
-                          // at the routine's next daily occurrence.
-                          final base = routineNextAt(r.rrule);
-                          for (var i = 0;
-                              i < r.stepTitles.length;
-                              i++) {
-                            await ref.read(repoProvider).addTask(
-                                PuduuTask(
-                                    id: _uuid.v4(),
-                                    title:
-                                        '${r.name}: ${r.stepTitles[i]}',
-                                    durationMin: 5,
-                                    scheduledAt: base.add(Duration(
-                                        minutes: i * 5)),
-                                    status: 'planned'));
-                          }
-                          bumpTasks(ref);
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(SnackBar(
-                                    content: Text(
-                                        'Started "${r.name}" — ${r.stepTitles.length} blocks on Today'),
-                                    duration:
-                                        const Duration(seconds: 2)));
-                          }
-                        },
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  for (var i = 0; i < r.stepTitles.length; i++)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 26,
+                            height: 26,
+                            decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: PuduuColors.sun,
+                                border: Border.all(
+                                    color: PuduuColors.ink,
+                                    width: 2.5)),
+                            child: Center(
+                              child: Text('${i + 1}',
+                                  style: const TextStyle(
+                                      fontFamily: 'Baloo2',
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w800,
+                                      color: PuduuColors.ink)),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                              child: Text(r.stepTitles[i],
+                                  style: PuduuType.body)),
+                          Sticker(
+                              text: '${(i + 1) * 5} MIN',
+                              color: PuduuColors.butter,
+                              rotate: 0),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
+                  const SizedBox(height: 8),
+                  PopButton(
+                    expanded: true,
+                    icon: PuduuIcons.play,
+                    label: 'Start routine',
+                    color: PuduuColors.coral,
+                    onPressed: () async {
+                      // Start = fan steps out as timed tasks anchored
+                      // at the routine's next daily occurrence.
+                      final base = routineNextAt(r.rrule);
+                      for (var i = 0;
+                          i < r.stepTitles.length;
+                          i++) {
+                        await ref.read(repoProvider).addTask(
+                            PuduuTask(
+                                id: _uuid.v4(),
+                                title:
+                                    '${r.name}: ${r.stepTitles[i]}',
+                                durationMin: 5,
+                                scheduledAt: base.add(Duration(
+                                    minutes: i * 5)),
+                                status: 'planned'));
+                      }
+                      bumpTasks(ref);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(SnackBar(
+                                content: Text(
+                                    'Started "${r.name}" — ${r.stepTitles.length} blocks on Today'),
+                                duration:
+                                    const Duration(seconds: 2)));
+                      }
+                    },
+                  ),
+                ],
               ),
-            const SizedBox(height: 8),
+            ),
+            const SizedBox(height: 10),
           ],
-        const SectionHead(label: 'SUGGESTED'),
+        const SectionHead(
+            label: 'SUGGESTED', accent: PuduuColors.grape),
         TaskCard(
-            dot: PuduuColors.teal,
+            dot: PuduuColors.grape,
             title: 'Study sprint',
             detail: '25 min focus · 5 min break ×4',
             side: '+ Add',
             icon: PuduuIcons.focus,
-            tile: PuduuColors.tealWash,
+            tile: PuduuColors.grape,
             onTap: () async {
               await ref.read(repoProvider).addRoutine(PuduuRoutine(
                   id: _uuid.v4(),
@@ -207,52 +231,82 @@ Future<void> _newRoutineSheet(BuildContext context, WidgetRef ref) async {
   await showModalBottomSheet(
     context: context,
     isScrollControlled: true,
+    backgroundColor: Colors.transparent,
     builder: (ctx) => StatefulBuilder(
-      builder: (ctx, setSheet) => Padding(
-        padding: EdgeInsets.only(
-            left: 20,
-            right: 20,
-            top: 20,
-            bottom: MediaQuery.of(ctx).viewInsets.bottom + 20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('New routine', style: PuduuType.title),
-            const SizedBox(height: 10),
-            TextField(
-                controller: nameCtl,
-                decoration: const InputDecoration(
-                    hintText: 'Name — e.g. Morning reset')),
-            const SizedBox(height: 8),
-            TextField(
-                controller: stepsCtl,
-                decoration: const InputDecoration(
-                    hintText:
-                        'Steps, comma separated — Meds, Water, Tidy')),
-            const SizedBox(height: 12),
-            Text('DAILY TIME', style: PuduuType.label()),
-            const SizedBox(height: 6),
-            OutlinedButton.icon(
-              icon: const Icon(Icons.schedule, size: 17),
-              label: Text(
-                  '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} daily'),
-              onPressed: () async {
-                final t = await showTimePicker(
-                    context: ctx,
-                    initialTime: TimeOfDay(hour: hour, minute: minute));
-                if (t == null) return;
-                setSheet(() {
-                  hour = t.hour;
-                  minute = t.minute;
-                });
-              },
-            ),
-            const SizedBox(height: 12),
-            GlossButton(
-              expanded: true,
-              label: 'Save routine',
-              onPressed: () async {
+      builder: (ctx, setSheet) => Container(
+        decoration: BoxDecoration(
+          color: PuduuColors.cream,
+          borderRadius:
+              const BorderRadius.vertical(top: Radius.circular(32)),
+          border: const Border(
+            top: BorderSide(color: PuduuColors.ink, width: 3),
+            left: BorderSide(color: PuduuColors.ink, width: 3),
+            right: BorderSide(color: PuduuColors.ink, width: 3),
+          ),
+        ),
+        child: Padding(
+          padding: EdgeInsets.only(
+              left: 20,
+              right: 20,
+              top: 14,
+              bottom: MediaQuery.of(ctx).viewInsets.bottom + 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                    width: 56,
+                    height: 10,
+                    decoration: BoxDecoration(
+                        color: PuduuColors.ink,
+                        borderRadius: BorderRadius.circular(6))),
+              ),
+              const SizedBox(height: 14),
+              const Sticker(
+                  text: 'NEW ROUTINE',
+                  color: PuduuColors.grape,
+                  textColor: Colors.white,
+                  rotate: -0.05),
+              const SizedBox(height: 12),
+              TextField(
+                  controller: nameCtl,
+                  decoration: const InputDecoration(
+                      hintText: 'Name — e.g. Morning reset')),
+              const SizedBox(height: 8),
+              TextField(
+                  controller: stepsCtl,
+                  decoration: const InputDecoration(
+                      hintText:
+                          'Steps, comma separated — Meds, Water, Tidy')),
+              const SizedBox(height: 12),
+              Text('DAILY TIME', style: PuduuType.label()),
+              const SizedBox(height: 8),
+              PopButton(
+                small: true,
+                color: PuduuColors.paper,
+                textColor: PuduuColors.ink,
+                icon: Icons.schedule_rounded,
+                label:
+                    '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} daily',
+                onPressed: () async {
+                  final t = await showTimePicker(
+                      context: ctx,
+                      initialTime:
+                          TimeOfDay(hour: hour, minute: minute));
+                  if (t == null) return;
+                  setSheet(() {
+                    hour = t.hour;
+                    minute = t.minute;
+                  });
+                },
+              ),
+              const SizedBox(height: 14),
+              PopButton(
+                expanded: true,
+                label: 'Save routine',
+                color: PuduuColors.grape,
+                onPressed: () async {
                   final name = nameCtl.text.trim();
                   if (name.isEmpty) return;
                   final steps = stepsCtl.text
@@ -272,8 +326,9 @@ Future<void> _newRoutineSheet(BuildContext context, WidgetRef ref) async {
                   bumpTasks(ref);
                   nav.pop();
                 },
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     ),
@@ -321,9 +376,12 @@ class CalendarPageBody extends ConsumerWidget {
     return ListView(
       padding: _pad,
       children: [
-        HelloHead(hello: 'Calendar', sub: '◉ $weekLabel'),
+        HelloHead(
+            hello: 'Calendar',
+            sub: '◉ $weekLabel',
+            accent: PuduuColors.sky),
         const SizedBox(height: 12),
-        GlossCard(
+        PopCard(
           padding: const EdgeInsets.all(12),
           child: Row(
             children: [
@@ -333,62 +391,62 @@ class CalendarPageBody extends ConsumerWidget {
                     padding:
                         const EdgeInsets.symmetric(vertical: 8),
                     decoration: BoxDecoration(
-                      gradient: i == now.weekday - 1
-                          ? PuduuGloss.btnTeal
-                          : null,
                       color: i == now.weekday - 1
-                          ? null
+                          ? PuduuColors.coral
                           : Colors.transparent,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(14),
                       border: i == now.weekday - 1
                           ? Border.all(
-                              color: Colors.white.withAlpha(70))
+                              color: PuduuColors.ink, width: 2.5)
                           : null,
                       boxShadow: i == now.weekday - 1
-                          ? PuduuGloss.glow(PuduuColors.teal)
+                          ? PopStyle.hardShadow(dx: 2, dy: 2)
                           : null,
                     ),
-                      child: Column(
-                        children: [
-                          Text(
-                              const ['M', 'T', 'W', 'T', 'F', 'S', 'S'][i],
-                              style: TextStyle(
-                                  fontFamily: 'Work Sans',
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
+                    child: Column(
+                      children: [
+                        Text(
+                            const ['M', 'T', 'W', 'T', 'F', 'S', 'S'][i],
+                            style: PuduuType.meta.copyWith(
+                                fontWeight: FontWeight.w800,
+                                color: i == now.weekday - 1
+                                    ? Colors.white
+                                    : PuduuColors.clay)),
+                        Text('${monday.add(Duration(days: i)).day}',
+                            style: PuduuType.title.copyWith(
+                                fontSize: 15,
+                                color: i == now.weekday - 1
+                                    ? Colors.white
+                                    : PuduuColors.ink)),
+                        if (_hasTasksOn(
+                            timed, monday.add(Duration(days: i))))
+                          Container(
+                              width: 6,
+                              height: 6,
+                              margin:
+                                  const EdgeInsets.only(top: 3),
+                              decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
                                   color: i == now.weekday - 1
                                       ? Colors.white
-                                      : PuduuColors.mute)),
-                          Text('${monday.add(Duration(days: i)).day}',
-                              style: TextStyle(
-                                  fontFamily: 'Outfit',
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                  color: i == now.weekday - 1
-                                      ? Colors.white
-                                      : PuduuColors.ink)),
-                          if (_hasTasksOn(
-                              timed, monday.add(Duration(days: i))))
-                            Container(
-                                width: 5,
-                                height: 5,
-                                margin:
-                                    const EdgeInsets.only(top: 3),
-                                decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: i == now.weekday - 1
-                                        ? Colors.white
-                                        : PuduuColors.teal)),
-                        ],
-                      ),
+                                      : PuduuColors.coral,
+                                  border: Border.all(
+                                      color: PuduuColors.ink,
+                                      width: 1.5))),
+                      ],
                     ),
                   ),
-              ],
-            )),
-        SectionHead(label: dayName.toUpperCase(), action: 'Sync calendars'),
+                ),
+            ],
+          ),
+        ),
+        SectionHead(
+            label: dayName.toUpperCase(),
+            accent: PuduuColors.sky,
+            action: 'Sync calendars'),
         if (timed.isEmpty)
-          const GlossCard(
-            padding: EdgeInsets.all(12),
+          const PopCard(
+            padding: EdgeInsets.all(14),
             child: Text('Nothing scheduled — add timed tasks from Today.',
                 style: PuduuType.meta),
           )
@@ -399,7 +457,7 @@ class CalendarPageBody extends ConsumerWidget {
                 title: t.title,
                 detail:
                     '${t.durationMin ?? 25} min · ${t.status == 'done' ? 'done ✓' : t.note?.isNotEmpty == true ? t.note! : 'timer ready'}',
-                color: PuduuColors.teal),
+                color: PuduuColors.coral),
       ],
     );
   }
@@ -430,27 +488,24 @@ class _TimeBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(width: 46, child: Text(time, style: PuduuType.meta)),
           Container(
-              width: 3,
-              height: 58,
+              width: 8,
+              height: 60,
               decoration: BoxDecoration(
-                  gradient: PuduuGloss.barTeal,
-                  borderRadius: BorderRadius.circular(2),
-                  boxShadow: [
-                    BoxShadow(
-                        color: PuduuColors.teal.withAlpha(70),
-                        blurRadius: 6),
-                  ])),
+                  color: color,
+                  borderRadius: BorderRadius.circular(5),
+                  border: Border.all(
+                      color: PuduuColors.ink, width: 2))),
           const SizedBox(width: 10),
           Expanded(
-            child: GlossCard(
+            child: PopCard(
               padding: const EdgeInsets.symmetric(
-                  horizontal: 12, vertical: 10),
+                  horizontal: 14, vertical: 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -474,6 +529,14 @@ final moodProvider = FutureProvider<List<MoodEntry>>((ref) async {
   return ref.watch(repoProvider).moods();
 });
 
+const _moodColors = [
+  PuduuColors.sky,
+  PuduuColors.grape,
+  PuduuColors.sun,
+  PuduuColors.mint,
+  PuduuColors.coral,
+];
+
 class MoodPageBody extends ConsumerStatefulWidget {
   const MoodPageBody({super.key});
   @override
@@ -495,13 +558,14 @@ class _MoodPageBodyState extends ConsumerState<MoodPageBody> {
     _noteCtl.dispose();
     super.dispose();
   }
+
   static const faces = ['Very low', 'Low', 'Okay', 'Good', 'Great'];
   static const icons = [
-    Icons.sentiment_very_dissatisfied,
-    Icons.sentiment_dissatisfied,
-    Icons.sentiment_neutral,
-    Icons.sentiment_satisfied,
-    Icons.sentiment_very_satisfied
+    Icons.sentiment_very_dissatisfied_rounded,
+    Icons.sentiment_dissatisfied_rounded,
+    Icons.sentiment_neutral_rounded,
+    Icons.sentiment_satisfied_rounded,
+    Icons.sentiment_very_satisfied_rounded
   ];
   @override
   Widget build(BuildContext context) {
@@ -515,130 +579,124 @@ class _MoodPageBodyState extends ConsumerState<MoodPageBody> {
     return ListView(
       padding: _pad,
       children: [
-        const HelloHead(hello: 'Mood', sub: '◉ How today felt'),
+        const HelloHead(
+            hello: 'Mood',
+            sub: '◉ How today felt',
+            accent: PuduuColors.coral),
         const SizedBox(height: 12),
-        GlossCard(
-          padding: const EdgeInsets.all(16),
+        PopCard(
+          padding: const EdgeInsets.all(18),
           child: Column(
             children: [
               Text(faces[picked - 1],
-                  style: PuduuType.title.copyWith(fontSize: 19)),
-                const SizedBox(height: 4),
-                const Text('Tap how today felt overall',
-                    style: PuduuType.meta),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    for (var i = 1; i <= 5; i++)
-                      GestureDetector(
-                        onTap: () => setState(() => picked = i),
-                        child: Container(
-                          width: 52,
-                          height: 52,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: i == picked
-                                ? PuduuGloss.btnTeal
-                                : null,
-                            color: i == picked
-                                ? null
-                                : Colors.transparent,
-                            border: Border.all(
-                                color: i == picked
-                                    ? Colors.white.withAlpha(90)
-                                    : PuduuColors.line,
-                                width: 1.4),
-                            boxShadow: i == picked
-                                ? PuduuGloss.glow(PuduuColors.teal)
-                                : null,
-                          ),
-                          child: Icon(icons[i - 1],
-                              size: 26,
-                              color: i == picked
-                                  ? Colors.white
-                                  : PuduuColors.mute),
+                  style:
+                      PuduuType.title.copyWith(fontSize: 22)),
+              const SizedBox(height: 4),
+              const Text('Tap how today felt overall',
+                  style: PuduuType.meta),
+              const SizedBox(height: 14),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  for (var i = 1; i <= 5; i++)
+                    GestureDetector(
+                      onTap: () => setState(() => picked = i),
+                      child: Container(
+                        width: 54,
+                        height: 54,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: i == picked
+                              ? _moodColors[i - 1]
+                              : PuduuColors.paper,
+                          border: Border.all(
+                              color: PuduuColors.ink,
+                              width: i == picked ? 3 : 2.5),
+                          boxShadow: i == picked
+                              ? PopStyle.hardShadow(dx: 3, dy: 3)
+                              : null,
                         ),
+                        child: Icon(icons[i - 1],
+                            size: 27,
+                            color: i == picked
+                                ? Colors.white
+                                : PuduuColors.ink),
                       ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _noteCtl,
-                  style: PuduuType.body,
-                  decoration: const InputDecoration(
-                      hintText: 'Note (optional) — what shaped today?'),
-                ),
-                const SizedBox(height: 12),
-                GlossButton(
-                  expanded: true,
-                  label: 'Log today',
-                  onPressed: () async {
-                      final note = _noteCtl.text.trim();
-                      await ref.read(repoProvider).logMoodAt(
-                          DateTime.now(), picked,
-                          note: note.isEmpty ? null : note);
-                      ref.read(_moodTickProvider.notifier).state++;
-                      bumpTasks(ref);
-                      _noteCtl.clear();
-                    },
-                ),
-              ],
-            )),
-        const SectionHead(label: 'PATTERNS'),
-        GlossCard(
-          padding: const EdgeInsets.all(14),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: _noteCtl,
+                style: PuduuType.body,
+                decoration: const InputDecoration(
+                    hintText: 'Note (optional) — what shaped today?'),
+              ),
+              const SizedBox(height: 14),
+              PopButton(
+                expanded: true,
+                label: 'Log today',
+                color: PuduuColors.coral,
+                onPressed: () async {
+                  final note = _noteCtl.text.trim();
+                  await ref.read(repoProvider).logMoodAt(
+                      DateTime.now(), picked,
+                      note: note.isEmpty ? null : note);
+                  ref.read(_moodTickProvider.notifier).state++;
+                  bumpTasks(ref);
+                  _noteCtl.clear();
+                },
+              ),
+            ],
+          ),
+        ),
+        const SectionHead(
+            label: 'PATTERNS', accent: PuduuColors.coral),
+        PopCard(
+          padding: const EdgeInsets.all(16),
           child: moods.isEmpty
               ? const Text('No check-ins yet — log your first mood above.',
                   style: PuduuType.meta)
               : Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      for (final m in moods.reversed.take(7))
-                        Expanded(
-                          child: Column(
-                            children: [
-                              Builder(builder: (ctx) {
-                                final base = m.score >= 4
-                                    ? PuduuColors.teal
-                                    : m.score == 3
-                                        ? PuduuColors.amber
-                                        : PuduuColors.danger;
-                                return Container(
-                                  height: (m.score * 16).toDouble(),
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 6),
-                                  decoration: BoxDecoration(
-                                      gradient: LinearGradient(colors: [
-                                        Color.lerp(base, Colors.white, 0.35) ??
-                                            base,
-                                        base,
-                                      ]),
-                                      borderRadius:
-                                          BorderRadius.circular(8),
-                                      boxShadow: [
-                                        BoxShadow(
-                                            color: base.withAlpha(70),
-                                            blurRadius: 8),
-                                      ]),
-                                );
-                              }),
-                              const SizedBox(height: 6),
-                              Text('${m.day.day}',
-                                  style: PuduuType.meta),
-                            ],
-                          ),
+                  children: [
+                    for (final m in moods.reversed.take(7))
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Container(
+                              height: (m.score * 16).toDouble(),
+                              margin: const EdgeInsets.symmetric(
+                                  horizontal: 6),
+                              decoration: BoxDecoration(
+                                  color: m.score >= 4
+                                      ? PuduuColors.mint
+                                      : m.score == 3
+                                          ? PuduuColors.sun
+                                          : PuduuColors.coral,
+                                  borderRadius:
+                                      BorderRadius.circular(8),
+                                  border: Border.all(
+                                      color: PuduuColors.ink,
+                                      width: 2.5)),
+                            ),
+                            const SizedBox(height: 6),
+                            Text('${m.day.day}',
+                                style: PuduuType.meta),
+                          ],
                         ),
-                    ],
-                  )),
-        const SizedBox(height: 8),
+                      ),
+                  ],
+                ),
+        ),
+        const SizedBox(height: 10),
         TaskCard(
-            dot: PuduuColors.teal,
+            dot: PuduuColors.mint,
             title: _insightTitle(moods),
             detail: _insightDetail(moods, avg),
             side: 'Insight',
-            icon: Icons.insights_outlined,
-            tile: PuduuColors.tealWash),
+            icon: Icons.insights_rounded,
+            tile: PuduuColors.mint),
       ],
     );
   }
@@ -690,22 +748,22 @@ class _PaywallPageBodyState extends ConsumerState<PaywallPageBody> {
   int _pick = 0;
   static const perks = [
     (
-      Icons.auto_awesome_outlined,
+      Icons.auto_awesome_rounded,
       'AI Co-Planner',
       'Brain-dump to schedule in one tap'
     ),
     (
-      Icons.language_outlined,
+      Icons.language_rounded,
       'Web planner',
       'Plan on desktop, synced everywhere'
     ),
     (
-      Icons.calendar_month_outlined,
+      Icons.calendar_month_rounded,
       'Calendar sync',
       'Apple, Google, Outlook import'
     ),
     (
-      Icons.notifications_outlined,
+      Icons.notifications_rounded,
       'Unlimited nudges',
       'Gentle reminders, zero fatigue'
     ),
@@ -715,139 +773,110 @@ class _PaywallPageBodyState extends ConsumerState<PaywallPageBody> {
     return ListView(
       padding: _pad,
       children: [
-        const HelloHead(hello: 'Puduu Pro', sub: '◉ Calm, unlimited'),
-        Container(
-          margin: const EdgeInsets.only(top: 12),
-          decoration: BoxDecoration(
-            gradient: PuduuGloss.heroTeal,
-            borderRadius: BorderRadius.circular(PuduuGloss.rHero),
-            border: Border.all(color: Colors.white.withAlpha(70)),
-            boxShadow: PuduuGloss.glow(PuduuColors.teal),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(PuduuGloss.rHero),
-            child: Stack(
+        const HelloHead(
+            hello: 'Puduu Pro',
+            sub: '◉ Calm, unlimited',
+            accent: PuduuColors.grape),
+        Padding(
+          padding: const EdgeInsets.only(top: 14),
+          child: PopCard(
+            color: PuduuColors.grape,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Positioned(
-                  top: -50,
-                  right: -30,
-                  child: Container(
-                    width: 190,
-                    height: 190,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(colors: [
-                        PuduuColors.gold.withAlpha(90),
-                        PuduuColors.gold.withAlpha(0),
-                      ]),
-                    ),
-                  ),
-                ),
-                const Positioned.fill(
-                  child: IgnorePointer(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: PuduuGloss.topSheen,
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(18),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('PUDUU PRO',
-                          style: TextStyle(
-                              fontFamily: 'Outfit',
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 1.6,
-                              color: PuduuColors.gold)),
-              const SizedBox(height: 5),
-              const Text('Unlimited calm',
-                  style: TextStyle(
-                      fontFamily: 'Outfit',
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                      height: 1.15)),
-              const SizedBox(height: 2),
-              const Text('7 days free, then your pick below',
-                  style: TextStyle(
-                      fontFamily: 'Work Sans',
-                      fontSize: 12,
-                      color: Color(0xFFB9CDC9))),
-              const SizedBox(height: 14),
-              for (final p in perks)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Row(
-                    children: [
-                      Icon(p.$1,
-                          size: 18, color: PuduuColors.gold),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment.start,
-                          children: [
-                            Text(p.$2,
-                                style: const TextStyle(
-                                    fontFamily: 'Work Sans',
-                                    fontSize: 13.5,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white)),
-                            Text(p.$3,
-                                style: const TextStyle(
-                                    fontFamily: 'Work Sans',
-                                    fontSize: 11.5,
-                                    color: Color(0xFFB9CDC9))),
-                          ],
+                const Sticker(
+                    text: 'PUDUU PRO',
+                    color: PuduuColors.sun,
+                    rotate: -0.06),
+                const SizedBox(height: 12),
+                Text('Unlimited calm',
+                    style: PuduuType.display.copyWith(
+                        fontSize: 30, color: Colors.white)),
+                const SizedBox(height: 4),
+                Text('7 days free, then your pick below',
+                    style: PuduuType.body
+                        .copyWith(color: Colors.white)),
+                const SizedBox(height: 16),
+                for (final p in perks)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Row(
+                      children: [
+                        PopTile(
+                            icon: p.$1,
+                            color: PuduuColors.sun,
+                            size: 40),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                            children: [
+                              Text(p.$2,
+                                  style: PuduuType.strong.copyWith(
+                                      color: Colors.white)),
+                              Text(p.$3,
+                                  style: PuduuType.meta.copyWith(
+                                      color: Colors.white
+                                          .withAlpha(230))),
+                            ],
+                          ),
                         ),
-                      ),
-                      const Icon(Icons.check,
-                          size: 17, color: PuduuColors.gold),
-                    ],
+                        Container(
+                          width: 26,
+                          height: 26,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: PuduuColors.mint,
+                            border: Border.all(
+                                color: PuduuColors.ink,
+                                width: 2.5),
+                          ),
+                          child: const Icon(
+                              Icons.check_rounded,
+                              size: 15,
+                              color: Colors.white),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                    ],
-                  ),
-                ),
               ],
             ),
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
         _PlanTile(
             tag: 'YEARLY · SAVE 30%',
             title: '\$49.99 / year',
             detail: '\$4.17/mo · billed yearly',
             picked: _pick == 0,
             onTap: () => setState(() => _pick = 0)),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         _PlanTile(
             tag: 'MONTHLY',
             title: '\$6.99 / month',
             detail: 'Cancel anytime',
             picked: _pick == 1,
             onTap: () => setState(() => _pick = 1)),
-        const SizedBox(height: 10),
-        GlossButton(
+        const SizedBox(height: 12),
+        PopButton(
             expanded: true,
+            color: PuduuColors.coral,
+            icon: PuduuIcons.crown,
+            label:
+                'Start 7-day free trial · ${_pick == 0 ? 'Yearly' : 'Monthly'}',
             onPressed: () {
               final plan = _pick == 0 ? 'Yearly' : 'Monthly';
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: Text(
                       '$plan trial is not wired to a store yet — your pick is saved locally'),
                   duration: const Duration(seconds: 3)));
-            },
-            label:
-                'Start 7-day free trial · ${_pick == 0 ? 'Yearly' : 'Monthly'}'),
-        const SizedBox(height: 6),
+            }),
+        const SizedBox(height: 8),
         const Center(
-            child:
-                Text('Restore purchase · Terms · Privacy', style: PuduuType.meta)),
+            child: Text('Restore purchase · Terms · Privacy',
+                style: PuduuType.meta)),
       ],
     );
   }
@@ -865,46 +894,49 @@ class _PlanTile extends StatelessWidget {
       required this.onTap});
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(2),
-      decoration: BoxDecoration(
-        gradient: picked ? PuduuGloss.goldSheen : null,
-        borderRadius: BorderRadius.circular(PuduuGloss.rCard),
-        boxShadow: picked ? PuduuGloss.glow(PuduuColors.gold) : null,
-      ),
-      child: GlossCard(
-        tint: picked ? PuduuColors.gold : PuduuColors.teal,
-        padding: const EdgeInsets.all(12),
-        onTap: onTap,
-        child: Row(
-          children: [
-            Icon(
-                picked
-                    ? Icons.radio_button_checked
-                    : Icons.radio_button_unchecked,
-                color: picked ? PuduuColors.gold : PuduuColors.mute,
-                size: 20),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(tag,
-                      style: TextStyle(
-                          fontFamily: 'Outfit',
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.2,
-                          color: picked
-                              ? PuduuColors.goldDeep
-                              : PuduuColors.tealDeep)),
-                  Text(title, style: PuduuType.strong),
-                  Text(detail, style: PuduuType.meta),
-                ],
-              ),
+    return PopCard(
+      color: picked ? PuduuColors.butter : PuduuColors.paper,
+      padding: const EdgeInsets.all(14),
+      onTap: onTap,
+      child: Row(
+        children: [
+          Container(
+            width: 26,
+            height: 26,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color:
+                  picked ? PuduuColors.sun : PuduuColors.paper,
+              border: Border.all(
+                  color: PuduuColors.ink, width: 2.5),
+              boxShadow: picked
+                  ? PopStyle.hardShadow(dx: 2, dy: 2)
+                  : null,
             ),
-          ],
-        ),
+            child: picked
+                ? const Icon(Icons.check_rounded,
+                    size: 15, color: PuduuColors.ink)
+                : null,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(tag,
+                    style: PuduuType.label(PuduuColors.ink)
+                        .copyWith(fontSize: 11)),
+                Text(title, style: PuduuType.strong),
+                Text(detail, style: PuduuType.meta),
+              ],
+            ),
+          ),
+          if (picked)
+            const Sticker(
+                text: 'BEST',
+                color: PuduuColors.sun,
+                rotate: 0.08),
+        ],
       ),
     );
   }
@@ -927,17 +959,20 @@ class _OnboardingFlowCompatState extends State<OnboardingFlowCompat> {
     (
       'See your day',
       'A visual timeline built for busy brains — one block at a time.',
-      Icons.calendar_month_outlined
+      Icons.calendar_month_rounded,
+      PuduuColors.coral,
     ),
     (
       'Start tiny',
       'Two-minute resets thaw frozen days. Done beats perfect.',
-      Icons.bolt_outlined
+      Icons.bolt_rounded,
+      PuduuColors.grape,
     ),
     (
       'Stay gentle',
       'Max 6 nudges a day. Quiet 22:00–07:00. You stay in charge.',
-      Icons.notifications_outlined
+      Icons.notifications_rounded,
+      PuduuColors.sun,
     ),
   ];
   @override
@@ -947,32 +982,33 @@ class _OnboardingFlowCompatState extends State<OnboardingFlowCompat> {
       padding: _pad,
       children: [
         const SizedBox(height: 24),
-        GlossTile(icon: s.$3, gradient: PuduuGloss.btnTeal, size: 84),
+        PopTile(icon: s.$3, color: s.$4, size: 92),
         const SizedBox(height: 20),
-        Text(s.$1, style: PuduuType.display.copyWith(fontSize: 26)),
+        Text(s.$1, style: PuduuType.display.copyWith(fontSize: 30)),
         const SizedBox(height: 6),
-        Text(s.$2, style: PuduuType.body.copyWith(fontSize: 14.5)),
+        Text(s.$2, style: PuduuType.body.copyWith(fontSize: 15)),
         const SizedBox(height: 20),
         Row(
           children: [
             for (var i = 0; i < 3; i++)
               Container(
-                  width: i == step ? 24 : 8,
-                  height: 8,
-                  margin: const EdgeInsets.only(right: 6),
+                  width: i == step ? 30 : 12,
+                  height: 12,
+                  margin: const EdgeInsets.only(right: 8),
                   decoration: BoxDecoration(
-                      gradient: i == step ? PuduuGloss.btnTeal : null,
-                      color: i == step ? null : PuduuColors.line,
-                      borderRadius: BorderRadius.circular(4),
-                      boxShadow: i == step
-                          ? PuduuGloss.glow(PuduuColors.teal)
-                          : null)),
+                      color: i == step
+                          ? PuduuColors.coral
+                          : PuduuColors.paper,
+                      borderRadius: BorderRadius.circular(7),
+                      border: Border.all(
+                          color: PuduuColors.ink, width: 2))),
           ],
         ),
         const SizedBox(height: 24),
-        GlossButton(
+        PopButton(
           expanded: true,
           label: step == 2 ? 'Start planning' : 'Next',
+          color: PuduuColors.coral,
           onPressed: () {
             if (step < 2) {
               setState(() => step++);
@@ -1009,10 +1045,10 @@ class LibraryPageBody extends ConsumerStatefulWidget {
 class _LibraryPageBodyState extends ConsumerState<LibraryPageBody> {
   String _query = '';
   static const groups = [
-    (Icons.water_drop_outlined, 'Body', PuduuColors.tealWash),
-    (Icons.bolt_outlined, 'Reset', PuduuColors.amberWash),
-    (Icons.timer_outlined, 'Focus', Color(0xFFE8F1F6)),
-    (Icons.nightlight_outlined, 'Evening', PuduuColors.mossWash),
+    (Icons.water_drop_rounded, 'Body', PuduuColors.sky),
+    (Icons.bolt_rounded, 'Reset', PuduuColors.grape),
+    (Icons.timer_rounded, 'Focus', PuduuColors.sun),
+    (Icons.nightlight_rounded, 'Evening', PuduuColors.mint),
   ];
   // (title, group, minutes) — group must match a groups entry for filtering.
   static const presets = [
@@ -1035,7 +1071,10 @@ class _LibraryPageBodyState extends ConsumerState<LibraryPageBody> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 110),
       children: [
-        const HelloHead(hello: 'Library', sub: '◉ Ready-made calm'),
+        const HelloHead(
+            hello: 'Library',
+            sub: '◉ Ready-made calm',
+            accent: PuduuColors.sun),
         const SizedBox(height: 12),
         SearchField2(
             hint: 'Search 12 presets',
@@ -1046,15 +1085,17 @@ class _LibraryPageBodyState extends ConsumerState<LibraryPageBody> {
               p.$2 == groups[gi].$2 &&
               (_query.isEmpty ||
                   p.$1.toLowerCase().contains(_query)))) ...[
-            SectionHead(label: groups[gi].$2.toUpperCase()),
+            SectionHead(
+                label: groups[gi].$2.toUpperCase(),
+                accent: groups[gi].$3),
             for (final p in presets.where((p) =>
                 p.$2 == groups[gi].$2 &&
                 (_query.isEmpty ||
                     p.$1.toLowerCase().contains(_query))))
               Padding(
-                padding: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.only(bottom: 10),
                 child: TaskCard(
-                  dot: PuduuColors.teal,
+                  dot: PuduuColors.coral,
                   title: p.$1,
                   detail: '${p.$2} · ${p.$3} min',
                   side: '+ Add',
