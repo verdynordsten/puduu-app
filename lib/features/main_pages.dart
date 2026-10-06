@@ -98,8 +98,8 @@ class _FocusPageState extends ConsumerState<FocusPage> {
         HelloHead(
             hello: 'Stay with it',
             sub: current == null
-                ? '◷ No timed task — plan one first'
-                : '◷ Focus session · ${current.title}',
+                ? '◷ No timed task'
+                : '◷ In session',
             accent: PuduuColors.sun),
         Padding(
           padding: const EdgeInsets.only(top: 14),
@@ -121,7 +121,7 @@ class _FocusPageState extends ConsumerState<FocusPage> {
                         height: 1.0)),
                 const SizedBox(height: 10),
                 const Sticker(
-                    text: 'MINUTES LEFT · GENTLE CHIME AT END',
+                    text: 'GENTLE CHIME AT END',
                     color: PuduuColors.sun,
                     rotate: 0.04),
                 const SizedBox(height: 18),

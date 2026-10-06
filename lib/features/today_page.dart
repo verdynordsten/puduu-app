@@ -219,7 +219,7 @@ class _TodayPageState extends ConsumerState<TodayPage> {
                 : '${timed.length} scheduled today',
             progress: timed.where((t) => t.status == 'done').length /
                 timed.length.clamp(1, 1 << 30),
-            primary: 'Begin session',
+            primary: 'Begin',
             secondary: 'Skip',
             onPrimary: () =>
                 ref.read(tabJumpProvider.notifier).state = 1,
@@ -239,7 +239,7 @@ class _TodayPageState extends ConsumerState<TodayPage> {
             title: 'Add your first block',
             meta: 'Capture below, then sort into your day',
             progress: 0.04,
-            primary: 'Begin session',
+            primary: 'Begin',
             secondary: 'Skip',
           ),
         const SectionHead(label: 'TIMELINE', accent: PuduuColors.coral),
@@ -257,7 +257,7 @@ class _TodayPageState extends ConsumerState<TodayPage> {
           physics: const NeverScrollableScrollPhysics(),
           mainAxisSpacing: 10,
           crossAxisSpacing: 10,
-          childAspectRatio: 0.88,
+          childAspectRatio: 0.72,
           children: [
             for (final c in cats)
               PopCard(
@@ -267,9 +267,18 @@ class _TodayPageState extends ConsumerState<TodayPage> {
                   children: [
                     PopTile(icon: c.$1, color: c.$3, size: 46),
                     const SizedBox(height: 8),
-                    Text(c.$2,
-                        style: PuduuType.label(PuduuColors.ink)
-                            .copyWith(fontSize: 11)),
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(c.$2,
+                            style: const TextStyle(
+                                fontFamily: 'Baloo2',
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.4,
+                                color: PuduuColors.ink)),
+                      ),
+                    ),
                   ],
                 ),
               ),

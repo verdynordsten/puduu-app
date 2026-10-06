@@ -865,7 +865,7 @@ class _PaywallPageBodyState extends ConsumerState<PaywallPageBody> {
             color: PuduuColors.coral,
             icon: PuduuIcons.crown,
             label:
-                'Start 7-day free trial · ${_pick == 0 ? 'Yearly' : 'Monthly'}',
+                'Start free trial · ${_pick == 0 ? 'Yearly' : 'Monthly'}',
             onPressed: () {
               final plan = _pick == 0 ? 'Yearly' : 'Monthly';
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(

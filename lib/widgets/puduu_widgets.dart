@@ -160,9 +160,12 @@ class PopButton extends StatelessWidget {
             child: Text(
               label,
               textAlign: TextAlign.center,
+              maxLines: 1,
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontFamily: 'Baloo2',
-                fontSize: small ? 13 : 16,
+                fontSize: small ? 13 : 15,
                 fontWeight: FontWeight.w800,
                 color: enabled
                     ? textColor
@@ -321,8 +324,8 @@ class SyncLine extends ConsumerWidget {
     final label = live == null
         ? 'SYNCING…'
         : live
-            ? '◉ MORNING PLAN · CLOUD'
-            : '◉ MORNING PLAN · LOCAL';
+            ? '● CLOUD'
+            : '● LOCAL';
     return GestureDetector(
       onTap: () async {
         final r = await ref.read(syncProvider).syncAll();
@@ -400,23 +403,6 @@ class HelloHead extends ConsumerWidget {
           ),
           const SizedBox(width: 10),
         ],
-        Container(
-          width: 48,
-          height: 48,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: accent,
-            shape: BoxShape.circle,
-            border: PopStyle.inkBorder(2.5),
-            boxShadow: PopStyle.hardShadow(dx: 3, dy: 3),
-          ),
-          child: const Text('A',
-              style: TextStyle(
-                  fontFamily: 'Baloo2',
-                  fontSize: 19,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white)),
-        ),
       ],
     );
   }
